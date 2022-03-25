@@ -1,0 +1,201 @@
+body {
+	background-color: inherit; /* background color */
+	font-family: Helvetica; /* font name */
+	font-size: xx-small; /* font size - DO NOT CHANGE! */
+}
+
+/* table for PDF export */
+.ew-table {
+	border: 0;
+	border-spacing: 0;
+	border-collapse: separate;
+	font-size: xx-small; /* font size - DO NOT CHANGE! */
+	width: 100%;
+	border-top: 0.5px solid;
+	border-left: 0.5px solid;
+	border-color: #D5D5D5; /* border color */
+	margin-left: 0;
+	margin-right: 0;
+}
+.ew-table td, .ew-table th {
+	padding: 3px; /* cell padding */
+	border-top: 0px;
+	border-left: 0px;
+	border-right: 0.5px solid; /* border width, vertical grid line */
+	border-bottom: 0.5px solid; /* border width, horizontal grid line */
+	border-color: #D5D5D5; /* border color */
+}
+.ew-table .ew-table-header td, .ew-table .ew-table-header th {
+	background-image: none; /* remove header bg image */
+	background-color: #B1174D; /* header bgcolor */
+	color: #FFFFFF; /* header font color */
+	vertical-align: top;
+}
+
+/* row color */
+.ew-table .ew-table-row, .ew-table .ew-table-row td {
+	background-color: #FFFFFF; /* alt row color 1 */
+}
+
+/* alternate row color */
+.ew-table .ew-table-alt-row, .ew-table .ew-table-alt-row td {
+	background-color: #F8EDEF; /* alt row color 2 */
+}
+
+/* main table footer */
+.ew-table .ew-table-footer td {
+	background-color: #F5F5F5; /* footer color */
+
+/* crosstab column row */
+.ew-table .ew-table-column-row {
+	background-color: #F8EDEF; /* alt row color 2 */
+}
+
+/* group 1 */
+.ew-table .ew-rpt-header-1 {
+	color: black;
+	background-color: #FFF5EE;
+	border-bottom: $table-border-widthpx solid; /* header border width */
+	border-right: $table-border-widthpx solid; /* header border width */
+	font-weight: bold;
+}
+.ew-rpt-header-1 a:link, .ew-rpt-header-1 a:active, .ew-rpt-header-1 a:visited {
+	color: inherit;
+	text-decoration: none;
+}
+.ew-rpt-field-1 {
+	background-color: #FFF5EE;
+}
+.ew-rpt-summary-1 {
+	color: black;
+	background-color: #FFE4E1;
+}
+
+/* group 2 */
+.ew-table .ew-rpt-header-2 {
+	color: black;
+	background-color: white;
+	border-bottom: $table-border-widthpx solid; /* header border width */
+	border-right: $table-border-widthpx solid; /* header border width */
+	font-weight: bold;
+}
+.ew-rpt-header-2 a:link, .ew-rpt-header-2 a:active, .ew-rpt-header-2 a:visited {
+//	color: inherit;
+	text-decoration: none;
+}
+.ew-rpt-field-2 {
+	background-color: white;
+}
+.ew-rpt-summary-2 {
+	color: black;
+	background-color: white;
+}
+
+/* group 3 */
+.ew-table .ew-rpt-header-3 {
+	color: black;
+	background-color: #FFF5EE;
+	border-bottom: $table-border-widthpx solid; /* header border width */
+	border-right: $table-border-widthpx solid; /* header border width */
+	font-weight: bold;
+}
+.ew-rpt-header-3 a:link, .ew-rpt-header-3 a:active, .ew-rpt-header-3 a:visited {
+//	color: inherit;
+	text-decoration: none;
+}
+.ew-rpt-field-3 {
+	background-color: #FFF5EE;
+}
+.ew-rpt-summary-3 {
+	color: black;
+	background-color: #FFE4E1;
+}
+
+/* group 4 */
+.ew-table .ew-rpt-header-4 {
+	color: black;
+	background-color: white;
+	border-bottom: $table-border-widthpx solid; /* header border width */
+	border-right: $table-border-widthpx solid; /* header border width */
+	font-weight: bold;
+}
+.ew-rpt-header-4 a:link, .ew-rpt-header-4 a:active, .ew-rpt-header-4 a:visited {
+//	color: inherit;
+	text-decoration: none;
+}
+.ew-rpt-field-4 {
+	background-color: white;
+}
+.ew-rpt-summary-4 {
+	color: black;
+	background-color: white;
+}
+
+/* group 5 */
+.ew-table .ew-rpt-header-5 {
+	color: black;
+	background-color: #FFF5EE;
+	border-bottom: $table-border-widthpx solid; /* header border width */
+	border-right: $table-border-widthpx solid; /* header border width */
+	font-weight: bold;
+}
+.ew-rpt-header-5 a:link, .ew-rpt-header-5 a:active, .ew-rpt-header-5 a:visited {
+//	color: inherit;
+	text-decoration: none;
+}
+.ew-rpt-field-5 {
+	background-color: #FFF5EE;
+}
+.ew-rpt-summary-5 {
+	color: black;
+	background-color: #FFE4E1;
+}
+
+/* group 6 */
+.ew-table .ew-rpt-header-6 {
+	color: black;
+	background-color: white;
+	border-bottom: $table-border-widthpx solid; /* header border width */
+	border-right: $table-border-widthpx solid; /* header border width */
+	font-weight: bold;
+}
+.ew-rpt-header-6 a:link, .ew-rpt-header-6 a:active, .ew-rpt-header-6 a:visited {
+//	color: inherit;
+	text-decoration: none;
+}
+.ew-rpt-field-6 {
+	background-color: white;
+}
+.ew-rpt-summary-6 {
+	color: black;
+	background-color: white;
+}
+.ew-rpt-grp-aggregate {
+	font-weight: bold;
+}
+.ew-rpt-page-summary {
+	color: black; /* page summary text color */
+	background-color: #FFF0F5; /* page total background color */
+}
+.ew-rpt-grand-summary {
+	color: black; /* grand summary text color */
+	background-color: white; /* grand summary background color */
+}
+
+/* for crosstab report only */
+.ew-rpt-col-header-row td {
+	border-bottom: $table-border-widthpx solid; /* header border width */
+}
+.ew-rpt-col-summary {
+	background-color: #B1174D; /* column summary */
+	color: #FFFFFF;
+}
+.ew-rpt-col-feader {
+	background-color: #B1174D; /* column heading background color */
+	color: #FFFFFF; /* column heading text color */
+}
+
+/* export page break */
+.ew-page-break {
+	page-break-before: always;
+}

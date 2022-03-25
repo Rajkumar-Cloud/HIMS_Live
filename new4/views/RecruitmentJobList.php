@@ -1,0 +1,675 @@
+<?php
+
+namespace PHPMaker2021\HIMS;
+
+// Page object
+$RecruitmentJobList = &$Page;
+?>
+<?php if (!$Page->isExport()) { ?>
+<script>
+var currentForm, currentPageID;
+var frecruitment_joblist;
+loadjs.ready("head", function () {
+    var $ = jQuery;
+    // Form object
+    currentPageID = ew.PAGE_ID = "list";
+    frecruitment_joblist = currentForm = new ew.Form("frecruitment_joblist", "list");
+    frecruitment_joblist.formKeyCountName = '<?= $Page->FormKeyCountName ?>';
+    loadjs.done("frecruitment_joblist");
+});
+var frecruitment_joblistsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready("head", function () {
+    var $ = jQuery;
+    // Form object for search
+    frecruitment_joblistsrch = currentSearchForm = new ew.Form("frecruitment_joblistsrch");
+
+    // Add fields
+    var currentTable = <?= JsonEncode(GetClientVar("tables", "recruitment_job")) ?>,
+        fields = currentTable.fields;
+    frecruitment_joblistsrch.addFields([
+        ["id", [], fields.id.isInvalid],
+        ["title", [], fields.title.isInvalid],
+        ["country", [], fields.country.isInvalid],
+        ["company", [], fields.company.isInvalid],
+        ["department", [], fields.department.isInvalid],
+        ["code", [], fields.code.isInvalid],
+        ["employementType", [], fields.employementType.isInvalid],
+        ["industry", [], fields.industry.isInvalid],
+        ["experienceLevel", [], fields.experienceLevel.isInvalid],
+        ["jobFunction", [], fields.jobFunction.isInvalid],
+        ["educationLevel", [], fields.educationLevel.isInvalid],
+        ["currency", [], fields.currency.isInvalid],
+        ["showSalary", [], fields.showSalary.isInvalid],
+        ["salaryMin", [], fields.salaryMin.isInvalid],
+        ["salaryMax", [], fields.salaryMax.isInvalid],
+        ["status", [], fields.status.isInvalid],
+        ["closingDate", [], fields.closingDate.isInvalid],
+        ["attachment", [], fields.attachment.isInvalid],
+        ["display", [], fields.display.isInvalid],
+        ["postedBy", [], fields.postedBy.isInvalid]
+    ]);
+
+    // Set invalid fields
+    $(function() {
+        frecruitment_joblistsrch.setInvalid();
+    });
+
+    // Validate form
+    frecruitment_joblistsrch.validate = function () {
+        if (!this.validateRequired)
+            return true; // Ignore validation
+        var fobj = this.getForm(),
+            $fobj = $(fobj),
+            rowIndex = "";
+        $fobj.data("rowindex", rowIndex);
+
+        // Validate fields
+        if (!this.validateFields(rowIndex))
+            return false;
+
+        // Call Form_CustomValidate event
+        if (!this.customValidate(fobj)) {
+            this.focus();
+            return false;
+        }
+        return true;
+    }
+
+    // Form_CustomValidate
+    frecruitment_joblistsrch.customValidate = function(fobj) { // DO NOT CHANGE THIS LINE!
+        // Your custom validation code here, return false if invalid.
+        return true;
+    }
+
+    // Use JavaScript validation or not
+    frecruitment_joblistsrch.validateRequired = <?= Config("CLIENT_VALIDATE") ? "true" : "false" ?>;
+
+    // Dynamic selection lists
+    frecruitment_joblistsrch.lists.showSalary = <?= $Page->showSalary->toClientList($Page) ?>;
+    frecruitment_joblistsrch.lists.status = <?= $Page->status->toClientList($Page) ?>;
+
+    // Filters
+    frecruitment_joblistsrch.filterList = <?= $Page->getFilterList() ?>;
+    loadjs.done("frecruitment_joblistsrch");
+});
+</script>
+<style type="text/css">
+.ew-table-preview-row { /* main table preview row color */
+    background-color: #FFFFFF; /* preview row color */
+}
+.ew-table-preview-row .ew-grid {
+    display: table;
+}
+</style>
+<div id="ew-preview" class="d-none"><!-- preview -->
+    <div class="ew-nav-tabs"><!-- .ew-nav-tabs -->
+        <ul class="nav nav-tabs"></ul>
+        <div class="tab-content"><!-- .tab-content -->
+            <div class="tab-pane fade active show"></div>
+        </div><!-- /.tab-content -->
+    </div><!-- /.ew-nav-tabs -->
+</div><!-- /preview -->
+<script>
+loadjs.ready("head", function() {
+    ew.PREVIEW_PLACEMENT = ew.CSS_FLIP ? "left" : "right";
+    ew.PREVIEW_SINGLE_ROW = false;
+    ew.PREVIEW_OVERLAY = false;
+    loadjs(ew.PATH_BASE + "js/ewpreview.js", "preview");
+});
+</script>
+<script>
+loadjs.ready("head", function () {
+    // Write your table-specific client script here, no need to add script tags.
+});
+</script>
+<?php } ?>
+<?php if (!$Page->isExport()) { ?>
+<div class="btn-toolbar ew-toolbar">
+<?php if ($Page->TotalRecords > 0 && $Page->ExportOptions->visible()) { ?>
+<?php $Page->ExportOptions->render("body") ?>
+<?php } ?>
+<?php if ($Page->ImportOptions->visible()) { ?>
+<?php $Page->ImportOptions->render("body") ?>
+<?php } ?>
+<?php if ($Page->SearchOptions->visible()) { ?>
+<?php $Page->SearchOptions->render("body") ?>
+<?php } ?>
+<?php if ($Page->FilterOptions->visible()) { ?>
+<?php $Page->FilterOptions->render("body") ?>
+<?php } ?>
+<div class="clearfix"></div>
+</div>
+<?php } ?>
+<?php
+$Page->renderOtherOptions();
+?>
+<?php if ($Security->canSearch()) { ?>
+<?php if (!$Page->isExport() && !$Page->CurrentAction) { ?>
+<form name="frecruitment_joblistsrch" id="frecruitment_joblistsrch" class="form-inline ew-form ew-ext-search-form" action="<?= CurrentPageUrl(false) ?>">
+<div id="frecruitment_joblistsrch-search-panel" class="<?= $Page->SearchPanelClass ?>">
+<input type="hidden" name="cmd" value="search">
+<input type="hidden" name="t" value="recruitment_job">
+    <div class="ew-extended-search">
+<?php
+// Render search row
+$Page->RowType = ROWTYPE_SEARCH;
+$Page->resetAttributes();
+$Page->renderRow();
+?>
+<?php if ($Page->showSalary->Visible) { // showSalary ?>
+    <?php
+        $Page->SearchColumnCount++;
+        if (($Page->SearchColumnCount - 1) % $Page->SearchFieldsPerRow == 0) {
+            $Page->SearchRowCount++;
+    ?>
+<div id="xsr_<?= $Page->SearchRowCount ?>" class="ew-row d-sm-flex">
+    <?php
+        }
+     ?>
+    <div id="xsc_showSalary" class="ew-cell form-group">
+        <label class="ew-search-caption ew-label"><?= $Page->showSalary->caption() ?></label>
+        <span class="ew-search-operator">
+<?= $Language->phrase("=") ?>
+<input type="hidden" name="z_showSalary" id="z_showSalary" value="=">
+</span>
+        <span id="el_recruitment_job_showSalary" class="ew-search-field">
+<template id="tp_x_showSalary">
+    <div class="custom-control custom-radio">
+        <input type="radio" class="custom-control-input" data-table="recruitment_job" data-field="x_showSalary" name="x_showSalary" id="x_showSalary"<?= $Page->showSalary->editAttributes() ?>>
+        <label class="custom-control-label"></label>
+    </div>
+</template>
+<div id="dsl_x_showSalary" class="ew-item-list"></div>
+<input type="hidden"
+    is="selection-list"
+    id="x_showSalary"
+    name="x_showSalary"
+    value="<?= HtmlEncode($Page->showSalary->AdvancedSearch->SearchValue) ?>"
+    data-type="select-one"
+    data-template="tp_x_showSalary"
+    data-target="dsl_x_showSalary"
+    data-repeatcolumn="5"
+    class="form-control<?= $Page->showSalary->isInvalidClass() ?>"
+    data-table="recruitment_job"
+    data-field="x_showSalary"
+    data-value-separator="<?= $Page->showSalary->displayValueSeparatorAttribute() ?>"
+    <?= $Page->showSalary->editAttributes() ?>>
+<div class="invalid-feedback"><?= $Page->showSalary->getErrorMessage(false) ?></div>
+</span>
+    </div>
+    <?php if ($Page->SearchColumnCount % $Page->SearchFieldsPerRow == 0) { ?>
+</div>
+    <?php } ?>
+<?php } ?>
+<?php if ($Page->status->Visible) { // status ?>
+    <?php
+        $Page->SearchColumnCount++;
+        if (($Page->SearchColumnCount - 1) % $Page->SearchFieldsPerRow == 0) {
+            $Page->SearchRowCount++;
+    ?>
+<div id="xsr_<?= $Page->SearchRowCount ?>" class="ew-row d-sm-flex">
+    <?php
+        }
+     ?>
+    <div id="xsc_status" class="ew-cell form-group">
+        <label class="ew-search-caption ew-label"><?= $Page->status->caption() ?></label>
+        <span class="ew-search-operator">
+<?= $Language->phrase("=") ?>
+<input type="hidden" name="z_status" id="z_status" value="=">
+</span>
+        <span id="el_recruitment_job_status" class="ew-search-field">
+<template id="tp_x_status">
+    <div class="custom-control custom-radio">
+        <input type="radio" class="custom-control-input" data-table="recruitment_job" data-field="x_status" name="x_status" id="x_status"<?= $Page->status->editAttributes() ?>>
+        <label class="custom-control-label"></label>
+    </div>
+</template>
+<div id="dsl_x_status" class="ew-item-list"></div>
+<input type="hidden"
+    is="selection-list"
+    id="x_status"
+    name="x_status"
+    value="<?= HtmlEncode($Page->status->AdvancedSearch->SearchValue) ?>"
+    data-type="select-one"
+    data-template="tp_x_status"
+    data-target="dsl_x_status"
+    data-repeatcolumn="5"
+    class="form-control<?= $Page->status->isInvalidClass() ?>"
+    data-table="recruitment_job"
+    data-field="x_status"
+    data-value-separator="<?= $Page->status->displayValueSeparatorAttribute() ?>"
+    <?= $Page->status->editAttributes() ?>>
+<div class="invalid-feedback"><?= $Page->status->getErrorMessage(false) ?></div>
+</span>
+    </div>
+    <?php if ($Page->SearchColumnCount % $Page->SearchFieldsPerRow == 0) { ?>
+</div>
+    <?php } ?>
+<?php } ?>
+    <?php if ($Page->SearchColumnCount % $Page->SearchFieldsPerRow > 0) { ?>
+</div>
+    <?php } ?>
+<div id="xsr_<?= $Page->SearchRowCount + 1 ?>" class="ew-row d-sm-flex">
+    <div class="ew-quick-search input-group">
+        <input type="text" name="<?= Config("TABLE_BASIC_SEARCH") ?>" id="<?= Config("TABLE_BASIC_SEARCH") ?>" class="form-control" value="<?= HtmlEncode($Page->BasicSearch->getKeyword()) ?>" placeholder="<?= HtmlEncode($Language->phrase("Search")) ?>">
+        <input type="hidden" name="<?= Config("TABLE_BASIC_SEARCH_TYPE") ?>" id="<?= Config("TABLE_BASIC_SEARCH_TYPE") ?>" value="<?= HtmlEncode($Page->BasicSearch->getType()) ?>">
+        <div class="input-group-append">
+            <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit"><?= $Language->phrase("SearchBtn") ?></button>
+            <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false"><span id="searchtype"><?= $Page->BasicSearch->getTypeNameShort() ?></span></button>
+            <div class="dropdown-menu dropdown-menu-right">
+                <a class="dropdown-item<?php if ($Page->BasicSearch->getType() == "") { ?> active<?php } ?>" href="#" onclick="return ew.setSearchType(this);"><?= $Language->phrase("QuickSearchAuto") ?></a>
+                <a class="dropdown-item<?php if ($Page->BasicSearch->getType() == "=") { ?> active<?php } ?>" href="#" onclick="return ew.setSearchType(this, '=');"><?= $Language->phrase("QuickSearchExact") ?></a>
+                <a class="dropdown-item<?php if ($Page->BasicSearch->getType() == "AND") { ?> active<?php } ?>" href="#" onclick="return ew.setSearchType(this, 'AND');"><?= $Language->phrase("QuickSearchAll") ?></a>
+                <a class="dropdown-item<?php if ($Page->BasicSearch->getType() == "OR") { ?> active<?php } ?>" href="#" onclick="return ew.setSearchType(this, 'OR');"><?= $Language->phrase("QuickSearchAny") ?></a>
+            </div>
+        </div>
+    </div>
+</div>
+    </div><!-- /.ew-extended-search -->
+</div><!-- /.ew-search-panel -->
+</form>
+<?php } ?>
+<?php } ?>
+<?php $Page->showPageHeader(); ?>
+<?php
+$Page->showMessage();
+?>
+<?php if ($Page->TotalRecords > 0 || $Page->CurrentAction) { ?>
+<div class="card ew-card ew-grid<?php if ($Page->isAddOrEdit()) { ?> ew-grid-add-edit<?php } ?> recruitment_job">
+<?php if (!$Page->isExport()) { ?>
+<div class="card-header ew-grid-upper-panel">
+<?php if (!$Page->isGridAdd()) { ?>
+<form name="ew-pager-form" class="form-inline ew-form ew-pager-form" action="<?= CurrentPageUrl(false) ?>">
+<?= $Page->Pager->render() ?>
+</form>
+<?php } ?>
+<div class="ew-list-other-options">
+<?php $Page->OtherOptions->render("body") ?>
+</div>
+<div class="clearfix"></div>
+</div>
+<?php } ?>
+<form name="frecruitment_joblist" id="frecruitment_joblist" class="form-inline ew-form ew-list-form" action="<?= CurrentPageUrl(false) ?>" method="post">
+<?php if (Config("CHECK_TOKEN")) { ?>
+<input type="hidden" name="<?= $TokenNameKey ?>" value="<?= $TokenName ?>"><!-- CSRF token name -->
+<input type="hidden" name="<?= $TokenValueKey ?>" value="<?= $TokenValue ?>"><!-- CSRF token value -->
+<?php } ?>
+<input type="hidden" name="t" value="recruitment_job">
+<div id="gmp_recruitment_job" class="<?= ResponsiveTableClass() ?>card-body ew-grid-middle-panel">
+<?php if ($Page->TotalRecords > 0 || $Page->isGridEdit()) { ?>
+<table id="tbl_recruitment_joblist" class="table ew-table"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+<?php
+// Header row
+$Page->RowType = ROWTYPE_HEADER;
+
+// Render list options
+$Page->renderListOptions();
+
+// Render list options (header, left)
+$Page->ListOptions->render("header", "left");
+?>
+<?php if ($Page->id->Visible) { // id ?>
+        <th data-name="id" class="<?= $Page->id->headerCellClass() ?>"><div id="elh_recruitment_job_id" class="recruitment_job_id"><?= $Page->renderSort($Page->id) ?></div></th>
+<?php } ?>
+<?php if ($Page->title->Visible) { // title ?>
+        <th data-name="title" class="<?= $Page->title->headerCellClass() ?>"><div id="elh_recruitment_job_title" class="recruitment_job_title"><?= $Page->renderSort($Page->title) ?></div></th>
+<?php } ?>
+<?php if ($Page->country->Visible) { // country ?>
+        <th data-name="country" class="<?= $Page->country->headerCellClass() ?>"><div id="elh_recruitment_job_country" class="recruitment_job_country"><?= $Page->renderSort($Page->country) ?></div></th>
+<?php } ?>
+<?php if ($Page->company->Visible) { // company ?>
+        <th data-name="company" class="<?= $Page->company->headerCellClass() ?>"><div id="elh_recruitment_job_company" class="recruitment_job_company"><?= $Page->renderSort($Page->company) ?></div></th>
+<?php } ?>
+<?php if ($Page->department->Visible) { // department ?>
+        <th data-name="department" class="<?= $Page->department->headerCellClass() ?>"><div id="elh_recruitment_job_department" class="recruitment_job_department"><?= $Page->renderSort($Page->department) ?></div></th>
+<?php } ?>
+<?php if ($Page->code->Visible) { // code ?>
+        <th data-name="code" class="<?= $Page->code->headerCellClass() ?>"><div id="elh_recruitment_job_code" class="recruitment_job_code"><?= $Page->renderSort($Page->code) ?></div></th>
+<?php } ?>
+<?php if ($Page->employementType->Visible) { // employementType ?>
+        <th data-name="employementType" class="<?= $Page->employementType->headerCellClass() ?>"><div id="elh_recruitment_job_employementType" class="recruitment_job_employementType"><?= $Page->renderSort($Page->employementType) ?></div></th>
+<?php } ?>
+<?php if ($Page->industry->Visible) { // industry ?>
+        <th data-name="industry" class="<?= $Page->industry->headerCellClass() ?>"><div id="elh_recruitment_job_industry" class="recruitment_job_industry"><?= $Page->renderSort($Page->industry) ?></div></th>
+<?php } ?>
+<?php if ($Page->experienceLevel->Visible) { // experienceLevel ?>
+        <th data-name="experienceLevel" class="<?= $Page->experienceLevel->headerCellClass() ?>"><div id="elh_recruitment_job_experienceLevel" class="recruitment_job_experienceLevel"><?= $Page->renderSort($Page->experienceLevel) ?></div></th>
+<?php } ?>
+<?php if ($Page->jobFunction->Visible) { // jobFunction ?>
+        <th data-name="jobFunction" class="<?= $Page->jobFunction->headerCellClass() ?>"><div id="elh_recruitment_job_jobFunction" class="recruitment_job_jobFunction"><?= $Page->renderSort($Page->jobFunction) ?></div></th>
+<?php } ?>
+<?php if ($Page->educationLevel->Visible) { // educationLevel ?>
+        <th data-name="educationLevel" class="<?= $Page->educationLevel->headerCellClass() ?>"><div id="elh_recruitment_job_educationLevel" class="recruitment_job_educationLevel"><?= $Page->renderSort($Page->educationLevel) ?></div></th>
+<?php } ?>
+<?php if ($Page->currency->Visible) { // currency ?>
+        <th data-name="currency" class="<?= $Page->currency->headerCellClass() ?>"><div id="elh_recruitment_job_currency" class="recruitment_job_currency"><?= $Page->renderSort($Page->currency) ?></div></th>
+<?php } ?>
+<?php if ($Page->showSalary->Visible) { // showSalary ?>
+        <th data-name="showSalary" class="<?= $Page->showSalary->headerCellClass() ?>"><div id="elh_recruitment_job_showSalary" class="recruitment_job_showSalary"><?= $Page->renderSort($Page->showSalary) ?></div></th>
+<?php } ?>
+<?php if ($Page->salaryMin->Visible) { // salaryMin ?>
+        <th data-name="salaryMin" class="<?= $Page->salaryMin->headerCellClass() ?>"><div id="elh_recruitment_job_salaryMin" class="recruitment_job_salaryMin"><?= $Page->renderSort($Page->salaryMin) ?></div></th>
+<?php } ?>
+<?php if ($Page->salaryMax->Visible) { // salaryMax ?>
+        <th data-name="salaryMax" class="<?= $Page->salaryMax->headerCellClass() ?>"><div id="elh_recruitment_job_salaryMax" class="recruitment_job_salaryMax"><?= $Page->renderSort($Page->salaryMax) ?></div></th>
+<?php } ?>
+<?php if ($Page->status->Visible) { // status ?>
+        <th data-name="status" class="<?= $Page->status->headerCellClass() ?>"><div id="elh_recruitment_job_status" class="recruitment_job_status"><?= $Page->renderSort($Page->status) ?></div></th>
+<?php } ?>
+<?php if ($Page->closingDate->Visible) { // closingDate ?>
+        <th data-name="closingDate" class="<?= $Page->closingDate->headerCellClass() ?>"><div id="elh_recruitment_job_closingDate" class="recruitment_job_closingDate"><?= $Page->renderSort($Page->closingDate) ?></div></th>
+<?php } ?>
+<?php if ($Page->attachment->Visible) { // attachment ?>
+        <th data-name="attachment" class="<?= $Page->attachment->headerCellClass() ?>"><div id="elh_recruitment_job_attachment" class="recruitment_job_attachment"><?= $Page->renderSort($Page->attachment) ?></div></th>
+<?php } ?>
+<?php if ($Page->display->Visible) { // display ?>
+        <th data-name="display" class="<?= $Page->display->headerCellClass() ?>"><div id="elh_recruitment_job_display" class="recruitment_job_display"><?= $Page->renderSort($Page->display) ?></div></th>
+<?php } ?>
+<?php if ($Page->postedBy->Visible) { // postedBy ?>
+        <th data-name="postedBy" class="<?= $Page->postedBy->headerCellClass() ?>"><div id="elh_recruitment_job_postedBy" class="recruitment_job_postedBy"><?= $Page->renderSort($Page->postedBy) ?></div></th>
+<?php } ?>
+<?php
+// Render list options (header, right)
+$Page->ListOptions->render("header", "right");
+?>
+    </tr>
+</thead>
+<tbody>
+<?php
+if ($Page->ExportAll && $Page->isExport()) {
+    $Page->StopRecord = $Page->TotalRecords;
+} else {
+    // Set the last record to display
+    if ($Page->TotalRecords > $Page->StartRecord + $Page->DisplayRecords - 1) {
+        $Page->StopRecord = $Page->StartRecord + $Page->DisplayRecords - 1;
+    } else {
+        $Page->StopRecord = $Page->TotalRecords;
+    }
+}
+$Page->RecordCount = $Page->StartRecord - 1;
+if ($Page->Recordset && !$Page->Recordset->EOF) {
+    // Nothing to do
+} elseif (!$Page->AllowAddDeleteRow && $Page->StopRecord == 0) {
+    $Page->StopRecord = $Page->GridAddRowCount;
+}
+
+// Initialize aggregate
+$Page->RowType = ROWTYPE_AGGREGATEINIT;
+$Page->resetAttributes();
+$Page->renderRow();
+while ($Page->RecordCount < $Page->StopRecord) {
+    $Page->RecordCount++;
+    if ($Page->RecordCount >= $Page->StartRecord) {
+        $Page->RowCount++;
+
+        // Set up key count
+        $Page->KeyCount = $Page->RowIndex;
+
+        // Init row class and style
+        $Page->resetAttributes();
+        $Page->CssClass = "";
+        if ($Page->isGridAdd()) {
+            $Page->loadRowValues(); // Load default values
+            $Page->OldKey = "";
+            $Page->setKey($Page->OldKey);
+        } else {
+            $Page->loadRowValues($Page->Recordset); // Load row values
+            if ($Page->isGridEdit()) {
+                $Page->OldKey = $Page->getKey(true); // Get from CurrentValue
+                $Page->setKey($Page->OldKey);
+            }
+        }
+        $Page->RowType = ROWTYPE_VIEW; // Render view
+
+        // Set up row id / data-rowindex
+        $Page->RowAttrs->merge(["data-rowindex" => $Page->RowCount, "id" => "r" . $Page->RowCount . "_recruitment_job", "data-rowtype" => $Page->RowType]);
+
+        // Render row
+        $Page->renderRow();
+
+        // Render list options
+        $Page->renderListOptions();
+?>
+    <tr <?= $Page->rowAttributes() ?>>
+<?php
+// Render list options (body, left)
+$Page->ListOptions->render("body", "left", $Page->RowCount);
+?>
+    <?php if ($Page->id->Visible) { // id ?>
+        <td data-name="id" <?= $Page->id->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_id">
+<span<?= $Page->id->viewAttributes() ?>>
+<?= $Page->id->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->title->Visible) { // title ?>
+        <td data-name="title" <?= $Page->title->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_title">
+<span<?= $Page->title->viewAttributes() ?>>
+<?= $Page->title->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->country->Visible) { // country ?>
+        <td data-name="country" <?= $Page->country->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_country">
+<span<?= $Page->country->viewAttributes() ?>>
+<?= $Page->country->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->company->Visible) { // company ?>
+        <td data-name="company" <?= $Page->company->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_company">
+<span<?= $Page->company->viewAttributes() ?>>
+<?= $Page->company->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->department->Visible) { // department ?>
+        <td data-name="department" <?= $Page->department->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_department">
+<span<?= $Page->department->viewAttributes() ?>>
+<?= $Page->department->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->code->Visible) { // code ?>
+        <td data-name="code" <?= $Page->code->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_code">
+<span<?= $Page->code->viewAttributes() ?>>
+<?= $Page->code->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->employementType->Visible) { // employementType ?>
+        <td data-name="employementType" <?= $Page->employementType->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_employementType">
+<span<?= $Page->employementType->viewAttributes() ?>>
+<?= $Page->employementType->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->industry->Visible) { // industry ?>
+        <td data-name="industry" <?= $Page->industry->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_industry">
+<span<?= $Page->industry->viewAttributes() ?>>
+<?= $Page->industry->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->experienceLevel->Visible) { // experienceLevel ?>
+        <td data-name="experienceLevel" <?= $Page->experienceLevel->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_experienceLevel">
+<span<?= $Page->experienceLevel->viewAttributes() ?>>
+<?= $Page->experienceLevel->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->jobFunction->Visible) { // jobFunction ?>
+        <td data-name="jobFunction" <?= $Page->jobFunction->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_jobFunction">
+<span<?= $Page->jobFunction->viewAttributes() ?>>
+<?= $Page->jobFunction->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->educationLevel->Visible) { // educationLevel ?>
+        <td data-name="educationLevel" <?= $Page->educationLevel->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_educationLevel">
+<span<?= $Page->educationLevel->viewAttributes() ?>>
+<?= $Page->educationLevel->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->currency->Visible) { // currency ?>
+        <td data-name="currency" <?= $Page->currency->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_currency">
+<span<?= $Page->currency->viewAttributes() ?>>
+<?= $Page->currency->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->showSalary->Visible) { // showSalary ?>
+        <td data-name="showSalary" <?= $Page->showSalary->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_showSalary">
+<span<?= $Page->showSalary->viewAttributes() ?>>
+<?= $Page->showSalary->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->salaryMin->Visible) { // salaryMin ?>
+        <td data-name="salaryMin" <?= $Page->salaryMin->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_salaryMin">
+<span<?= $Page->salaryMin->viewAttributes() ?>>
+<?= $Page->salaryMin->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->salaryMax->Visible) { // salaryMax ?>
+        <td data-name="salaryMax" <?= $Page->salaryMax->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_salaryMax">
+<span<?= $Page->salaryMax->viewAttributes() ?>>
+<?= $Page->salaryMax->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->status->Visible) { // status ?>
+        <td data-name="status" <?= $Page->status->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_status">
+<span<?= $Page->status->viewAttributes() ?>>
+<?= $Page->status->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->closingDate->Visible) { // closingDate ?>
+        <td data-name="closingDate" <?= $Page->closingDate->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_closingDate">
+<span<?= $Page->closingDate->viewAttributes() ?>>
+<?= $Page->closingDate->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->attachment->Visible) { // attachment ?>
+        <td data-name="attachment" <?= $Page->attachment->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_attachment">
+<span<?= $Page->attachment->viewAttributes() ?>>
+<?= $Page->attachment->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->display->Visible) { // display ?>
+        <td data-name="display" <?= $Page->display->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_display">
+<span<?= $Page->display->viewAttributes() ?>>
+<?= $Page->display->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->postedBy->Visible) { // postedBy ?>
+        <td data-name="postedBy" <?= $Page->postedBy->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_recruitment_job_postedBy">
+<span<?= $Page->postedBy->viewAttributes() ?>>
+<?= $Page->postedBy->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+<?php
+// Render list options (body, right)
+$Page->ListOptions->render("body", "right", $Page->RowCount);
+?>
+    </tr>
+<?php
+    }
+    if (!$Page->isGridAdd()) {
+        $Page->Recordset->moveNext();
+    }
+}
+?>
+</tbody>
+</table><!-- /.ew-table -->
+<?php } ?>
+</div><!-- /.ew-grid-middle-panel -->
+<?php if (!$Page->CurrentAction) { ?>
+<input type="hidden" name="action" id="action" value="">
+<?php } ?>
+</form><!-- /.ew-list-form -->
+<?php
+// Close recordset
+if ($Page->Recordset) {
+    $Page->Recordset->close();
+}
+?>
+<?php if (!$Page->isExport()) { ?>
+<div class="card-footer ew-grid-lower-panel">
+<?php if (!$Page->isGridAdd()) { ?>
+<form name="ew-pager-form" class="form-inline ew-form ew-pager-form" action="<?= CurrentPageUrl(false) ?>">
+<?= $Page->Pager->render() ?>
+</form>
+<?php } ?>
+<div class="ew-list-other-options">
+<?php $Page->OtherOptions->render("body", "bottom") ?>
+</div>
+<div class="clearfix"></div>
+</div>
+<?php } ?>
+</div><!-- /.ew-grid -->
+<?php } ?>
+<?php if ($Page->TotalRecords == 0 && !$Page->CurrentAction) { // Show other options ?>
+<div class="ew-list-other-options">
+<?php $Page->OtherOptions->render("body") ?>
+</div>
+<div class="clearfix"></div>
+<?php } ?>
+<?php
+$Page->showPageFooter();
+echo GetDebugMessage();
+?>
+<?php if (!$Page->isExport()) { ?>
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("recruitment_job");
+});
+</script>
+<script>
+loadjs.ready("load", function () {
+    // Write your table-specific startup script here, no need to add script tags.
+});
+</script>
+<?php if (!$Page->isExport()) { ?>
+<script>
+loadjs.ready("fixedheadertable", function () {
+    ew.fixedHeaderTable({
+        delay: 0,
+        container: "gmp_recruitment_job",
+        width: "95%",
+        height: ""
+    });
+});
+</script>
+<?php } ?>
+<?php } ?>

@@ -1,0 +1,843 @@
+<?php
+
+namespace PHPMaker2021\project3;
+
+// Page object
+$PharmacyPurchaseorderEdit = &$Page;
+?>
+<script>
+var currentForm, currentPageID;
+var fpharmacy_purchaseorderedit;
+loadjs.ready("head", function () {
+    var $ = jQuery;
+    // Form object
+    currentPageID = ew.PAGE_ID = "edit";
+    fpharmacy_purchaseorderedit = currentForm = new ew.Form("fpharmacy_purchaseorderedit", "edit");
+
+    // Add fields
+    var fields = ew.vars.tables.pharmacy_purchaseorder.fields;
+    fpharmacy_purchaseorderedit.addFields([
+        ["ORDNO", [fields.ORDNO.required ? ew.Validators.required(fields.ORDNO.caption) : null], fields.ORDNO.isInvalid],
+        ["PRC", [fields.PRC.required ? ew.Validators.required(fields.PRC.caption) : null], fields.PRC.isInvalid],
+        ["QTY", [fields.QTY.required ? ew.Validators.required(fields.QTY.caption) : null, ew.Validators.integer], fields.QTY.isInvalid],
+        ["DT", [fields.DT.required ? ew.Validators.required(fields.DT.caption) : null, ew.Validators.datetime(0)], fields.DT.isInvalid],
+        ["PC", [fields.PC.required ? ew.Validators.required(fields.PC.caption) : null], fields.PC.isInvalid],
+        ["YM", [fields.YM.required ? ew.Validators.required(fields.YM.caption) : null], fields.YM.isInvalid],
+        ["MFRCODE", [fields.MFRCODE.required ? ew.Validators.required(fields.MFRCODE.caption) : null], fields.MFRCODE.isInvalid],
+        ["Stock", [fields.Stock.required ? ew.Validators.required(fields.Stock.caption) : null, ew.Validators.integer], fields.Stock.isInvalid],
+        ["LastMonthSale", [fields.LastMonthSale.required ? ew.Validators.required(fields.LastMonthSale.caption) : null, ew.Validators.integer], fields.LastMonthSale.isInvalid],
+        ["Printcheck", [fields.Printcheck.required ? ew.Validators.required(fields.Printcheck.caption) : null], fields.Printcheck.isInvalid],
+        ["id", [fields.id.required ? ew.Validators.required(fields.id.caption) : null], fields.id.isInvalid],
+        ["poid", [fields.poid.required ? ew.Validators.required(fields.poid.caption) : null, ew.Validators.integer], fields.poid.isInvalid],
+        ["grnid", [fields.grnid.required ? ew.Validators.required(fields.grnid.caption) : null, ew.Validators.integer], fields.grnid.isInvalid],
+        ["BatchNo", [fields.BatchNo.required ? ew.Validators.required(fields.BatchNo.caption) : null], fields.BatchNo.isInvalid],
+        ["ExpDate", [fields.ExpDate.required ? ew.Validators.required(fields.ExpDate.caption) : null, ew.Validators.datetime(0)], fields.ExpDate.isInvalid],
+        ["PrName", [fields.PrName.required ? ew.Validators.required(fields.PrName.caption) : null], fields.PrName.isInvalid],
+        ["Quantity", [fields.Quantity.required ? ew.Validators.required(fields.Quantity.caption) : null, ew.Validators.integer], fields.Quantity.isInvalid],
+        ["FreeQty", [fields.FreeQty.required ? ew.Validators.required(fields.FreeQty.caption) : null, ew.Validators.integer], fields.FreeQty.isInvalid],
+        ["ItemValue", [fields.ItemValue.required ? ew.Validators.required(fields.ItemValue.caption) : null, ew.Validators.float], fields.ItemValue.isInvalid],
+        ["Disc", [fields.Disc.required ? ew.Validators.required(fields.Disc.caption) : null, ew.Validators.float], fields.Disc.isInvalid],
+        ["PTax", [fields.PTax.required ? ew.Validators.required(fields.PTax.caption) : null, ew.Validators.float], fields.PTax.isInvalid],
+        ["MRP", [fields.MRP.required ? ew.Validators.required(fields.MRP.caption) : null, ew.Validators.float], fields.MRP.isInvalid],
+        ["SalTax", [fields.SalTax.required ? ew.Validators.required(fields.SalTax.caption) : null, ew.Validators.float], fields.SalTax.isInvalid],
+        ["PurValue", [fields.PurValue.required ? ew.Validators.required(fields.PurValue.caption) : null, ew.Validators.float], fields.PurValue.isInvalid],
+        ["PurRate", [fields.PurRate.required ? ew.Validators.required(fields.PurRate.caption) : null, ew.Validators.float], fields.PurRate.isInvalid],
+        ["SalRate", [fields.SalRate.required ? ew.Validators.required(fields.SalRate.caption) : null, ew.Validators.float], fields.SalRate.isInvalid],
+        ["Discount", [fields.Discount.required ? ew.Validators.required(fields.Discount.caption) : null, ew.Validators.float], fields.Discount.isInvalid],
+        ["PSGST", [fields.PSGST.required ? ew.Validators.required(fields.PSGST.caption) : null, ew.Validators.float], fields.PSGST.isInvalid],
+        ["PCGST", [fields.PCGST.required ? ew.Validators.required(fields.PCGST.caption) : null, ew.Validators.float], fields.PCGST.isInvalid],
+        ["SSGST", [fields.SSGST.required ? ew.Validators.required(fields.SSGST.caption) : null, ew.Validators.float], fields.SSGST.isInvalid],
+        ["SCGST", [fields.SCGST.required ? ew.Validators.required(fields.SCGST.caption) : null, ew.Validators.float], fields.SCGST.isInvalid],
+        ["BRCODE", [fields.BRCODE.required ? ew.Validators.required(fields.BRCODE.caption) : null, ew.Validators.integer], fields.BRCODE.isInvalid],
+        ["HSN", [fields.HSN.required ? ew.Validators.required(fields.HSN.caption) : null], fields.HSN.isInvalid],
+        ["Pack", [fields.Pack.required ? ew.Validators.required(fields.Pack.caption) : null], fields.Pack.isInvalid],
+        ["PUnit", [fields.PUnit.required ? ew.Validators.required(fields.PUnit.caption) : null, ew.Validators.integer], fields.PUnit.isInvalid],
+        ["SUnit", [fields.SUnit.required ? ew.Validators.required(fields.SUnit.caption) : null, ew.Validators.integer], fields.SUnit.isInvalid],
+        ["GrnQuantity", [fields.GrnQuantity.required ? ew.Validators.required(fields.GrnQuantity.caption) : null, ew.Validators.integer], fields.GrnQuantity.isInvalid],
+        ["GrnMRP", [fields.GrnMRP.required ? ew.Validators.required(fields.GrnMRP.caption) : null, ew.Validators.float], fields.GrnMRP.isInvalid],
+        ["trid", [fields.trid.required ? ew.Validators.required(fields.trid.caption) : null, ew.Validators.integer], fields.trid.isInvalid],
+        ["HospID", [fields.HospID.required ? ew.Validators.required(fields.HospID.caption) : null, ew.Validators.integer], fields.HospID.isInvalid],
+        ["CreatedBy", [fields.CreatedBy.required ? ew.Validators.required(fields.CreatedBy.caption) : null, ew.Validators.integer], fields.CreatedBy.isInvalid],
+        ["CreatedDateTime", [fields.CreatedDateTime.required ? ew.Validators.required(fields.CreatedDateTime.caption) : null, ew.Validators.datetime(0)], fields.CreatedDateTime.isInvalid],
+        ["ModifiedBy", [fields.ModifiedBy.required ? ew.Validators.required(fields.ModifiedBy.caption) : null, ew.Validators.integer], fields.ModifiedBy.isInvalid],
+        ["ModifiedDateTime", [fields.ModifiedDateTime.required ? ew.Validators.required(fields.ModifiedDateTime.caption) : null, ew.Validators.datetime(0)], fields.ModifiedDateTime.isInvalid],
+        ["grncreatedby", [fields.grncreatedby.required ? ew.Validators.required(fields.grncreatedby.caption) : null, ew.Validators.integer], fields.grncreatedby.isInvalid],
+        ["grncreatedDateTime", [fields.grncreatedDateTime.required ? ew.Validators.required(fields.grncreatedDateTime.caption) : null, ew.Validators.datetime(0)], fields.grncreatedDateTime.isInvalid],
+        ["grnModifiedby", [fields.grnModifiedby.required ? ew.Validators.required(fields.grnModifiedby.caption) : null, ew.Validators.integer], fields.grnModifiedby.isInvalid],
+        ["grnModifiedDateTime", [fields.grnModifiedDateTime.required ? ew.Validators.required(fields.grnModifiedDateTime.caption) : null, ew.Validators.datetime(0)], fields.grnModifiedDateTime.isInvalid],
+        ["Received", [fields.Received.required ? ew.Validators.required(fields.Received.caption) : null], fields.Received.isInvalid],
+        ["BillDate", [fields.BillDate.required ? ew.Validators.required(fields.BillDate.caption) : null, ew.Validators.datetime(0)], fields.BillDate.isInvalid],
+        ["CurStock", [fields.CurStock.required ? ew.Validators.required(fields.CurStock.caption) : null, ew.Validators.integer], fields.CurStock.isInvalid]
+    ]);
+
+    // Set invalid fields
+    $(function() {
+        var f = fpharmacy_purchaseorderedit,
+            fobj = f.getForm(),
+            $fobj = $(fobj),
+            $k = $fobj.find("#" + f.formKeyCountName), // Get key_count
+            rowcnt = ($k[0]) ? parseInt($k.val(), 10) : 1,
+            startcnt = (rowcnt == 0) ? 0 : 1; // Check rowcnt == 0 => Inline-Add
+        for (var i = startcnt; i <= rowcnt; i++) {
+            var rowIndex = ($k[0]) ? String(i) : "";
+            f.setInvalid(rowIndex);
+        }
+    });
+
+    // Validate form
+    fpharmacy_purchaseorderedit.validate = function () {
+        if (!this.validateRequired)
+            return true; // Ignore validation
+        var fobj = this.getForm(),
+            $fobj = $(fobj);
+        if ($fobj.find("#confirm").val() == "confirm")
+            return true;
+        var addcnt = 0,
+            $k = $fobj.find("#" + this.formKeyCountName), // Get key_count
+            rowcnt = ($k[0]) ? parseInt($k.val(), 10) : 1,
+            startcnt = (rowcnt == 0) ? 0 : 1, // Check rowcnt == 0 => Inline-Add
+            gridinsert = ["insert", "gridinsert"].includes($fobj.find("#action").val()) && $k[0];
+        for (var i = startcnt; i <= rowcnt; i++) {
+            var rowIndex = ($k[0]) ? String(i) : "";
+            $fobj.data("rowindex", rowIndex);
+
+            // Validate fields
+            if (!this.validateFields(rowIndex))
+                return false;
+
+            // Call Form_CustomValidate event
+            if (!this.customValidate(fobj)) {
+                this.focus();
+                return false;
+            }
+        }
+
+        // Process detail forms
+        var dfs = $fobj.find("input[name='detailpage']").get();
+        for (var i = 0; i < dfs.length; i++) {
+            var df = dfs[i],
+                val = df.value,
+                frm = ew.forms.get(val);
+            if (val && frm && !frm.validate())
+                return false;
+        }
+        return true;
+    }
+
+    // Form_CustomValidate
+    fpharmacy_purchaseorderedit.customValidate = function(fobj) { // DO NOT CHANGE THIS LINE!
+        // Your custom validation code here, return false if invalid.
+        return true;
+    }
+
+    // Use JavaScript validation or not
+    fpharmacy_purchaseorderedit.validateRequired = <?= Config("CLIENT_VALIDATE") ? "true" : "false" ?>;
+
+    // Dynamic selection lists
+    loadjs.done("fpharmacy_purchaseorderedit");
+});
+</script>
+<script>
+loadjs.ready("head", function () {
+    // Write your table-specific client script here, no need to add script tags.
+});
+</script>
+<?php $Page->showPageHeader(); ?>
+<?php
+$Page->showMessage();
+?>
+<form name="fpharmacy_purchaseorderedit" id="fpharmacy_purchaseorderedit" class="<?= $Page->FormClassName ?>" action="<?= CurrentPageUrl() ?>" method="post">
+<?php if (Config("CHECK_TOKEN")) { ?>
+<input type="hidden" name="<?= $TokenNameKey ?>" value="<?= $TokenName ?>"><!-- CSRF token name -->
+<input type="hidden" name="<?= $TokenValueKey ?>" value="<?= $TokenValue ?>"><!-- CSRF token value -->
+<?php } ?>
+<input type="hidden" name="t" value="pharmacy_purchaseorder">
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="<?= (int)$Page->IsModal ?>">
+<div class="ew-edit-div"><!-- page* -->
+<?php if ($Page->ORDNO->Visible) { // ORDNO ?>
+    <div id="r_ORDNO" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_ORDNO" for="x_ORDNO" class="<?= $Page->LeftColumnClass ?>"><?= $Page->ORDNO->caption() ?><?= $Page->ORDNO->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->ORDNO->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_ORDNO">
+<input type="<?= $Page->ORDNO->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_ORDNO" name="x_ORDNO" id="x_ORDNO" size="30" maxlength="5" placeholder="<?= HtmlEncode($Page->ORDNO->getPlaceHolder()) ?>" value="<?= $Page->ORDNO->EditValue ?>"<?= $Page->ORDNO->editAttributes() ?> aria-describedby="x_ORDNO_help">
+<?= $Page->ORDNO->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->ORDNO->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->PRC->Visible) { // PRC ?>
+    <div id="r_PRC" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_PRC" for="x_PRC" class="<?= $Page->LeftColumnClass ?>"><?= $Page->PRC->caption() ?><?= $Page->PRC->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->PRC->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_PRC">
+<input type="<?= $Page->PRC->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_PRC" name="x_PRC" id="x_PRC" size="30" maxlength="9" placeholder="<?= HtmlEncode($Page->PRC->getPlaceHolder()) ?>" value="<?= $Page->PRC->EditValue ?>"<?= $Page->PRC->editAttributes() ?> aria-describedby="x_PRC_help">
+<?= $Page->PRC->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->PRC->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->QTY->Visible) { // QTY ?>
+    <div id="r_QTY" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_QTY" for="x_QTY" class="<?= $Page->LeftColumnClass ?>"><?= $Page->QTY->caption() ?><?= $Page->QTY->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->QTY->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_QTY">
+<input type="<?= $Page->QTY->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_QTY" name="x_QTY" id="x_QTY" size="30" placeholder="<?= HtmlEncode($Page->QTY->getPlaceHolder()) ?>" value="<?= $Page->QTY->EditValue ?>"<?= $Page->QTY->editAttributes() ?> aria-describedby="x_QTY_help">
+<?= $Page->QTY->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->QTY->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->DT->Visible) { // DT ?>
+    <div id="r_DT" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_DT" for="x_DT" class="<?= $Page->LeftColumnClass ?>"><?= $Page->DT->caption() ?><?= $Page->DT->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->DT->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_DT">
+<input type="<?= $Page->DT->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_DT" name="x_DT" id="x_DT" placeholder="<?= HtmlEncode($Page->DT->getPlaceHolder()) ?>" value="<?= $Page->DT->EditValue ?>"<?= $Page->DT->editAttributes() ?> aria-describedby="x_DT_help">
+<?= $Page->DT->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->DT->getErrorMessage() ?></div>
+<?php if (!$Page->DT->ReadOnly && !$Page->DT->Disabled && !isset($Page->DT->EditAttrs["readonly"]) && !isset($Page->DT->EditAttrs["disabled"])) { ?>
+<script>
+loadjs.ready(["fpharmacy_purchaseorderedit", "datetimepicker"], function() {
+    ew.createDateTimePicker("fpharmacy_purchaseorderedit", "x_DT", {"ignoreReadonly":true,"useCurrent":false,"format":0});
+});
+</script>
+<?php } ?>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->PC->Visible) { // PC ?>
+    <div id="r_PC" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_PC" for="x_PC" class="<?= $Page->LeftColumnClass ?>"><?= $Page->PC->caption() ?><?= $Page->PC->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->PC->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_PC">
+<input type="<?= $Page->PC->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_PC" name="x_PC" id="x_PC" size="30" maxlength="5" placeholder="<?= HtmlEncode($Page->PC->getPlaceHolder()) ?>" value="<?= $Page->PC->EditValue ?>"<?= $Page->PC->editAttributes() ?> aria-describedby="x_PC_help">
+<?= $Page->PC->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->PC->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->YM->Visible) { // YM ?>
+    <div id="r_YM" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_YM" for="x_YM" class="<?= $Page->LeftColumnClass ?>"><?= $Page->YM->caption() ?><?= $Page->YM->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->YM->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_YM">
+<input type="<?= $Page->YM->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_YM" name="x_YM" id="x_YM" size="30" maxlength="6" placeholder="<?= HtmlEncode($Page->YM->getPlaceHolder()) ?>" value="<?= $Page->YM->EditValue ?>"<?= $Page->YM->editAttributes() ?> aria-describedby="x_YM_help">
+<?= $Page->YM->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->YM->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->MFRCODE->Visible) { // MFRCODE ?>
+    <div id="r_MFRCODE" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_MFRCODE" for="x_MFRCODE" class="<?= $Page->LeftColumnClass ?>"><?= $Page->MFRCODE->caption() ?><?= $Page->MFRCODE->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->MFRCODE->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_MFRCODE">
+<input type="<?= $Page->MFRCODE->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_MFRCODE" name="x_MFRCODE" id="x_MFRCODE" size="30" maxlength="45" placeholder="<?= HtmlEncode($Page->MFRCODE->getPlaceHolder()) ?>" value="<?= $Page->MFRCODE->EditValue ?>"<?= $Page->MFRCODE->editAttributes() ?> aria-describedby="x_MFRCODE_help">
+<?= $Page->MFRCODE->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->MFRCODE->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->Stock->Visible) { // Stock ?>
+    <div id="r_Stock" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_Stock" for="x_Stock" class="<?= $Page->LeftColumnClass ?>"><?= $Page->Stock->caption() ?><?= $Page->Stock->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->Stock->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_Stock">
+<input type="<?= $Page->Stock->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_Stock" name="x_Stock" id="x_Stock" size="30" placeholder="<?= HtmlEncode($Page->Stock->getPlaceHolder()) ?>" value="<?= $Page->Stock->EditValue ?>"<?= $Page->Stock->editAttributes() ?> aria-describedby="x_Stock_help">
+<?= $Page->Stock->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->Stock->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->LastMonthSale->Visible) { // LastMonthSale ?>
+    <div id="r_LastMonthSale" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_LastMonthSale" for="x_LastMonthSale" class="<?= $Page->LeftColumnClass ?>"><?= $Page->LastMonthSale->caption() ?><?= $Page->LastMonthSale->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->LastMonthSale->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_LastMonthSale">
+<input type="<?= $Page->LastMonthSale->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_LastMonthSale" name="x_LastMonthSale" id="x_LastMonthSale" size="30" placeholder="<?= HtmlEncode($Page->LastMonthSale->getPlaceHolder()) ?>" value="<?= $Page->LastMonthSale->EditValue ?>"<?= $Page->LastMonthSale->editAttributes() ?> aria-describedby="x_LastMonthSale_help">
+<?= $Page->LastMonthSale->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->LastMonthSale->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->Printcheck->Visible) { // Printcheck ?>
+    <div id="r_Printcheck" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_Printcheck" for="x_Printcheck" class="<?= $Page->LeftColumnClass ?>"><?= $Page->Printcheck->caption() ?><?= $Page->Printcheck->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->Printcheck->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_Printcheck">
+<input type="<?= $Page->Printcheck->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_Printcheck" name="x_Printcheck" id="x_Printcheck" size="30" maxlength="50" placeholder="<?= HtmlEncode($Page->Printcheck->getPlaceHolder()) ?>" value="<?= $Page->Printcheck->EditValue ?>"<?= $Page->Printcheck->editAttributes() ?> aria-describedby="x_Printcheck_help">
+<?= $Page->Printcheck->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->Printcheck->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->id->Visible) { // id ?>
+    <div id="r_id" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_id" class="<?= $Page->LeftColumnClass ?>"><?= $Page->id->caption() ?><?= $Page->id->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->id->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_id">
+<span<?= $Page->id->viewAttributes() ?>>
+<input type="text" readonly class="form-control-plaintext" value="<?= HtmlEncode(RemoveHtml($Page->id->getDisplayValue($Page->id->EditValue))) ?>"></span>
+</span>
+<input type="hidden" data-table="pharmacy_purchaseorder" data-field="x_id" data-hidden="1" name="x_id" id="x_id" value="<?= HtmlEncode($Page->id->CurrentValue) ?>">
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->poid->Visible) { // poid ?>
+    <div id="r_poid" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_poid" for="x_poid" class="<?= $Page->LeftColumnClass ?>"><?= $Page->poid->caption() ?><?= $Page->poid->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->poid->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_poid">
+<input type="<?= $Page->poid->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_poid" name="x_poid" id="x_poid" size="30" placeholder="<?= HtmlEncode($Page->poid->getPlaceHolder()) ?>" value="<?= $Page->poid->EditValue ?>"<?= $Page->poid->editAttributes() ?> aria-describedby="x_poid_help">
+<?= $Page->poid->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->poid->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->grnid->Visible) { // grnid ?>
+    <div id="r_grnid" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_grnid" for="x_grnid" class="<?= $Page->LeftColumnClass ?>"><?= $Page->grnid->caption() ?><?= $Page->grnid->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->grnid->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_grnid">
+<input type="<?= $Page->grnid->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_grnid" name="x_grnid" id="x_grnid" size="30" placeholder="<?= HtmlEncode($Page->grnid->getPlaceHolder()) ?>" value="<?= $Page->grnid->EditValue ?>"<?= $Page->grnid->editAttributes() ?> aria-describedby="x_grnid_help">
+<?= $Page->grnid->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->grnid->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->BatchNo->Visible) { // BatchNo ?>
+    <div id="r_BatchNo" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_BatchNo" for="x_BatchNo" class="<?= $Page->LeftColumnClass ?>"><?= $Page->BatchNo->caption() ?><?= $Page->BatchNo->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->BatchNo->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_BatchNo">
+<input type="<?= $Page->BatchNo->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_BatchNo" name="x_BatchNo" id="x_BatchNo" size="30" maxlength="45" placeholder="<?= HtmlEncode($Page->BatchNo->getPlaceHolder()) ?>" value="<?= $Page->BatchNo->EditValue ?>"<?= $Page->BatchNo->editAttributes() ?> aria-describedby="x_BatchNo_help">
+<?= $Page->BatchNo->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->BatchNo->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->ExpDate->Visible) { // ExpDate ?>
+    <div id="r_ExpDate" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_ExpDate" for="x_ExpDate" class="<?= $Page->LeftColumnClass ?>"><?= $Page->ExpDate->caption() ?><?= $Page->ExpDate->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->ExpDate->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_ExpDate">
+<input type="<?= $Page->ExpDate->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_ExpDate" name="x_ExpDate" id="x_ExpDate" placeholder="<?= HtmlEncode($Page->ExpDate->getPlaceHolder()) ?>" value="<?= $Page->ExpDate->EditValue ?>"<?= $Page->ExpDate->editAttributes() ?> aria-describedby="x_ExpDate_help">
+<?= $Page->ExpDate->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->ExpDate->getErrorMessage() ?></div>
+<?php if (!$Page->ExpDate->ReadOnly && !$Page->ExpDate->Disabled && !isset($Page->ExpDate->EditAttrs["readonly"]) && !isset($Page->ExpDate->EditAttrs["disabled"])) { ?>
+<script>
+loadjs.ready(["fpharmacy_purchaseorderedit", "datetimepicker"], function() {
+    ew.createDateTimePicker("fpharmacy_purchaseorderedit", "x_ExpDate", {"ignoreReadonly":true,"useCurrent":false,"format":0});
+});
+</script>
+<?php } ?>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->PrName->Visible) { // PrName ?>
+    <div id="r_PrName" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_PrName" for="x_PrName" class="<?= $Page->LeftColumnClass ?>"><?= $Page->PrName->caption() ?><?= $Page->PrName->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->PrName->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_PrName">
+<input type="<?= $Page->PrName->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_PrName" name="x_PrName" id="x_PrName" size="30" maxlength="100" placeholder="<?= HtmlEncode($Page->PrName->getPlaceHolder()) ?>" value="<?= $Page->PrName->EditValue ?>"<?= $Page->PrName->editAttributes() ?> aria-describedby="x_PrName_help">
+<?= $Page->PrName->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->PrName->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->Quantity->Visible) { // Quantity ?>
+    <div id="r_Quantity" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_Quantity" for="x_Quantity" class="<?= $Page->LeftColumnClass ?>"><?= $Page->Quantity->caption() ?><?= $Page->Quantity->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->Quantity->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_Quantity">
+<input type="<?= $Page->Quantity->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_Quantity" name="x_Quantity" id="x_Quantity" size="30" placeholder="<?= HtmlEncode($Page->Quantity->getPlaceHolder()) ?>" value="<?= $Page->Quantity->EditValue ?>"<?= $Page->Quantity->editAttributes() ?> aria-describedby="x_Quantity_help">
+<?= $Page->Quantity->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->Quantity->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->FreeQty->Visible) { // FreeQty ?>
+    <div id="r_FreeQty" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_FreeQty" for="x_FreeQty" class="<?= $Page->LeftColumnClass ?>"><?= $Page->FreeQty->caption() ?><?= $Page->FreeQty->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->FreeQty->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_FreeQty">
+<input type="<?= $Page->FreeQty->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_FreeQty" name="x_FreeQty" id="x_FreeQty" size="30" placeholder="<?= HtmlEncode($Page->FreeQty->getPlaceHolder()) ?>" value="<?= $Page->FreeQty->EditValue ?>"<?= $Page->FreeQty->editAttributes() ?> aria-describedby="x_FreeQty_help">
+<?= $Page->FreeQty->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->FreeQty->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->ItemValue->Visible) { // ItemValue ?>
+    <div id="r_ItemValue" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_ItemValue" for="x_ItemValue" class="<?= $Page->LeftColumnClass ?>"><?= $Page->ItemValue->caption() ?><?= $Page->ItemValue->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->ItemValue->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_ItemValue">
+<input type="<?= $Page->ItemValue->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_ItemValue" name="x_ItemValue" id="x_ItemValue" size="30" placeholder="<?= HtmlEncode($Page->ItemValue->getPlaceHolder()) ?>" value="<?= $Page->ItemValue->EditValue ?>"<?= $Page->ItemValue->editAttributes() ?> aria-describedby="x_ItemValue_help">
+<?= $Page->ItemValue->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->ItemValue->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->Disc->Visible) { // Disc ?>
+    <div id="r_Disc" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_Disc" for="x_Disc" class="<?= $Page->LeftColumnClass ?>"><?= $Page->Disc->caption() ?><?= $Page->Disc->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->Disc->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_Disc">
+<input type="<?= $Page->Disc->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_Disc" name="x_Disc" id="x_Disc" size="30" placeholder="<?= HtmlEncode($Page->Disc->getPlaceHolder()) ?>" value="<?= $Page->Disc->EditValue ?>"<?= $Page->Disc->editAttributes() ?> aria-describedby="x_Disc_help">
+<?= $Page->Disc->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->Disc->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->PTax->Visible) { // PTax ?>
+    <div id="r_PTax" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_PTax" for="x_PTax" class="<?= $Page->LeftColumnClass ?>"><?= $Page->PTax->caption() ?><?= $Page->PTax->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->PTax->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_PTax">
+<input type="<?= $Page->PTax->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_PTax" name="x_PTax" id="x_PTax" size="30" placeholder="<?= HtmlEncode($Page->PTax->getPlaceHolder()) ?>" value="<?= $Page->PTax->EditValue ?>"<?= $Page->PTax->editAttributes() ?> aria-describedby="x_PTax_help">
+<?= $Page->PTax->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->PTax->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->MRP->Visible) { // MRP ?>
+    <div id="r_MRP" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_MRP" for="x_MRP" class="<?= $Page->LeftColumnClass ?>"><?= $Page->MRP->caption() ?><?= $Page->MRP->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->MRP->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_MRP">
+<input type="<?= $Page->MRP->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_MRP" name="x_MRP" id="x_MRP" size="30" placeholder="<?= HtmlEncode($Page->MRP->getPlaceHolder()) ?>" value="<?= $Page->MRP->EditValue ?>"<?= $Page->MRP->editAttributes() ?> aria-describedby="x_MRP_help">
+<?= $Page->MRP->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->MRP->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->SalTax->Visible) { // SalTax ?>
+    <div id="r_SalTax" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_SalTax" for="x_SalTax" class="<?= $Page->LeftColumnClass ?>"><?= $Page->SalTax->caption() ?><?= $Page->SalTax->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->SalTax->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_SalTax">
+<input type="<?= $Page->SalTax->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_SalTax" name="x_SalTax" id="x_SalTax" size="30" placeholder="<?= HtmlEncode($Page->SalTax->getPlaceHolder()) ?>" value="<?= $Page->SalTax->EditValue ?>"<?= $Page->SalTax->editAttributes() ?> aria-describedby="x_SalTax_help">
+<?= $Page->SalTax->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->SalTax->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->PurValue->Visible) { // PurValue ?>
+    <div id="r_PurValue" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_PurValue" for="x_PurValue" class="<?= $Page->LeftColumnClass ?>"><?= $Page->PurValue->caption() ?><?= $Page->PurValue->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->PurValue->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_PurValue">
+<input type="<?= $Page->PurValue->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_PurValue" name="x_PurValue" id="x_PurValue" size="30" placeholder="<?= HtmlEncode($Page->PurValue->getPlaceHolder()) ?>" value="<?= $Page->PurValue->EditValue ?>"<?= $Page->PurValue->editAttributes() ?> aria-describedby="x_PurValue_help">
+<?= $Page->PurValue->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->PurValue->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->PurRate->Visible) { // PurRate ?>
+    <div id="r_PurRate" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_PurRate" for="x_PurRate" class="<?= $Page->LeftColumnClass ?>"><?= $Page->PurRate->caption() ?><?= $Page->PurRate->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->PurRate->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_PurRate">
+<input type="<?= $Page->PurRate->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_PurRate" name="x_PurRate" id="x_PurRate" size="30" placeholder="<?= HtmlEncode($Page->PurRate->getPlaceHolder()) ?>" value="<?= $Page->PurRate->EditValue ?>"<?= $Page->PurRate->editAttributes() ?> aria-describedby="x_PurRate_help">
+<?= $Page->PurRate->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->PurRate->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->SalRate->Visible) { // SalRate ?>
+    <div id="r_SalRate" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_SalRate" for="x_SalRate" class="<?= $Page->LeftColumnClass ?>"><?= $Page->SalRate->caption() ?><?= $Page->SalRate->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->SalRate->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_SalRate">
+<input type="<?= $Page->SalRate->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_SalRate" name="x_SalRate" id="x_SalRate" size="30" placeholder="<?= HtmlEncode($Page->SalRate->getPlaceHolder()) ?>" value="<?= $Page->SalRate->EditValue ?>"<?= $Page->SalRate->editAttributes() ?> aria-describedby="x_SalRate_help">
+<?= $Page->SalRate->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->SalRate->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->Discount->Visible) { // Discount ?>
+    <div id="r_Discount" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_Discount" for="x_Discount" class="<?= $Page->LeftColumnClass ?>"><?= $Page->Discount->caption() ?><?= $Page->Discount->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->Discount->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_Discount">
+<input type="<?= $Page->Discount->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_Discount" name="x_Discount" id="x_Discount" size="30" placeholder="<?= HtmlEncode($Page->Discount->getPlaceHolder()) ?>" value="<?= $Page->Discount->EditValue ?>"<?= $Page->Discount->editAttributes() ?> aria-describedby="x_Discount_help">
+<?= $Page->Discount->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->Discount->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->PSGST->Visible) { // PSGST ?>
+    <div id="r_PSGST" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_PSGST" for="x_PSGST" class="<?= $Page->LeftColumnClass ?>"><?= $Page->PSGST->caption() ?><?= $Page->PSGST->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->PSGST->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_PSGST">
+<input type="<?= $Page->PSGST->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_PSGST" name="x_PSGST" id="x_PSGST" size="30" placeholder="<?= HtmlEncode($Page->PSGST->getPlaceHolder()) ?>" value="<?= $Page->PSGST->EditValue ?>"<?= $Page->PSGST->editAttributes() ?> aria-describedby="x_PSGST_help">
+<?= $Page->PSGST->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->PSGST->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->PCGST->Visible) { // PCGST ?>
+    <div id="r_PCGST" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_PCGST" for="x_PCGST" class="<?= $Page->LeftColumnClass ?>"><?= $Page->PCGST->caption() ?><?= $Page->PCGST->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->PCGST->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_PCGST">
+<input type="<?= $Page->PCGST->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_PCGST" name="x_PCGST" id="x_PCGST" size="30" placeholder="<?= HtmlEncode($Page->PCGST->getPlaceHolder()) ?>" value="<?= $Page->PCGST->EditValue ?>"<?= $Page->PCGST->editAttributes() ?> aria-describedby="x_PCGST_help">
+<?= $Page->PCGST->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->PCGST->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->SSGST->Visible) { // SSGST ?>
+    <div id="r_SSGST" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_SSGST" for="x_SSGST" class="<?= $Page->LeftColumnClass ?>"><?= $Page->SSGST->caption() ?><?= $Page->SSGST->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->SSGST->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_SSGST">
+<input type="<?= $Page->SSGST->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_SSGST" name="x_SSGST" id="x_SSGST" size="30" placeholder="<?= HtmlEncode($Page->SSGST->getPlaceHolder()) ?>" value="<?= $Page->SSGST->EditValue ?>"<?= $Page->SSGST->editAttributes() ?> aria-describedby="x_SSGST_help">
+<?= $Page->SSGST->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->SSGST->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->SCGST->Visible) { // SCGST ?>
+    <div id="r_SCGST" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_SCGST" for="x_SCGST" class="<?= $Page->LeftColumnClass ?>"><?= $Page->SCGST->caption() ?><?= $Page->SCGST->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->SCGST->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_SCGST">
+<input type="<?= $Page->SCGST->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_SCGST" name="x_SCGST" id="x_SCGST" size="30" placeholder="<?= HtmlEncode($Page->SCGST->getPlaceHolder()) ?>" value="<?= $Page->SCGST->EditValue ?>"<?= $Page->SCGST->editAttributes() ?> aria-describedby="x_SCGST_help">
+<?= $Page->SCGST->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->SCGST->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->BRCODE->Visible) { // BRCODE ?>
+    <div id="r_BRCODE" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_BRCODE" for="x_BRCODE" class="<?= $Page->LeftColumnClass ?>"><?= $Page->BRCODE->caption() ?><?= $Page->BRCODE->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->BRCODE->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_BRCODE">
+<input type="<?= $Page->BRCODE->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_BRCODE" name="x_BRCODE" id="x_BRCODE" size="30" placeholder="<?= HtmlEncode($Page->BRCODE->getPlaceHolder()) ?>" value="<?= $Page->BRCODE->EditValue ?>"<?= $Page->BRCODE->editAttributes() ?> aria-describedby="x_BRCODE_help">
+<?= $Page->BRCODE->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->BRCODE->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->HSN->Visible) { // HSN ?>
+    <div id="r_HSN" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_HSN" for="x_HSN" class="<?= $Page->LeftColumnClass ?>"><?= $Page->HSN->caption() ?><?= $Page->HSN->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->HSN->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_HSN">
+<input type="<?= $Page->HSN->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_HSN" name="x_HSN" id="x_HSN" size="30" maxlength="45" placeholder="<?= HtmlEncode($Page->HSN->getPlaceHolder()) ?>" value="<?= $Page->HSN->EditValue ?>"<?= $Page->HSN->editAttributes() ?> aria-describedby="x_HSN_help">
+<?= $Page->HSN->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->HSN->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->Pack->Visible) { // Pack ?>
+    <div id="r_Pack" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_Pack" for="x_Pack" class="<?= $Page->LeftColumnClass ?>"><?= $Page->Pack->caption() ?><?= $Page->Pack->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->Pack->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_Pack">
+<input type="<?= $Page->Pack->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_Pack" name="x_Pack" id="x_Pack" size="30" maxlength="45" placeholder="<?= HtmlEncode($Page->Pack->getPlaceHolder()) ?>" value="<?= $Page->Pack->EditValue ?>"<?= $Page->Pack->editAttributes() ?> aria-describedby="x_Pack_help">
+<?= $Page->Pack->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->Pack->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->PUnit->Visible) { // PUnit ?>
+    <div id="r_PUnit" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_PUnit" for="x_PUnit" class="<?= $Page->LeftColumnClass ?>"><?= $Page->PUnit->caption() ?><?= $Page->PUnit->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->PUnit->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_PUnit">
+<input type="<?= $Page->PUnit->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_PUnit" name="x_PUnit" id="x_PUnit" size="30" placeholder="<?= HtmlEncode($Page->PUnit->getPlaceHolder()) ?>" value="<?= $Page->PUnit->EditValue ?>"<?= $Page->PUnit->editAttributes() ?> aria-describedby="x_PUnit_help">
+<?= $Page->PUnit->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->PUnit->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->SUnit->Visible) { // SUnit ?>
+    <div id="r_SUnit" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_SUnit" for="x_SUnit" class="<?= $Page->LeftColumnClass ?>"><?= $Page->SUnit->caption() ?><?= $Page->SUnit->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->SUnit->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_SUnit">
+<input type="<?= $Page->SUnit->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_SUnit" name="x_SUnit" id="x_SUnit" size="30" placeholder="<?= HtmlEncode($Page->SUnit->getPlaceHolder()) ?>" value="<?= $Page->SUnit->EditValue ?>"<?= $Page->SUnit->editAttributes() ?> aria-describedby="x_SUnit_help">
+<?= $Page->SUnit->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->SUnit->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->GrnQuantity->Visible) { // GrnQuantity ?>
+    <div id="r_GrnQuantity" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_GrnQuantity" for="x_GrnQuantity" class="<?= $Page->LeftColumnClass ?>"><?= $Page->GrnQuantity->caption() ?><?= $Page->GrnQuantity->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->GrnQuantity->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_GrnQuantity">
+<input type="<?= $Page->GrnQuantity->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_GrnQuantity" name="x_GrnQuantity" id="x_GrnQuantity" size="30" placeholder="<?= HtmlEncode($Page->GrnQuantity->getPlaceHolder()) ?>" value="<?= $Page->GrnQuantity->EditValue ?>"<?= $Page->GrnQuantity->editAttributes() ?> aria-describedby="x_GrnQuantity_help">
+<?= $Page->GrnQuantity->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->GrnQuantity->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->GrnMRP->Visible) { // GrnMRP ?>
+    <div id="r_GrnMRP" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_GrnMRP" for="x_GrnMRP" class="<?= $Page->LeftColumnClass ?>"><?= $Page->GrnMRP->caption() ?><?= $Page->GrnMRP->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->GrnMRP->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_GrnMRP">
+<input type="<?= $Page->GrnMRP->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_GrnMRP" name="x_GrnMRP" id="x_GrnMRP" size="30" placeholder="<?= HtmlEncode($Page->GrnMRP->getPlaceHolder()) ?>" value="<?= $Page->GrnMRP->EditValue ?>"<?= $Page->GrnMRP->editAttributes() ?> aria-describedby="x_GrnMRP_help">
+<?= $Page->GrnMRP->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->GrnMRP->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->trid->Visible) { // trid ?>
+    <div id="r_trid" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_trid" for="x_trid" class="<?= $Page->LeftColumnClass ?>"><?= $Page->trid->caption() ?><?= $Page->trid->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->trid->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_trid">
+<input type="<?= $Page->trid->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_trid" name="x_trid" id="x_trid" size="30" placeholder="<?= HtmlEncode($Page->trid->getPlaceHolder()) ?>" value="<?= $Page->trid->EditValue ?>"<?= $Page->trid->editAttributes() ?> aria-describedby="x_trid_help">
+<?= $Page->trid->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->trid->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->HospID->Visible) { // HospID ?>
+    <div id="r_HospID" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_HospID" for="x_HospID" class="<?= $Page->LeftColumnClass ?>"><?= $Page->HospID->caption() ?><?= $Page->HospID->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->HospID->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_HospID">
+<input type="<?= $Page->HospID->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_HospID" name="x_HospID" id="x_HospID" size="30" placeholder="<?= HtmlEncode($Page->HospID->getPlaceHolder()) ?>" value="<?= $Page->HospID->EditValue ?>"<?= $Page->HospID->editAttributes() ?> aria-describedby="x_HospID_help">
+<?= $Page->HospID->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->HospID->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->CreatedBy->Visible) { // CreatedBy ?>
+    <div id="r_CreatedBy" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_CreatedBy" for="x_CreatedBy" class="<?= $Page->LeftColumnClass ?>"><?= $Page->CreatedBy->caption() ?><?= $Page->CreatedBy->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->CreatedBy->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_CreatedBy">
+<input type="<?= $Page->CreatedBy->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_CreatedBy" name="x_CreatedBy" id="x_CreatedBy" size="30" placeholder="<?= HtmlEncode($Page->CreatedBy->getPlaceHolder()) ?>" value="<?= $Page->CreatedBy->EditValue ?>"<?= $Page->CreatedBy->editAttributes() ?> aria-describedby="x_CreatedBy_help">
+<?= $Page->CreatedBy->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->CreatedBy->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->CreatedDateTime->Visible) { // CreatedDateTime ?>
+    <div id="r_CreatedDateTime" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_CreatedDateTime" for="x_CreatedDateTime" class="<?= $Page->LeftColumnClass ?>"><?= $Page->CreatedDateTime->caption() ?><?= $Page->CreatedDateTime->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->CreatedDateTime->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_CreatedDateTime">
+<input type="<?= $Page->CreatedDateTime->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_CreatedDateTime" name="x_CreatedDateTime" id="x_CreatedDateTime" placeholder="<?= HtmlEncode($Page->CreatedDateTime->getPlaceHolder()) ?>" value="<?= $Page->CreatedDateTime->EditValue ?>"<?= $Page->CreatedDateTime->editAttributes() ?> aria-describedby="x_CreatedDateTime_help">
+<?= $Page->CreatedDateTime->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->CreatedDateTime->getErrorMessage() ?></div>
+<?php if (!$Page->CreatedDateTime->ReadOnly && !$Page->CreatedDateTime->Disabled && !isset($Page->CreatedDateTime->EditAttrs["readonly"]) && !isset($Page->CreatedDateTime->EditAttrs["disabled"])) { ?>
+<script>
+loadjs.ready(["fpharmacy_purchaseorderedit", "datetimepicker"], function() {
+    ew.createDateTimePicker("fpharmacy_purchaseorderedit", "x_CreatedDateTime", {"ignoreReadonly":true,"useCurrent":false,"format":0});
+});
+</script>
+<?php } ?>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->ModifiedBy->Visible) { // ModifiedBy ?>
+    <div id="r_ModifiedBy" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_ModifiedBy" for="x_ModifiedBy" class="<?= $Page->LeftColumnClass ?>"><?= $Page->ModifiedBy->caption() ?><?= $Page->ModifiedBy->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->ModifiedBy->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_ModifiedBy">
+<input type="<?= $Page->ModifiedBy->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_ModifiedBy" name="x_ModifiedBy" id="x_ModifiedBy" size="30" placeholder="<?= HtmlEncode($Page->ModifiedBy->getPlaceHolder()) ?>" value="<?= $Page->ModifiedBy->EditValue ?>"<?= $Page->ModifiedBy->editAttributes() ?> aria-describedby="x_ModifiedBy_help">
+<?= $Page->ModifiedBy->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->ModifiedBy->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->ModifiedDateTime->Visible) { // ModifiedDateTime ?>
+    <div id="r_ModifiedDateTime" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_ModifiedDateTime" for="x_ModifiedDateTime" class="<?= $Page->LeftColumnClass ?>"><?= $Page->ModifiedDateTime->caption() ?><?= $Page->ModifiedDateTime->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->ModifiedDateTime->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_ModifiedDateTime">
+<input type="<?= $Page->ModifiedDateTime->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_ModifiedDateTime" name="x_ModifiedDateTime" id="x_ModifiedDateTime" placeholder="<?= HtmlEncode($Page->ModifiedDateTime->getPlaceHolder()) ?>" value="<?= $Page->ModifiedDateTime->EditValue ?>"<?= $Page->ModifiedDateTime->editAttributes() ?> aria-describedby="x_ModifiedDateTime_help">
+<?= $Page->ModifiedDateTime->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->ModifiedDateTime->getErrorMessage() ?></div>
+<?php if (!$Page->ModifiedDateTime->ReadOnly && !$Page->ModifiedDateTime->Disabled && !isset($Page->ModifiedDateTime->EditAttrs["readonly"]) && !isset($Page->ModifiedDateTime->EditAttrs["disabled"])) { ?>
+<script>
+loadjs.ready(["fpharmacy_purchaseorderedit", "datetimepicker"], function() {
+    ew.createDateTimePicker("fpharmacy_purchaseorderedit", "x_ModifiedDateTime", {"ignoreReadonly":true,"useCurrent":false,"format":0});
+});
+</script>
+<?php } ?>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->grncreatedby->Visible) { // grncreatedby ?>
+    <div id="r_grncreatedby" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_grncreatedby" for="x_grncreatedby" class="<?= $Page->LeftColumnClass ?>"><?= $Page->grncreatedby->caption() ?><?= $Page->grncreatedby->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->grncreatedby->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_grncreatedby">
+<input type="<?= $Page->grncreatedby->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_grncreatedby" name="x_grncreatedby" id="x_grncreatedby" size="30" placeholder="<?= HtmlEncode($Page->grncreatedby->getPlaceHolder()) ?>" value="<?= $Page->grncreatedby->EditValue ?>"<?= $Page->grncreatedby->editAttributes() ?> aria-describedby="x_grncreatedby_help">
+<?= $Page->grncreatedby->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->grncreatedby->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->grncreatedDateTime->Visible) { // grncreatedDateTime ?>
+    <div id="r_grncreatedDateTime" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_grncreatedDateTime" for="x_grncreatedDateTime" class="<?= $Page->LeftColumnClass ?>"><?= $Page->grncreatedDateTime->caption() ?><?= $Page->grncreatedDateTime->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->grncreatedDateTime->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_grncreatedDateTime">
+<input type="<?= $Page->grncreatedDateTime->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_grncreatedDateTime" name="x_grncreatedDateTime" id="x_grncreatedDateTime" placeholder="<?= HtmlEncode($Page->grncreatedDateTime->getPlaceHolder()) ?>" value="<?= $Page->grncreatedDateTime->EditValue ?>"<?= $Page->grncreatedDateTime->editAttributes() ?> aria-describedby="x_grncreatedDateTime_help">
+<?= $Page->grncreatedDateTime->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->grncreatedDateTime->getErrorMessage() ?></div>
+<?php if (!$Page->grncreatedDateTime->ReadOnly && !$Page->grncreatedDateTime->Disabled && !isset($Page->grncreatedDateTime->EditAttrs["readonly"]) && !isset($Page->grncreatedDateTime->EditAttrs["disabled"])) { ?>
+<script>
+loadjs.ready(["fpharmacy_purchaseorderedit", "datetimepicker"], function() {
+    ew.createDateTimePicker("fpharmacy_purchaseorderedit", "x_grncreatedDateTime", {"ignoreReadonly":true,"useCurrent":false,"format":0});
+});
+</script>
+<?php } ?>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->grnModifiedby->Visible) { // grnModifiedby ?>
+    <div id="r_grnModifiedby" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_grnModifiedby" for="x_grnModifiedby" class="<?= $Page->LeftColumnClass ?>"><?= $Page->grnModifiedby->caption() ?><?= $Page->grnModifiedby->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->grnModifiedby->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_grnModifiedby">
+<input type="<?= $Page->grnModifiedby->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_grnModifiedby" name="x_grnModifiedby" id="x_grnModifiedby" size="30" placeholder="<?= HtmlEncode($Page->grnModifiedby->getPlaceHolder()) ?>" value="<?= $Page->grnModifiedby->EditValue ?>"<?= $Page->grnModifiedby->editAttributes() ?> aria-describedby="x_grnModifiedby_help">
+<?= $Page->grnModifiedby->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->grnModifiedby->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->grnModifiedDateTime->Visible) { // grnModifiedDateTime ?>
+    <div id="r_grnModifiedDateTime" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_grnModifiedDateTime" for="x_grnModifiedDateTime" class="<?= $Page->LeftColumnClass ?>"><?= $Page->grnModifiedDateTime->caption() ?><?= $Page->grnModifiedDateTime->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->grnModifiedDateTime->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_grnModifiedDateTime">
+<input type="<?= $Page->grnModifiedDateTime->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_grnModifiedDateTime" name="x_grnModifiedDateTime" id="x_grnModifiedDateTime" placeholder="<?= HtmlEncode($Page->grnModifiedDateTime->getPlaceHolder()) ?>" value="<?= $Page->grnModifiedDateTime->EditValue ?>"<?= $Page->grnModifiedDateTime->editAttributes() ?> aria-describedby="x_grnModifiedDateTime_help">
+<?= $Page->grnModifiedDateTime->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->grnModifiedDateTime->getErrorMessage() ?></div>
+<?php if (!$Page->grnModifiedDateTime->ReadOnly && !$Page->grnModifiedDateTime->Disabled && !isset($Page->grnModifiedDateTime->EditAttrs["readonly"]) && !isset($Page->grnModifiedDateTime->EditAttrs["disabled"])) { ?>
+<script>
+loadjs.ready(["fpharmacy_purchaseorderedit", "datetimepicker"], function() {
+    ew.createDateTimePicker("fpharmacy_purchaseorderedit", "x_grnModifiedDateTime", {"ignoreReadonly":true,"useCurrent":false,"format":0});
+});
+</script>
+<?php } ?>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->Received->Visible) { // Received ?>
+    <div id="r_Received" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_Received" for="x_Received" class="<?= $Page->LeftColumnClass ?>"><?= $Page->Received->caption() ?><?= $Page->Received->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->Received->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_Received">
+<input type="<?= $Page->Received->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_Received" name="x_Received" id="x_Received" size="30" maxlength="45" placeholder="<?= HtmlEncode($Page->Received->getPlaceHolder()) ?>" value="<?= $Page->Received->EditValue ?>"<?= $Page->Received->editAttributes() ?> aria-describedby="x_Received_help">
+<?= $Page->Received->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->Received->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->BillDate->Visible) { // BillDate ?>
+    <div id="r_BillDate" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_BillDate" for="x_BillDate" class="<?= $Page->LeftColumnClass ?>"><?= $Page->BillDate->caption() ?><?= $Page->BillDate->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->BillDate->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_BillDate">
+<input type="<?= $Page->BillDate->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_BillDate" name="x_BillDate" id="x_BillDate" placeholder="<?= HtmlEncode($Page->BillDate->getPlaceHolder()) ?>" value="<?= $Page->BillDate->EditValue ?>"<?= $Page->BillDate->editAttributes() ?> aria-describedby="x_BillDate_help">
+<?= $Page->BillDate->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->BillDate->getErrorMessage() ?></div>
+<?php if (!$Page->BillDate->ReadOnly && !$Page->BillDate->Disabled && !isset($Page->BillDate->EditAttrs["readonly"]) && !isset($Page->BillDate->EditAttrs["disabled"])) { ?>
+<script>
+loadjs.ready(["fpharmacy_purchaseorderedit", "datetimepicker"], function() {
+    ew.createDateTimePicker("fpharmacy_purchaseorderedit", "x_BillDate", {"ignoreReadonly":true,"useCurrent":false,"format":0});
+});
+</script>
+<?php } ?>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+<?php if ($Page->CurStock->Visible) { // CurStock ?>
+    <div id="r_CurStock" class="form-group row">
+        <label id="elh_pharmacy_purchaseorder_CurStock" for="x_CurStock" class="<?= $Page->LeftColumnClass ?>"><?= $Page->CurStock->caption() ?><?= $Page->CurStock->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+        <div class="<?= $Page->RightColumnClass ?>"><div <?= $Page->CurStock->cellAttributes() ?>>
+<span id="el_pharmacy_purchaseorder_CurStock">
+<input type="<?= $Page->CurStock->getInputTextType() ?>" data-table="pharmacy_purchaseorder" data-field="x_CurStock" name="x_CurStock" id="x_CurStock" size="30" placeholder="<?= HtmlEncode($Page->CurStock->getPlaceHolder()) ?>" value="<?= $Page->CurStock->EditValue ?>"<?= $Page->CurStock->editAttributes() ?> aria-describedby="x_CurStock_help">
+<?= $Page->CurStock->getCustomMessage() ?>
+<div class="invalid-feedback"><?= $Page->CurStock->getErrorMessage() ?></div>
+</span>
+</div></div>
+    </div>
+<?php } ?>
+</div><!-- /page* -->
+<?php if (!$Page->IsModal) { ?>
+<div class="form-group row"><!-- buttons .form-group -->
+    <div class="<?= $Page->OffsetColumnClass ?>"><!-- buttons offset -->
+<button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit"><?= $Language->phrase("SaveBtn") ?></button>
+<button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-href="<?= GetUrl($Page->getReturnUrl()) ?>"><?= $Language->phrase("CancelBtn") ?></button>
+    </div><!-- /buttons offset -->
+</div><!-- /buttons .form-group -->
+<?php } ?>
+</form>
+<?php
+$Page->showPageFooter();
+echo GetDebugMessage();
+?>
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("pharmacy_purchaseorder");
+});
+</script>
+<script>
+loadjs.ready("load", function () {
+    // Write your table-specific startup script here, no need to add script tags.
+});
+</script>

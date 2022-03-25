@@ -1,0 +1,111 @@
+﻿.table td {
+    padding: .1rem;
+}
+
+.cu-tablerow {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.form-control {
+    width: 100%;
+    /*min-width: 100%;*/
+}
+
+/*input {
+    width: 100%;
+    min-width: 25px;
+}*/
+
+
+    input[type=text]:not([size]):not([name=pageno]):not(.cke_dialog_ui_input_text):not(.form-control-plaintext),
+    input[type=password]:not([size]) {
+        min-width:100%;
+        
+    }
+
+
+
+.md-75 {
+    width: 75px;
+}
+.md-80 {
+    width: 80px;
+}
+.md-85 {
+    width: 85px;
+}
+
+.md-100 {
+    width: 100px;
+}
+
+.md-120{
+    width:120px;
+}
+.md-150 {
+    width: 150px;
+}
+.md-200 {
+    width: 200px;
+}
+.md-250 {
+    width: 250px;
+}
+.md-300 {
+    width: 300px;
+}
+.md-400 {
+    width: 400px;
+}
+.md-500 {
+    width: 500px;
+}
+.md-550 {
+    width: 550px;
+}
+}
+.md-600 {
+    width: 600px;
+}
+
+}
+.md-700 {
+    width: 700px;
+}
+
+}
+
+.md-800 {
+    width: 800px;
+}
+
+.avatar {
+    width: 25%;
+    float: left;
+}
+
+.select2-container {
+    z-index: 9999999
+}
+
+.info {
+    width: 75%;
+    float: right;
+}
+
+.clearfix {
+    width: 100%;
+    clear: both;
+    float: none;
+    content: '';
+}
+
+li {
+    overflow: auto;
+}
+
+
+
+
+

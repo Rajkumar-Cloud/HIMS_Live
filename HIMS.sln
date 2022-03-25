@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30621.155
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{A0786B88-2ADB-4C21-ABE8-AA2D79766269}") = "HIMS", "HIMS.phpproj", "{F9FDEC08-F5DE-4E1A-AD67-6874FBC420A0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F9FDEC08-F5DE-4E1A-AD67-6874FBC420A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9FDEC08-F5DE-4E1A-AD67-6874FBC420A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {61F628DC-6053-4D3A-A257-0C0D84105FC7}
+	EndGlobalSection
+EndGlobal

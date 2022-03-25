@@ -1,0 +1,395 @@
+<?php
+namespace PHPMaker2019\HIMS;
+
+// Session
+if (session_status() !== PHP_SESSION_ACTIVE)
+	session_start(); // Init session data
+
+// Output buffering
+ob_start(); 
+
+// Autoload
+include_once "autoload.php";
+?>
+<?php
+
+// Write header
+WriteHeader(FALSE);
+
+// Create page object
+$hospital_pharmacy_edit = new hospital_pharmacy_edit();
+
+// Run the page
+$hospital_pharmacy_edit->run();
+
+// Setup login status
+SetupLoginStatus();
+SetClientVar("login", LoginStatus());
+
+// Global Page Rendering event (in userfn*.php)
+Page_Rendering();
+
+// Page Rendering event
+$hospital_pharmacy_edit->Page_Render();
+?>
+<?php include_once "header.php" ?>
+<script>
+
+// Form object
+currentPageID = ew.PAGE_ID = "edit";
+var fhospital_pharmacyedit = currentForm = new ew.Form("fhospital_pharmacyedit", "edit");
+
+// Validate form
+fhospital_pharmacyedit.validate = function() {
+	if (!this.validateRequired)
+		return true; // Ignore validation
+	var $ = jQuery, fobj = this.getForm(), $fobj = $(fobj);
+	if ($fobj.find("#confirm").val() == "F")
+		return true;
+	var elm, felm, uelm, addcnt = 0;
+	var $k = $fobj.find("#" + this.formKeyCountName); // Get key_count
+	var rowcnt = ($k[0]) ? parseInt($k.val(), 10) : 1;
+	var startcnt = (rowcnt == 0) ? 0 : 1; // Check rowcnt == 0 => Inline-Add
+	var gridinsert = ["insert", "gridinsert"].includes($fobj.find("#action").val()) && $k[0];
+	for (var i = startcnt; i <= rowcnt; i++) {
+		var infix = ($k[0]) ? String(i) : "";
+		$fobj.data("rowindex", infix);
+		<?php if ($hospital_pharmacy_edit->id->Required) { ?>
+			elm = this.getElements("x" + infix + "_id");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->id->caption(), $hospital_pharmacy->id->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->logo->Required) { ?>
+			felm = this.getElements("x" + infix + "_logo");
+			elm = this.getElements("fn_x" + infix + "_logo");
+			if (felm && elm && !ew.hasValue(elm))
+				return this.onError(felm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->logo->caption(), $hospital_pharmacy->logo->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->pharmacy->Required) { ?>
+			elm = this.getElements("x" + infix + "_pharmacy");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->pharmacy->caption(), $hospital_pharmacy->pharmacy->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->street->Required) { ?>
+			elm = this.getElements("x" + infix + "_street");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->street->caption(), $hospital_pharmacy->street->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->area->Required) { ?>
+			elm = this.getElements("x" + infix + "_area");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->area->caption(), $hospital_pharmacy->area->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->town->Required) { ?>
+			elm = this.getElements("x" + infix + "_town");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->town->caption(), $hospital_pharmacy->town->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->province->Required) { ?>
+			elm = this.getElements("x" + infix + "_province");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->province->caption(), $hospital_pharmacy->province->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->postal_code->Required) { ?>
+			elm = this.getElements("x" + infix + "_postal_code");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->postal_code->caption(), $hospital_pharmacy->postal_code->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->phone_no->Required) { ?>
+			elm = this.getElements("x" + infix + "_phone_no");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->phone_no->caption(), $hospital_pharmacy->phone_no->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->PreFixCode->Required) { ?>
+			elm = this.getElements("x" + infix + "_PreFixCode");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->PreFixCode->caption(), $hospital_pharmacy->PreFixCode->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->status->Required) { ?>
+			elm = this.getElements("x" + infix + "_status");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->status->caption(), $hospital_pharmacy->status->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->createdby->Required) { ?>
+			elm = this.getElements("x" + infix + "_createdby");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->createdby->caption(), $hospital_pharmacy->createdby->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->createddatetime->Required) { ?>
+			elm = this.getElements("x" + infix + "_createddatetime");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->createddatetime->caption(), $hospital_pharmacy->createddatetime->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->modifiedby->Required) { ?>
+			elm = this.getElements("x" + infix + "_modifiedby");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->modifiedby->caption(), $hospital_pharmacy->modifiedby->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->modifieddatetime->Required) { ?>
+			elm = this.getElements("x" + infix + "_modifieddatetime");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->modifieddatetime->caption(), $hospital_pharmacy->modifieddatetime->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->pharmacyGST->Required) { ?>
+			elm = this.getElements("x" + infix + "_pharmacyGST");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->pharmacyGST->caption(), $hospital_pharmacy->pharmacyGST->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->HospId->Required) { ?>
+			elm = this.getElements("x" + infix + "_HospId");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->HospId->caption(), $hospital_pharmacy->HospId->RequiredErrorMessage)) ?>");
+		<?php } ?>
+		<?php if ($hospital_pharmacy_edit->BranchID->Required) { ?>
+			elm = this.getElements("x" + infix + "_BranchID");
+			if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+				return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $hospital_pharmacy->BranchID->caption(), $hospital_pharmacy->BranchID->RequiredErrorMessage)) ?>");
+		<?php } ?>
+			elm = this.getElements("x" + infix + "_BranchID");
+			if (elm && !ew.checkInteger(elm.value))
+				return this.onError(elm, "<?php echo JsEncode($hospital_pharmacy->BranchID->errorMessage()) ?>");
+
+			// Fire Form_CustomValidate event
+			if (!this.Form_CustomValidate(fobj))
+				return false;
+	}
+
+	// Process detail forms
+	var dfs = $fobj.find("input[name='detailpage']").get();
+	for (var i = 0; i < dfs.length; i++) {
+		var df = dfs[i], val = df.value;
+		if (val && ew.forms[val])
+			if (!ew.forms[val].validate())
+				return false;
+	}
+	return true;
+}
+
+// Form_CustomValidate event
+fhospital_pharmacyedit.Form_CustomValidate = function(fobj) { // DO NOT CHANGE THIS LINE!
+
+	// Your custom validation code here, return false if invalid.
+	return true;
+}
+
+// Use JavaScript validation or not
+fhospital_pharmacyedit.validateRequired = <?php echo json_encode(CLIENT_VALIDATE) ?>;
+
+// Dynamic selection lists
+fhospital_pharmacyedit.lists["x_status"] = <?php echo $hospital_pharmacy_edit->status->Lookup->toClientList() ?>;
+fhospital_pharmacyedit.lists["x_status"].options = <?php echo JsonEncode($hospital_pharmacy_edit->status->lookupOptions()) ?>;
+fhospital_pharmacyedit.lists["x_HospId"] = <?php echo $hospital_pharmacy_edit->HospId->Lookup->toClientList() ?>;
+fhospital_pharmacyedit.lists["x_HospId"].options = <?php echo JsonEncode($hospital_pharmacy_edit->HospId->lookupOptions()) ?>;
+
+// Form object for search
+</script>
+<script>
+
+// Write your client script here, no need to add script tags.
+</script>
+<?php $hospital_pharmacy_edit->showPageHeader(); ?>
+<?php
+$hospital_pharmacy_edit->showMessage();
+?>
+<form name="fhospital_pharmacyedit" id="fhospital_pharmacyedit" class="<?php echo $hospital_pharmacy_edit->FormClassName ?>" action="<?php echo CurrentPageName() ?>" method="post">
+<?php if ($hospital_pharmacy_edit->CheckToken) { ?>
+<input type="hidden" name="<?php echo TOKEN_NAME ?>" value="<?php echo $hospital_pharmacy_edit->Token ?>">
+<?php } ?>
+<input type="hidden" name="t" value="hospital_pharmacy">
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="<?php echo (int)$hospital_pharmacy_edit->IsModal ?>">
+<div class="ew-edit-div"><!-- page* -->
+<?php if ($hospital_pharmacy->id->Visible) { // id ?>
+	<div id="r_id" class="form-group row">
+		<label id="elh_hospital_pharmacy_id" class="<?php echo $hospital_pharmacy_edit->LeftColumnClass ?>"><?php echo $hospital_pharmacy->id->caption() ?><?php echo ($hospital_pharmacy->id->Required) ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $hospital_pharmacy_edit->RightColumnClass ?>"><div<?php echo $hospital_pharmacy->id->cellAttributes() ?>>
+<span id="el_hospital_pharmacy_id">
+<span<?php echo $hospital_pharmacy->id->viewAttributes() ?>>
+<input type="text" readonly class="form-control-plaintext" value="<?php echo RemoveHtml($hospital_pharmacy->id->EditValue) ?>"></span>
+</span>
+<input type="hidden" data-table="hospital_pharmacy" data-field="x_id" name="x_id" id="x_id" value="<?php echo HtmlEncode($hospital_pharmacy->id->CurrentValue) ?>">
+<?php echo $hospital_pharmacy->id->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($hospital_pharmacy->logo->Visible) { // logo ?>
+	<div id="r_logo" class="form-group row">
+		<label id="elh_hospital_pharmacy_logo" class="<?php echo $hospital_pharmacy_edit->LeftColumnClass ?>"><?php echo $hospital_pharmacy->logo->caption() ?><?php echo ($hospital_pharmacy->logo->Required) ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $hospital_pharmacy_edit->RightColumnClass ?>"><div<?php echo $hospital_pharmacy->logo->cellAttributes() ?>>
+<span id="el_hospital_pharmacy_logo">
+<div id="fd_x_logo">
+<span title="<?php echo $hospital_pharmacy->logo->title() ? $hospital_pharmacy->logo->title() : $Language->phrase("ChooseFile") ?>" class="btn btn-default btn-sm fileinput-button ew-tooltip<?php if ($hospital_pharmacy->logo->ReadOnly || $hospital_pharmacy->logo->Disabled) echo " d-none"; ?>">
+	<span><?php echo $Language->phrase("ChooseFileBtn") ?></span>
+	<input type="file" title=" " data-table="hospital_pharmacy" data-field="x_logo" name="x_logo" id="x_logo"<?php echo $hospital_pharmacy->logo->editAttributes() ?>>
+</span>
+<input type="hidden" name="fn_x_logo" id= "fn_x_logo" value="<?php echo $hospital_pharmacy->logo->Upload->FileName ?>">
+<?php if (Post("fa_x_logo") == "0") { ?>
+<input type="hidden" name="fa_x_logo" id= "fa_x_logo" value="0">
+<?php } else { ?>
+<input type="hidden" name="fa_x_logo" id= "fa_x_logo" value="1">
+<?php } ?>
+<input type="hidden" name="fs_x_logo" id= "fs_x_logo" value="450">
+<input type="hidden" name="fx_x_logo" id= "fx_x_logo" value="<?php echo $hospital_pharmacy->logo->UploadAllowedFileExt ?>">
+<input type="hidden" name="fm_x_logo" id= "fm_x_logo" value="<?php echo $hospital_pharmacy->logo->UploadMaxFileSize ?>">
+</div>
+<table id="ft_x_logo" class="table table-sm float-left ew-upload-table"><tbody class="files"></tbody></table>
+</span>
+<?php echo $hospital_pharmacy->logo->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($hospital_pharmacy->pharmacy->Visible) { // pharmacy ?>
+	<div id="r_pharmacy" class="form-group row">
+		<label id="elh_hospital_pharmacy_pharmacy" for="x_pharmacy" class="<?php echo $hospital_pharmacy_edit->LeftColumnClass ?>"><?php echo $hospital_pharmacy->pharmacy->caption() ?><?php echo ($hospital_pharmacy->pharmacy->Required) ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $hospital_pharmacy_edit->RightColumnClass ?>"><div<?php echo $hospital_pharmacy->pharmacy->cellAttributes() ?>>
+<span id="el_hospital_pharmacy_pharmacy">
+<input type="text" data-table="hospital_pharmacy" data-field="x_pharmacy" name="x_pharmacy" id="x_pharmacy" size="30" maxlength="100" placeholder="<?php echo HtmlEncode($hospital_pharmacy->pharmacy->getPlaceHolder()) ?>" value="<?php echo $hospital_pharmacy->pharmacy->EditValue ?>"<?php echo $hospital_pharmacy->pharmacy->editAttributes() ?>>
+</span>
+<?php echo $hospital_pharmacy->pharmacy->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($hospital_pharmacy->street->Visible) { // street ?>
+	<div id="r_street" class="form-group row">
+		<label id="elh_hospital_pharmacy_street" for="x_street" class="<?php echo $hospital_pharmacy_edit->LeftColumnClass ?>"><?php echo $hospital_pharmacy->street->caption() ?><?php echo ($hospital_pharmacy->street->Required) ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $hospital_pharmacy_edit->RightColumnClass ?>"><div<?php echo $hospital_pharmacy->street->cellAttributes() ?>>
+<span id="el_hospital_pharmacy_street">
+<input type="text" data-table="hospital_pharmacy" data-field="x_street" name="x_street" id="x_street" size="30" maxlength="100" placeholder="<?php echo HtmlEncode($hospital_pharmacy->street->getPlaceHolder()) ?>" value="<?php echo $hospital_pharmacy->street->EditValue ?>"<?php echo $hospital_pharmacy->street->editAttributes() ?>>
+</span>
+<?php echo $hospital_pharmacy->street->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($hospital_pharmacy->area->Visible) { // area ?>
+	<div id="r_area" class="form-group row">
+		<label id="elh_hospital_pharmacy_area" for="x_area" class="<?php echo $hospital_pharmacy_edit->LeftColumnClass ?>"><?php echo $hospital_pharmacy->area->caption() ?><?php echo ($hospital_pharmacy->area->Required) ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $hospital_pharmacy_edit->RightColumnClass ?>"><div<?php echo $hospital_pharmacy->area->cellAttributes() ?>>
+<span id="el_hospital_pharmacy_area">
+<input type="text" data-table="hospital_pharmacy" data-field="x_area" name="x_area" id="x_area" size="30" maxlength="45" placeholder="<?php echo HtmlEncode($hospital_pharmacy->area->getPlaceHolder()) ?>" value="<?php echo $hospital_pharmacy->area->EditValue ?>"<?php echo $hospital_pharmacy->area->editAttributes() ?>>
+</span>
+<?php echo $hospital_pharmacy->area->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($hospital_pharmacy->town->Visible) { // town ?>
+	<div id="r_town" class="form-group row">
+		<label id="elh_hospital_pharmacy_town" for="x_town" class="<?php echo $hospital_pharmacy_edit->LeftColumnClass ?>"><?php echo $hospital_pharmacy->town->caption() ?><?php echo ($hospital_pharmacy->town->Required) ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $hospital_pharmacy_edit->RightColumnClass ?>"><div<?php echo $hospital_pharmacy->town->cellAttributes() ?>>
+<span id="el_hospital_pharmacy_town">
+<input type="text" data-table="hospital_pharmacy" data-field="x_town" name="x_town" id="x_town" size="30" maxlength="50" placeholder="<?php echo HtmlEncode($hospital_pharmacy->town->getPlaceHolder()) ?>" value="<?php echo $hospital_pharmacy->town->EditValue ?>"<?php echo $hospital_pharmacy->town->editAttributes() ?>>
+</span>
+<?php echo $hospital_pharmacy->town->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($hospital_pharmacy->province->Visible) { // province ?>
+	<div id="r_province" class="form-group row">
+		<label id="elh_hospital_pharmacy_province" for="x_province" class="<?php echo $hospital_pharmacy_edit->LeftColumnClass ?>"><?php echo $hospital_pharmacy->province->caption() ?><?php echo ($hospital_pharmacy->province->Required) ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $hospital_pharmacy_edit->RightColumnClass ?>"><div<?php echo $hospital_pharmacy->province->cellAttributes() ?>>
+<span id="el_hospital_pharmacy_province">
+<input type="text" data-table="hospital_pharmacy" data-field="x_province" name="x_province" id="x_province" size="30" maxlength="50" placeholder="<?php echo HtmlEncode($hospital_pharmacy->province->getPlaceHolder()) ?>" value="<?php echo $hospital_pharmacy->province->EditValue ?>"<?php echo $hospital_pharmacy->province->editAttributes() ?>>
+</span>
+<?php echo $hospital_pharmacy->province->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($hospital_pharmacy->postal_code->Visible) { // postal_code ?>
+	<div id="r_postal_code" class="form-group row">
+		<label id="elh_hospital_pharmacy_postal_code" for="x_postal_code" class="<?php echo $hospital_pharmacy_edit->LeftColumnClass ?>"><?php echo $hospital_pharmacy->postal_code->caption() ?><?php echo ($hospital_pharmacy->postal_code->Required) ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $hospital_pharmacy_edit->RightColumnClass ?>"><div<?php echo $hospital_pharmacy->postal_code->cellAttributes() ?>>
+<span id="el_hospital_pharmacy_postal_code">
+<input type="text" data-table="hospital_pharmacy" data-field="x_postal_code" name="x_postal_code" id="x_postal_code" size="30" maxlength="6" placeholder="<?php echo HtmlEncode($hospital_pharmacy->postal_code->getPlaceHolder()) ?>" value="<?php echo $hospital_pharmacy->postal_code->EditValue ?>"<?php echo $hospital_pharmacy->postal_code->editAttributes() ?>>
+</span>
+<?php echo $hospital_pharmacy->postal_code->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($hospital_pharmacy->phone_no->Visible) { // phone_no ?>
+	<div id="r_phone_no" class="form-group row">
+		<label id="elh_hospital_pharmacy_phone_no" for="x_phone_no" class="<?php echo $hospital_pharmacy_edit->LeftColumnClass ?>"><?php echo $hospital_pharmacy->phone_no->caption() ?><?php echo ($hospital_pharmacy->phone_no->Required) ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $hospital_pharmacy_edit->RightColumnClass ?>"><div<?php echo $hospital_pharmacy->phone_no->cellAttributes() ?>>
+<span id="el_hospital_pharmacy_phone_no">
+<input type="text" data-table="hospital_pharmacy" data-field="x_phone_no" name="x_phone_no" id="x_phone_no" size="30" maxlength="50" placeholder="<?php echo HtmlEncode($hospital_pharmacy->phone_no->getPlaceHolder()) ?>" value="<?php echo $hospital_pharmacy->phone_no->EditValue ?>"<?php echo $hospital_pharmacy->phone_no->editAttributes() ?>>
+</span>
+<?php echo $hospital_pharmacy->phone_no->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($hospital_pharmacy->PreFixCode->Visible) { // PreFixCode ?>
+	<div id="r_PreFixCode" class="form-group row">
+		<label id="elh_hospital_pharmacy_PreFixCode" for="x_PreFixCode" class="<?php echo $hospital_pharmacy_edit->LeftColumnClass ?>"><?php echo $hospital_pharmacy->PreFixCode->caption() ?><?php echo ($hospital_pharmacy->PreFixCode->Required) ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $hospital_pharmacy_edit->RightColumnClass ?>"><div<?php echo $hospital_pharmacy->PreFixCode->cellAttributes() ?>>
+<span id="el_hospital_pharmacy_PreFixCode">
+<input type="text" data-table="hospital_pharmacy" data-field="x_PreFixCode" name="x_PreFixCode" id="x_PreFixCode" size="30" maxlength="45" placeholder="<?php echo HtmlEncode($hospital_pharmacy->PreFixCode->getPlaceHolder()) ?>" value="<?php echo $hospital_pharmacy->PreFixCode->EditValue ?>"<?php echo $hospital_pharmacy->PreFixCode->editAttributes() ?>>
+</span>
+<?php echo $hospital_pharmacy->PreFixCode->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($hospital_pharmacy->status->Visible) { // status ?>
+	<div id="r_status" class="form-group row">
+		<label id="elh_hospital_pharmacy_status" for="x_status" class="<?php echo $hospital_pharmacy_edit->LeftColumnClass ?>"><?php echo $hospital_pharmacy->status->caption() ?><?php echo ($hospital_pharmacy->status->Required) ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $hospital_pharmacy_edit->RightColumnClass ?>"><div<?php echo $hospital_pharmacy->status->cellAttributes() ?>>
+<span id="el_hospital_pharmacy_status">
+<div class="input-group">
+	<select class="custom-select ew-custom-select" data-table="hospital_pharmacy" data-field="x_status" data-value-separator="<?php echo $hospital_pharmacy->status->displayValueSeparatorAttribute() ?>" id="x_status" name="x_status"<?php echo $hospital_pharmacy->status->editAttributes() ?>>
+		<?php echo $hospital_pharmacy->status->selectOptionListHtml("x_status") ?>
+	</select>
+</div>
+<?php echo $hospital_pharmacy->status->Lookup->getParamTag("p_x_status") ?>
+</span>
+<?php echo $hospital_pharmacy->status->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($hospital_pharmacy->pharmacyGST->Visible) { // pharmacyGST ?>
+	<div id="r_pharmacyGST" class="form-group row">
+		<label id="elh_hospital_pharmacy_pharmacyGST" for="x_pharmacyGST" class="<?php echo $hospital_pharmacy_edit->LeftColumnClass ?>"><?php echo $hospital_pharmacy->pharmacyGST->caption() ?><?php echo ($hospital_pharmacy->pharmacyGST->Required) ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $hospital_pharmacy_edit->RightColumnClass ?>"><div<?php echo $hospital_pharmacy->pharmacyGST->cellAttributes() ?>>
+<span id="el_hospital_pharmacy_pharmacyGST">
+<input type="text" data-table="hospital_pharmacy" data-field="x_pharmacyGST" name="x_pharmacyGST" id="x_pharmacyGST" size="30" maxlength="45" placeholder="<?php echo HtmlEncode($hospital_pharmacy->pharmacyGST->getPlaceHolder()) ?>" value="<?php echo $hospital_pharmacy->pharmacyGST->EditValue ?>"<?php echo $hospital_pharmacy->pharmacyGST->editAttributes() ?>>
+</span>
+<?php echo $hospital_pharmacy->pharmacyGST->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($hospital_pharmacy->HospId->Visible) { // HospId ?>
+	<div id="r_HospId" class="form-group row">
+		<label id="elh_hospital_pharmacy_HospId" for="x_HospId" class="<?php echo $hospital_pharmacy_edit->LeftColumnClass ?>"><?php echo $hospital_pharmacy->HospId->caption() ?><?php echo ($hospital_pharmacy->HospId->Required) ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $hospital_pharmacy_edit->RightColumnClass ?>"><div<?php echo $hospital_pharmacy->HospId->cellAttributes() ?>>
+<span id="el_hospital_pharmacy_HospId">
+<div class="input-group ew-lookup-list">
+	<div class="form-control ew-lookup-text" tabindex="-1" id="lu_x_HospId"><?php echo strval($hospital_pharmacy->HospId->ViewValue) == "" ? $Language->phrase("PleaseSelect") : (REMOVE_XSS ? HtmlDecode($hospital_pharmacy->HospId->ViewValue) : $hospital_pharmacy->HospId->ViewValue) ?></div>
+	<div class="input-group-append">
+		<button type="button" title="<?php echo HtmlEncode(str_replace("%s", RemoveHtml($hospital_pharmacy->HospId->caption()), $Language->phrase("LookupLink", TRUE))) ?>" class="ew-lookup-btn btn btn-default"<?php echo (($hospital_pharmacy->HospId->ReadOnly || $hospital_pharmacy->HospId->Disabled) ? " disabled" : "")?> onclick="ew.modalLookupShow({lnk:this,el:'x_HospId',m:0,n:10});"><i class="fa fa-search ew-icon"></i></button>
+	</div>
+</div>
+<?php echo $hospital_pharmacy->HospId->Lookup->getParamTag("p_x_HospId") ?>
+<input type="hidden" data-table="hospital_pharmacy" data-field="x_HospId" data-multiple="0" data-lookup="1" data-value-separator="<?php echo $hospital_pharmacy->HospId->displayValueSeparatorAttribute() ?>" name="x_HospId" id="x_HospId" value="<?php echo $hospital_pharmacy->HospId->CurrentValue ?>"<?php echo $hospital_pharmacy->HospId->editAttributes() ?>>
+</span>
+<?php echo $hospital_pharmacy->HospId->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($hospital_pharmacy->BranchID->Visible) { // BranchID ?>
+	<div id="r_BranchID" class="form-group row">
+		<label id="elh_hospital_pharmacy_BranchID" for="x_BranchID" class="<?php echo $hospital_pharmacy_edit->LeftColumnClass ?>"><?php echo $hospital_pharmacy->BranchID->caption() ?><?php echo ($hospital_pharmacy->BranchID->Required) ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $hospital_pharmacy_edit->RightColumnClass ?>"><div<?php echo $hospital_pharmacy->BranchID->cellAttributes() ?>>
+<span id="el_hospital_pharmacy_BranchID">
+<input type="text" data-table="hospital_pharmacy" data-field="x_BranchID" name="x_BranchID" id="x_BranchID" size="30" placeholder="<?php echo HtmlEncode($hospital_pharmacy->BranchID->getPlaceHolder()) ?>" value="<?php echo $hospital_pharmacy->BranchID->EditValue ?>"<?php echo $hospital_pharmacy->BranchID->editAttributes() ?>>
+</span>
+<?php echo $hospital_pharmacy->BranchID->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+</div><!-- /page* -->
+<?php if (!$hospital_pharmacy_edit->IsModal) { ?>
+<div class="form-group row"><!-- buttons .form-group -->
+	<div class="<?php echo $hospital_pharmacy_edit->OffsetColumnClass ?>"><!-- buttons offset -->
+<button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit"><?php echo $Language->phrase("SaveBtn") ?></button>
+<button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-href="<?php echo $hospital_pharmacy_edit->getReturnUrl() ?>"><?php echo $Language->phrase("CancelBtn") ?></button>
+	</div><!-- /buttons offset -->
+</div><!-- /buttons .form-group -->
+<?php } ?>
+</form>
+<?php
+$hospital_pharmacy_edit->showPageFooter();
+if (DEBUG_ENABLED)
+	echo GetDebugMessage();
+?>
+<script>
+
+// Write your table-specific startup script here
+// document.write("page loaded");
+
+</script>
+<?php include_once "footer.php" ?>
+<?php
+$hospital_pharmacy_edit->terminate();
+?>

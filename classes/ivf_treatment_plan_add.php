@@ -1,0 +1,3562 @@
+<?php
+namespace PHPMaker2019\HIMS;
+
+/**
+ * Page class
+ */
+class ivf_treatment_plan_add extends ivf_treatment_plan
+{
+
+	// Page ID
+	public $PageID = "add";
+
+	// Project ID
+	public $ProjectID = "{EA4F6D13-AF8F-428D-9EA7-BA88D1107EC3}";
+
+	// Table name
+	public $TableName = 'ivf_treatment_plan';
+
+	// Page object name
+	public $PageObjName = "ivf_treatment_plan_add";
+
+	// Page headings
+	public $Heading = "";
+	public $Subheading = "";
+	public $PageHeader;
+	public $PageFooter;
+
+	// Token
+	public $Token = "";
+	public $TokenTimeout = 0;
+	public $CheckToken = CHECK_TOKEN;
+
+	// Messages
+	private $_message = "";
+	private $_failureMessage = "";
+	private $_successMessage = "";
+	private $_warningMessage = "";
+
+	// Page URL
+	private $_pageUrl = "";
+
+	// Page heading
+	public function pageHeading()
+	{
+		global $Language;
+		if ($this->Heading <> "")
+			return $this->Heading;
+		if (method_exists($this, "tableCaption"))
+			return $this->tableCaption();
+		return "";
+	}
+
+	// Page subheading
+	public function pageSubheading()
+	{
+		global $Language;
+		if ($this->Subheading <> "")
+			return $this->Subheading;
+		if ($this->TableName)
+			return $Language->phrase($this->PageID);
+		return "";
+	}
+
+	// Page name
+	public function pageName()
+	{
+		return CurrentPageName();
+	}
+
+	// Page URL
+	public function pageUrl()
+	{
+		if ($this->_pageUrl == "") {
+			$this->_pageUrl = CurrentPageName() . "?";
+			if ($this->UseTokenInUrl)
+				$this->_pageUrl .= "t=" . $this->TableVar . "&"; // Add page token
+		}
+		return $this->_pageUrl;
+	}
+
+	// Get message
+	public function getMessage()
+	{
+		return isset($_SESSION[SESSION_MESSAGE]) ? $_SESSION[SESSION_MESSAGE] : $this->_message;
+	}
+
+	// Set message
+	public function setMessage($v)
+	{
+		AddMessage($this->_message, $v);
+		$_SESSION[SESSION_MESSAGE] = $this->_message;
+	}
+
+	// Get failure message
+	public function getFailureMessage()
+	{
+		return isset($_SESSION[SESSION_FAILURE_MESSAGE]) ? $_SESSION[SESSION_FAILURE_MESSAGE] : $this->_failureMessage;
+	}
+
+	// Set failure message
+	public function setFailureMessage($v)
+	{
+		AddMessage($this->_failureMessage, $v);
+		$_SESSION[SESSION_FAILURE_MESSAGE] = $this->_failureMessage;
+	}
+
+	// Get success message
+	public function getSuccessMessage()
+	{
+		return isset($_SESSION[SESSION_SUCCESS_MESSAGE]) ? $_SESSION[SESSION_SUCCESS_MESSAGE] : $this->_successMessage;
+	}
+
+	// Set success message
+	public function setSuccessMessage($v)
+	{
+		AddMessage($this->_successMessage, $v);
+		$_SESSION[SESSION_SUCCESS_MESSAGE] = $this->_successMessage;
+	}
+
+	// Get warning message
+	public function getWarningMessage()
+	{
+		return isset($_SESSION[SESSION_WARNING_MESSAGE]) ? $_SESSION[SESSION_WARNING_MESSAGE] : $this->_warningMessage;
+	}
+
+	// Set warning message
+	public function setWarningMessage($v)
+	{
+		AddMessage($this->_warningMessage, $v);
+		$_SESSION[SESSION_WARNING_MESSAGE] = $this->_warningMessage;
+	}
+
+	// Clear message
+	public function clearMessage()
+	{
+		$this->_message = "";
+		$_SESSION[SESSION_MESSAGE] = "";
+	}
+
+	// Clear failure message
+	public function clearFailureMessage()
+	{
+		$this->_failureMessage = "";
+		$_SESSION[SESSION_FAILURE_MESSAGE] = "";
+	}
+
+	// Clear success message
+	public function clearSuccessMessage()
+	{
+		$this->_successMessage = "";
+		$_SESSION[SESSION_SUCCESS_MESSAGE] = "";
+	}
+
+	// Clear warning message
+	public function clearWarningMessage()
+	{
+		$this->_warningMessage = "";
+		$_SESSION[SESSION_WARNING_MESSAGE] = "";
+	}
+
+	// Clear messages
+	public function clearMessages()
+	{
+		$this->clearMessage();
+		$this->clearFailureMessage();
+		$this->clearSuccessMessage();
+		$this->clearWarningMessage();
+	}
+
+	// Show message
+	public function showMessage()
+	{
+		$hidden = FALSE;
+		$html = "";
+
+		// Message
+		$message = $this->getMessage();
+		if (method_exists($this, "Message_Showing"))
+			$this->Message_Showing($message, "");
+		if ($message <> "") { // Message in Session, display
+			if (!$hidden)
+				$message = '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $message;
+			$html .= '<div class="alert alert-info alert-dismissible ew-info"><i class="icon fa fa-info"></i>' . $message . '</div>';
+			$_SESSION[SESSION_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Warning message
+		$warningMessage = $this->getWarningMessage();
+		if (method_exists($this, "Message_Showing"))
+			$this->Message_Showing($warningMessage, "warning");
+		if ($warningMessage <> "") { // Message in Session, display
+			if (!$hidden)
+				$warningMessage = '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $warningMessage;
+			$html .= '<div class="alert alert-warning alert-dismissible ew-warning"><i class="icon fa fa-warning"></i>' . $warningMessage . '</div>';
+			$_SESSION[SESSION_WARNING_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Success message
+		$successMessage = $this->getSuccessMessage();
+		if (method_exists($this, "Message_Showing"))
+			$this->Message_Showing($successMessage, "success");
+		if ($successMessage <> "") { // Message in Session, display
+			if (!$hidden)
+				$successMessage = '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $successMessage;
+			$html .= '<div class="alert alert-success alert-dismissible ew-success"><i class="icon fa fa-check"></i>' . $successMessage . '</div>';
+			$_SESSION[SESSION_SUCCESS_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Failure message
+		$errorMessage = $this->getFailureMessage();
+		if (method_exists($this, "Message_Showing"))
+			$this->Message_Showing($errorMessage, "failure");
+		if ($errorMessage <> "") { // Message in Session, display
+			if (!$hidden)
+				$errorMessage = '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $errorMessage;
+			$html .= '<div class="alert alert-danger alert-dismissible ew-error"><i class="icon fa fa-ban"></i>' . $errorMessage . '</div>';
+			$_SESSION[SESSION_FAILURE_MESSAGE] = ""; // Clear message in Session
+		}
+		echo '<div class="ew-message-dialog' . (($hidden) ? ' d-none' : "") . '">' . $html . '</div>';
+	}
+
+	// Get message as array
+	public function getMessages()
+	{
+		$ar = array();
+
+		// Message
+		$message = $this->getMessage();
+
+		//if (method_exists($this, "Message_Showing"))
+		//	$this->Message_Showing($message, "");
+
+		if ($message <> "") { // Message in Session, display
+			$ar["message"] = $message;
+			$_SESSION[SESSION_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Warning message
+		$warningMessage = $this->getWarningMessage();
+
+		//if (method_exists($this, "Message_Showing"))
+		//	$this->Message_Showing($warningMessage, "warning");
+
+		if ($warningMessage <> "") { // Message in Session, display
+			$ar["warningMessage"] = $warningMessage;
+			$_SESSION[SESSION_WARNING_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Success message
+		$successMessage = $this->getSuccessMessage();
+
+		//if (method_exists($this, "Message_Showing"))
+		//	$this->Message_Showing($successMessage, "success");
+
+		if ($successMessage <> "") { // Message in Session, display
+			$ar["successMessage"] = $successMessage;
+			$_SESSION[SESSION_SUCCESS_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Failure message
+		$failureMessage = $this->getFailureMessage();
+
+		//if (method_exists($this, "Message_Showing"))
+		//	$this->Message_Showing($failureMessage, "failure");
+
+		if ($failureMessage <> "") { // Message in Session, display
+			$ar["failureMessage"] = $failureMessage;
+			$_SESSION[SESSION_FAILURE_MESSAGE] = ""; // Clear message in Session
+		}
+		return $ar;
+	}
+
+	// Show Page Header
+	public function showPageHeader()
+	{
+		$header = $this->PageHeader;
+		$this->Page_DataRendering($header);
+		if ($header <> "") { // Header exists, display
+			echo '<p id="ew-page-header">' . $header . '</p>';
+		}
+	}
+
+	// Show Page Footer
+	public function showPageFooter()
+	{
+		$footer = $this->PageFooter;
+		$this->Page_DataRendered($footer);
+		if ($footer <> "") { // Footer exists, display
+			echo '<p id="ew-page-footer">' . $footer . '</p>';
+		}
+	}
+
+	// Validate page request
+	protected function isPageRequest()
+	{
+		global $CurrentForm;
+		if ($this->UseTokenInUrl) {
+			if ($CurrentForm)
+				return ($this->TableVar == $CurrentForm->getValue("t"));
+			if (Get("t") !== NULL)
+				return ($this->TableVar == Get("t"));
+		}
+		return TRUE;
+	}
+
+	// Valid Post
+	protected function validPost()
+	{
+		if (!$this->CheckToken || !IsPost() || IsApi())
+			return TRUE;
+		if (Post(TOKEN_NAME) === NULL)
+			return FALSE;
+		$fn = PROJECT_NAMESPACE . CHECK_TOKEN_FUNC;
+		if (is_callable($fn))
+			return $fn(Post(TOKEN_NAME), $this->TokenTimeout);
+		return FALSE;
+	}
+
+	// Create Token
+	public function createToken()
+	{
+		global $CurrentToken;
+		$fn = PROJECT_NAMESPACE . CREATE_TOKEN_FUNC; // Always create token, required by API file/lookup request
+		if ($this->Token == "" && is_callable($fn)) // Create token
+			$this->Token = $fn();
+		$CurrentToken = $this->Token; // Save to global variable
+	}
+
+	// Constructor
+	public function __construct()
+	{
+		global $Language, $COMPOSITE_KEY_SEPARATOR;
+		global $UserTable, $UserTableConn;
+
+		// Initialize
+		$GLOBALS["Page"] = &$this;
+		$this->TokenTimeout = SessionTimeoutTime();
+
+		// Language object
+		if (!isset($Language))
+			$Language = new Language();
+
+		// Parent constuctor
+		parent::__construct();
+
+		// Table object (ivf_treatment_plan)
+		if (!isset($GLOBALS["ivf_treatment_plan"]) || get_class($GLOBALS["ivf_treatment_plan"]) == PROJECT_NAMESPACE . "ivf_treatment_plan") {
+			$GLOBALS["ivf_treatment_plan"] = &$this;
+			$GLOBALS["Table"] = &$GLOBALS["ivf_treatment_plan"];
+		}
+		$this->CancelUrl = $this->pageUrl() . "action=cancel";
+
+		// Table object (user_login)
+		if (!isset($GLOBALS['user_login']))
+			$GLOBALS['user_login'] = new user_login();
+
+		// Table object (ivf)
+		if (!isset($GLOBALS['ivf']))
+			$GLOBALS['ivf'] = new ivf();
+
+		// Table object (view_donor_ivf)
+		if (!isset($GLOBALS['view_donor_ivf']))
+			$GLOBALS['view_donor_ivf'] = new view_donor_ivf();
+
+		// Page ID
+		if (!defined(PROJECT_NAMESPACE . "PAGE_ID"))
+			define(PROJECT_NAMESPACE . "PAGE_ID", 'add');
+
+		// Table name (for backward compatibility)
+		if (!defined(PROJECT_NAMESPACE . "TABLE_NAME"))
+			define(PROJECT_NAMESPACE . "TABLE_NAME", 'ivf_treatment_plan');
+
+		// Start timer
+		if (!isset($GLOBALS["DebugTimer"]))
+			$GLOBALS["DebugTimer"] = new Timer();
+
+		// Debug message
+		LoadDebugMessage();
+
+		// Open connection
+		if (!isset($GLOBALS["Conn"]))
+			$GLOBALS["Conn"] = &$this->getConnection();
+
+		// User table object (user_login)
+		if (!isset($UserTable)) {
+			$UserTable = new user_login();
+			$UserTableConn = Conn($UserTable->Dbid);
+		}
+	}
+
+	// Terminate page
+	public function terminate($url = "")
+	{
+		global $ExportFileName, $TempImages;
+		if (Post("customexport") === NULL) {
+
+		// Page Unload event
+		$this->Page_Unload();
+
+		// Global Page Unloaded event (in userfn*.php)
+		Page_Unloaded();
+		}
+
+		// Export
+		global $EXPORT, $ivf_treatment_plan;
+		if ($this->CustomExport && $this->CustomExport == $this->Export && array_key_exists($this->CustomExport, $EXPORT)) {
+			if (is_array(@$_SESSION[SESSION_TEMP_IMAGES])) // Restore temp images
+				$TempImages = @$_SESSION[SESSION_TEMP_IMAGES];
+			if (Post("data") !== NULL)
+				$content = Post("data");
+			$ExportFileName = Post("filename", "");
+			if ($ExportFileName == "")
+				$ExportFileName = $this->TableVar;
+			$class = PROJECT_NAMESPACE . $EXPORT[$this->CustomExport];
+			if (class_exists($class)) {
+				$doc = new $class($ivf_treatment_plan);
+				$doc->Text = @$content;
+				if ($this->isExport("email"))
+					echo $this->exportEmail($doc->Text);
+				else
+					$doc->export();
+				DeleteTempImages(); // Delete temp images
+				exit();
+			}
+		}
+	if ($this->CustomExport) { // Save temp images array for custom export
+		if (is_array($TempImages))
+			$_SESSION[SESSION_TEMP_IMAGES] = $TempImages;
+	}
+		if (!IsApi())
+			$this->Page_Redirecting($url);
+
+		// Close connection
+		CloseConnections();
+
+		// Return for API
+		if (IsApi()) {
+			$res = $url === TRUE;
+			if (!$res) // Show error
+				WriteJson(array_merge(["success" => FALSE], $this->getMessages()));
+			return;
+		}
+
+		// Go to URL if specified
+		if ($url <> "") {
+			if (!DEBUG_ENABLED && ob_get_length())
+				ob_end_clean();
+
+			// Handle modal response
+			if ($this->IsModal) { // Show as modal
+				$row = array("url" => $url, "modal" => "1");
+				$pageName = GetPageName($url);
+				if ($pageName != $this->getListUrl()) { // Not List page
+					$row["caption"] = $this->getModalCaption($pageName);
+					if ($pageName == "ivf_treatment_planview.php")
+						$row["view"] = "1";
+				} else { // List page should not be shown as modal => error
+					$row["error"] = $this->getFailureMessage();
+					$this->clearFailureMessage();
+				}
+				WriteJson($row);
+			} else {
+				SaveDebugMessage();
+				AddHeader("Location", $url);
+			}
+		}
+		exit();
+	}
+
+	// Get records from recordset
+	protected function getRecordsFromRecordset($rs, $current = FALSE)
+	{
+		$rows = array();
+		if (is_object($rs)) { // Recordset
+			while ($rs && !$rs->EOF) {
+				$this->loadRowValues($rs); // Set up DbValue/CurrentValue
+				$row = $this->getRecordFromArray($rs->fields);
+				if ($current)
+					return $row;
+				else
+					$rows[] = $row;
+				$rs->moveNext();
+			}
+		} elseif (is_array($rs)) {
+			foreach ($rs as $ar) {
+				$row = $this->getRecordFromArray($ar);
+				if ($current)
+					return $row;
+				else
+					$rows[] = $row;
+			}
+		}
+		return $rows;
+	}
+
+	// Get record from array
+	protected function getRecordFromArray($ar)
+	{
+		$row = array();
+		if (is_array($ar)) {
+			foreach ($ar as $fldname => $val) {
+				if (array_key_exists($fldname, $this->fields) && ($this->fields[$fldname]->Visible || $this->fields[$fldname]->IsPrimaryKey)) { // Primary key or Visible
+					$fld = &$this->fields[$fldname];
+					if ($fld->HtmlTag == "FILE") { // Upload field
+						if (EmptyValue($val)) {
+							$row[$fldname] = NULL;
+						} else {
+							if ($fld->DataType == DATATYPE_BLOB) {
+
+								//$url = FullUrl($fld->TableVar . "/" . API_FILE_ACTION . "/" . $fld->Param . "/" . rawurlencode($this->getRecordKeyValue($ar))); // URL rewrite format
+								$url = FullUrl(GetPageName(API_URL) . "?" . API_OBJECT_NAME . "=" . $fld->TableVar . "&" . API_ACTION_NAME . "=" . API_FILE_ACTION . "&" . API_FIELD_NAME . "=" . $fld->Param . "&" . API_KEY_NAME . "=" . rawurlencode($this->getRecordKeyValue($ar))); // Query string format
+								$row[$fldname] = ["mimeType" => ContentType($val), "url" => $url];
+							} elseif (!$fld->UploadMultiple || !ContainsString($val, MULTIPLE_UPLOAD_SEPARATOR)) { // Single file
+								$row[$fldname] = ["mimeType" => MimeContentType($val), "url" => FullUrl($fld->hrefPath() . $val)];
+							} else { // Multiple files
+								$files = explode(MULTIPLE_UPLOAD_SEPARATOR, $val);
+								$ar = [];
+								foreach ($files as $file) {
+									if (!EmptyValue($file))
+										$ar[] = ["type" => MimeContentType($file), "url" => FullUrl($fld->hrefPath() . $file)];
+								}
+								$row[$fldname] = $ar;
+							}
+						}
+					} else {
+						$row[$fldname] = $val;
+					}
+				}
+			}
+		}
+		return $row;
+	}
+
+	// Get record key value from array
+	protected function getRecordKeyValue($ar)
+	{
+		global $COMPOSITE_KEY_SEPARATOR;
+		$key = "";
+		if (is_array($ar)) {
+			$key .= @$ar['id'];
+		}
+		return $key;
+	}
+
+	/**
+	 * Hide fields for add/edit
+	 *
+	 * @return void
+	 */
+	protected function hideFieldsForAddEdit()
+	{
+	}
+	public $FormClassName = "ew-horizontal ew-form ew-add-form";
+	public $IsModal = FALSE;
+	public $IsMobileOrModal = FALSE;
+	public $DbMasterFilter = "";
+	public $DbDetailFilter = "";
+	public $StartRec;
+	public $Priv = 0;
+	public $OldRecordset;
+	public $CopyRecord;
+
+	//
+	// Page run
+	//
+
+	public function run()
+	{
+		global $ExportType, $CustomExportType, $ExportFileName, $UserProfile, $Language, $Security, $RequestSecurity, $CurrentForm,
+			$FormError, $SkipHeaderFooter;
+
+		// Init Session data for API request if token found
+		if (IsApi() && session_status() !== PHP_SESSION_ACTIVE) {
+			$func = PROJECT_NAMESPACE . CHECK_TOKEN_FUNC;
+			if (is_callable($func) && Param(TOKEN_NAME) !== NULL && $func(Param(TOKEN_NAME), SessionTimeoutTime()))
+				session_start();
+		}
+
+		// Is modal
+		$this->IsModal = (Param("modal") == "1");
+
+		// User profile
+		$UserProfile = new UserProfile();
+
+		// Security
+		$Security = new AdvancedSecurity();
+		$validRequest = FALSE;
+
+		// Check security for API request
+		If (IsApi()) {
+
+			// Check token first
+			$func = PROJECT_NAMESPACE . CHECK_TOKEN_FUNC;
+			if (is_callable($func) && Post(TOKEN_NAME) !== NULL)
+				$validRequest = $func(Post(TOKEN_NAME), SessionTimeoutTime());
+			elseif (is_array($RequestSecurity) && @$RequestSecurity["username"] <> "") // Login user for API request
+				$Security->loginUser(@$RequestSecurity["username"], @$RequestSecurity["userid"], @$RequestSecurity["parentuserid"], @$RequestSecurity["userlevelid"]);
+		}
+		if (!$validRequest) {
+			if (!$Security->isLoggedIn())
+				$Security->autoLogin();
+			if ($Security->isLoggedIn())
+				$Security->TablePermission_Loading();
+			$Security->loadCurrentUserLevel($this->ProjectID . $this->TableName);
+			if ($Security->isLoggedIn())
+				$Security->TablePermission_Loaded();
+			if (!$Security->canAdd()) {
+				$Security->saveLastUrl();
+				$this->setFailureMessage(DeniedMessage()); // Set no permission
+				if ($Security->canList())
+					$this->terminate(GetUrl("ivf_treatment_planlist.php"));
+				else
+					$this->terminate(GetUrl("login.php"));
+				return;
+			}
+		}
+
+		// Create form object
+		$CurrentForm = new HttpForm();
+		$this->CurrentAction = Param("action"); // Set up current action
+		$this->id->Visible = FALSE;
+		$this->RIDNO->setVisibility();
+		$this->Name->setVisibility();
+		$this->TreatmentStartDate->setVisibility();
+		$this->Age->setVisibility();
+		$this->treatment_status->setVisibility();
+		$this->ARTCYCLE->setVisibility();
+		$this->IVFCycleNO->setVisibility();
+		$this->RESULT->setVisibility();
+		$this->status->setVisibility();
+		$this->createdby->setVisibility();
+		$this->createddatetime->setVisibility();
+		$this->modifiedby->Visible = FALSE;
+		$this->modifieddatetime->Visible = FALSE;
+		$this->TreatementStopDate->setVisibility();
+		$this->TypePatient->setVisibility();
+		$this->Treatment->setVisibility();
+		$this->TreatmentTec->setVisibility();
+		$this->TypeOfCycle->setVisibility();
+		$this->SpermOrgin->setVisibility();
+		$this->State->setVisibility();
+		$this->Origin->setVisibility();
+		$this->MACS->setVisibility();
+		$this->Technique->setVisibility();
+		$this->PgdPlanning->setVisibility();
+		$this->IMSI->setVisibility();
+		$this->SequentialCulture->setVisibility();
+		$this->TimeLapse->setVisibility();
+		$this->AH->setVisibility();
+		$this->Weight->setVisibility();
+		$this->BMI->setVisibility();
+		$this->MaleIndications->setVisibility();
+		$this->FemaleIndications->setVisibility();
+		$this->UseOfThe->setVisibility();
+		$this->Ectopic->setVisibility();
+		$this->Heterotopic->setVisibility();
+		$this->TransferDFE->setVisibility();
+		$this->Evolutive->setVisibility();
+		$this->Number->setVisibility();
+		$this->SequentialCult->setVisibility();
+		$this->TineLapse->setVisibility();
+		$this->PatientName->setVisibility();
+		$this->PatientID->setVisibility();
+		$this->PartnerName->setVisibility();
+		$this->PartnerID->setVisibility();
+		$this->WifeCell->setVisibility();
+		$this->HusbandCell->setVisibility();
+		$this->CoupleID->setVisibility();
+		$this->hideFieldsForAddEdit();
+
+		// Do not use lookup cache
+		$this->setUseLookupCache(FALSE);
+
+		// Global Page Loading event (in userfn*.php)
+		Page_Loading();
+
+		// Page Load event
+		$this->Page_Load();
+
+		// Check token
+		if (!$this->validPost()) {
+			Write($Language->phrase("InvalidPostRequest"));
+			$this->terminate();
+		}
+
+		// Create Token
+		$this->createToken();
+
+		// Set up lookup cache
+		$this->setupLookupOptions($this->status);
+
+		// Check modal
+		if ($this->IsModal)
+			$SkipHeaderFooter = TRUE;
+		$this->IsMobileOrModal = IsMobile() || $this->IsModal;
+		$this->FormClassName = "ew-form ew-add-form ew-horizontal";
+		$postBack = FALSE;
+
+		// Set up current action
+		if (IsApi()) {
+			$this->CurrentAction = "insert"; // Add record directly
+			$postBack = TRUE;
+		} elseif (Post("action") !== NULL) {
+			$this->CurrentAction = Post("action"); // Get form action
+			$postBack = TRUE;
+		} else { // Not post back
+
+			// Load key values from QueryString
+			$this->CopyRecord = TRUE;
+			if (Get("id") !== NULL) {
+				$this->id->setQueryStringValue(Get("id"));
+				$this->setKey("id", $this->id->CurrentValue); // Set up key
+			} else {
+				$this->setKey("id", ""); // Clear key
+				$this->CopyRecord = FALSE;
+			}
+			if ($this->CopyRecord) {
+				$this->CurrentAction = "copy"; // Copy record
+			} else {
+				$this->CurrentAction = "show"; // Display blank record
+			}
+		}
+
+		// Load old record / default values
+		$loaded = $this->loadOldRecord();
+
+		// Set up master/detail parameters
+		// NOTE: must be after loadOldRecord to prevent master key values overwritten
+
+		$this->setupMasterParms();
+
+		// Load form values
+		if ($postBack) {
+			$this->loadFormValues(); // Load form values
+		}
+
+		// Set up detail parameters
+		$this->setupDetailParms();
+
+		// Validate form if post back
+		if ($postBack) {
+			if (!$this->validateForm()) {
+				$this->EventCancelled = TRUE; // Event cancelled
+				$this->restoreFormValues(); // Restore form values
+				$this->setFailureMessage($FormError);
+				if (IsApi()) {
+					$this->terminate();
+					return;
+				} else {
+					$this->CurrentAction = "show"; // Form error, reset action
+				}
+			}
+		}
+
+		// Perform current action
+		switch ($this->CurrentAction) {
+			case "copy": // Copy an existing record
+				if (!$loaded) { // Record not loaded
+					if ($this->getFailureMessage() == "")
+						$this->setFailureMessage($Language->phrase("NoRecord")); // No record found
+					$this->terminate("ivf_treatment_planlist.php"); // No matching record, return to list
+				}
+
+				// Set up detail parameters
+				$this->setupDetailParms();
+				break;
+			case "insert": // Add new record
+				$this->SendEmail = TRUE; // Send email on add success
+				if ($this->addRow($this->OldRecordset)) { // Add successful
+					if ($this->getSuccessMessage() == "")
+						$this->setSuccessMessage($Language->phrase("AddSuccess")); // Set up success message
+					if ($this->getCurrentDetailTable() <> "") // Master/detail add
+						$returnUrl = $this->getDetailUrl();
+					else
+						$returnUrl = $this->getReturnUrl();
+					if (GetPageName($returnUrl) == "ivf_treatment_planlist.php")
+						$returnUrl = $this->addMasterUrl($returnUrl); // List page, return to List page with correct master key if necessary
+					elseif (GetPageName($returnUrl) == "ivf_treatment_planview.php")
+						$returnUrl = $this->getViewUrl(); // View page, return to View page with keyurl directly
+					if (IsApi()) { // Return to caller
+						$this->terminate(TRUE);
+						return;
+					} else {
+						$this->terminate($returnUrl);
+					}
+				} elseif (IsApi()) { // API request, return
+					$this->terminate();
+					return;
+				} else {
+					$this->EventCancelled = TRUE; // Event cancelled
+					$this->restoreFormValues(); // Add failed, restore form values
+
+					// Set up detail parameters
+					$this->setupDetailParms();
+				}
+		}
+
+		// Set up Breadcrumb
+		$this->setupBreadcrumb();
+
+		// Render row based on row type
+		$this->RowType = ROWTYPE_ADD; // Render add type
+
+		// Render row
+		$this->resetAttributes();
+		$this->renderRow();
+	}
+
+	// Get upload files
+	protected function getUploadFiles()
+	{
+		global $CurrentForm, $Language;
+	}
+
+	// Load default values
+	protected function loadDefaultValues()
+	{
+		$this->id->CurrentValue = NULL;
+		$this->id->OldValue = $this->id->CurrentValue;
+		$this->RIDNO->CurrentValue = NULL;
+		$this->RIDNO->OldValue = $this->RIDNO->CurrentValue;
+		$this->Name->CurrentValue = NULL;
+		$this->Name->OldValue = $this->Name->CurrentValue;
+		$this->TreatmentStartDate->CurrentValue = NULL;
+		$this->TreatmentStartDate->OldValue = $this->TreatmentStartDate->CurrentValue;
+		$this->Age->CurrentValue = NULL;
+		$this->Age->OldValue = $this->Age->CurrentValue;
+		$this->treatment_status->CurrentValue = 'On Going';
+		$this->ARTCYCLE->CurrentValue = NULL;
+		$this->ARTCYCLE->OldValue = $this->ARTCYCLE->CurrentValue;
+		$this->IVFCycleNO->CurrentValue = NULL;
+		$this->IVFCycleNO->OldValue = $this->IVFCycleNO->CurrentValue;
+		$this->RESULT->CurrentValue = NULL;
+		$this->RESULT->OldValue = $this->RESULT->CurrentValue;
+		$this->status->CurrentValue = NULL;
+		$this->status->OldValue = $this->status->CurrentValue;
+		$this->createdby->CurrentValue = NULL;
+		$this->createdby->OldValue = $this->createdby->CurrentValue;
+		$this->createddatetime->CurrentValue = NULL;
+		$this->createddatetime->OldValue = $this->createddatetime->CurrentValue;
+		$this->modifiedby->CurrentValue = NULL;
+		$this->modifiedby->OldValue = $this->modifiedby->CurrentValue;
+		$this->modifieddatetime->CurrentValue = NULL;
+		$this->modifieddatetime->OldValue = $this->modifieddatetime->CurrentValue;
+		$this->TreatementStopDate->CurrentValue = NULL;
+		$this->TreatementStopDate->OldValue = $this->TreatementStopDate->CurrentValue;
+		$this->TypePatient->CurrentValue = NULL;
+		$this->TypePatient->OldValue = $this->TypePatient->CurrentValue;
+		$this->Treatment->CurrentValue = NULL;
+		$this->Treatment->OldValue = $this->Treatment->CurrentValue;
+		$this->TreatmentTec->CurrentValue = NULL;
+		$this->TreatmentTec->OldValue = $this->TreatmentTec->CurrentValue;
+		$this->TypeOfCycle->CurrentValue = NULL;
+		$this->TypeOfCycle->OldValue = $this->TypeOfCycle->CurrentValue;
+		$this->SpermOrgin->CurrentValue = NULL;
+		$this->SpermOrgin->OldValue = $this->SpermOrgin->CurrentValue;
+		$this->State->CurrentValue = NULL;
+		$this->State->OldValue = $this->State->CurrentValue;
+		$this->Origin->CurrentValue = NULL;
+		$this->Origin->OldValue = $this->Origin->CurrentValue;
+		$this->MACS->CurrentValue = NULL;
+		$this->MACS->OldValue = $this->MACS->CurrentValue;
+		$this->Technique->CurrentValue = NULL;
+		$this->Technique->OldValue = $this->Technique->CurrentValue;
+		$this->PgdPlanning->CurrentValue = NULL;
+		$this->PgdPlanning->OldValue = $this->PgdPlanning->CurrentValue;
+		$this->IMSI->CurrentValue = NULL;
+		$this->IMSI->OldValue = $this->IMSI->CurrentValue;
+		$this->SequentialCulture->CurrentValue = NULL;
+		$this->SequentialCulture->OldValue = $this->SequentialCulture->CurrentValue;
+		$this->TimeLapse->CurrentValue = NULL;
+		$this->TimeLapse->OldValue = $this->TimeLapse->CurrentValue;
+		$this->AH->CurrentValue = NULL;
+		$this->AH->OldValue = $this->AH->CurrentValue;
+		$this->Weight->CurrentValue = NULL;
+		$this->Weight->OldValue = $this->Weight->CurrentValue;
+		$this->BMI->CurrentValue = NULL;
+		$this->BMI->OldValue = $this->BMI->CurrentValue;
+		$this->MaleIndications->CurrentValue = NULL;
+		$this->MaleIndications->OldValue = $this->MaleIndications->CurrentValue;
+		$this->FemaleIndications->CurrentValue = NULL;
+		$this->FemaleIndications->OldValue = $this->FemaleIndications->CurrentValue;
+		$this->UseOfThe->CurrentValue = NULL;
+		$this->UseOfThe->OldValue = $this->UseOfThe->CurrentValue;
+		$this->Ectopic->CurrentValue = NULL;
+		$this->Ectopic->OldValue = $this->Ectopic->CurrentValue;
+		$this->Heterotopic->CurrentValue = NULL;
+		$this->Heterotopic->OldValue = $this->Heterotopic->CurrentValue;
+		$this->TransferDFE->CurrentValue = NULL;
+		$this->TransferDFE->OldValue = $this->TransferDFE->CurrentValue;
+		$this->Evolutive->CurrentValue = NULL;
+		$this->Evolutive->OldValue = $this->Evolutive->CurrentValue;
+		$this->Number->CurrentValue = NULL;
+		$this->Number->OldValue = $this->Number->CurrentValue;
+		$this->SequentialCult->CurrentValue = NULL;
+		$this->SequentialCult->OldValue = $this->SequentialCult->CurrentValue;
+		$this->TineLapse->CurrentValue = NULL;
+		$this->TineLapse->OldValue = $this->TineLapse->CurrentValue;
+		$this->PatientName->CurrentValue = NULL;
+		$this->PatientName->OldValue = $this->PatientName->CurrentValue;
+		$this->PatientID->CurrentValue = NULL;
+		$this->PatientID->OldValue = $this->PatientID->CurrentValue;
+		$this->PartnerName->CurrentValue = NULL;
+		$this->PartnerName->OldValue = $this->PartnerName->CurrentValue;
+		$this->PartnerID->CurrentValue = NULL;
+		$this->PartnerID->OldValue = $this->PartnerID->CurrentValue;
+		$this->WifeCell->CurrentValue = NULL;
+		$this->WifeCell->OldValue = $this->WifeCell->CurrentValue;
+		$this->HusbandCell->CurrentValue = NULL;
+		$this->HusbandCell->OldValue = $this->HusbandCell->CurrentValue;
+		$this->CoupleID->CurrentValue = NULL;
+		$this->CoupleID->OldValue = $this->CoupleID->CurrentValue;
+	}
+
+	// Load form values
+	protected function loadFormValues()
+	{
+
+		// Load from form
+		global $CurrentForm;
+
+		// Check field name 'RIDNO' first before field var 'x_RIDNO'
+		$val = $CurrentForm->hasValue("RIDNO") ? $CurrentForm->getValue("RIDNO") : $CurrentForm->getValue("x_RIDNO");
+		if (!$this->RIDNO->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->RIDNO->Visible = FALSE; // Disable update for API request
+			else
+				$this->RIDNO->setFormValue($val);
+		}
+
+		// Check field name 'Name' first before field var 'x_Name'
+		$val = $CurrentForm->hasValue("Name") ? $CurrentForm->getValue("Name") : $CurrentForm->getValue("x_Name");
+		if (!$this->Name->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Name->Visible = FALSE; // Disable update for API request
+			else
+				$this->Name->setFormValue($val);
+		}
+
+		// Check field name 'TreatmentStartDate' first before field var 'x_TreatmentStartDate'
+		$val = $CurrentForm->hasValue("TreatmentStartDate") ? $CurrentForm->getValue("TreatmentStartDate") : $CurrentForm->getValue("x_TreatmentStartDate");
+		if (!$this->TreatmentStartDate->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->TreatmentStartDate->Visible = FALSE; // Disable update for API request
+			else
+				$this->TreatmentStartDate->setFormValue($val);
+			$this->TreatmentStartDate->CurrentValue = UnFormatDateTime($this->TreatmentStartDate->CurrentValue, 7);
+		}
+
+		// Check field name 'Age' first before field var 'x_Age'
+		$val = $CurrentForm->hasValue("Age") ? $CurrentForm->getValue("Age") : $CurrentForm->getValue("x_Age");
+		if (!$this->Age->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Age->Visible = FALSE; // Disable update for API request
+			else
+				$this->Age->setFormValue($val);
+		}
+
+		// Check field name 'treatment_status' first before field var 'x_treatment_status'
+		$val = $CurrentForm->hasValue("treatment_status") ? $CurrentForm->getValue("treatment_status") : $CurrentForm->getValue("x_treatment_status");
+		if (!$this->treatment_status->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->treatment_status->Visible = FALSE; // Disable update for API request
+			else
+				$this->treatment_status->setFormValue($val);
+		}
+
+		// Check field name 'ARTCYCLE' first before field var 'x_ARTCYCLE'
+		$val = $CurrentForm->hasValue("ARTCYCLE") ? $CurrentForm->getValue("ARTCYCLE") : $CurrentForm->getValue("x_ARTCYCLE");
+		if (!$this->ARTCYCLE->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->ARTCYCLE->Visible = FALSE; // Disable update for API request
+			else
+				$this->ARTCYCLE->setFormValue($val);
+		}
+
+		// Check field name 'IVFCycleNO' first before field var 'x_IVFCycleNO'
+		$val = $CurrentForm->hasValue("IVFCycleNO") ? $CurrentForm->getValue("IVFCycleNO") : $CurrentForm->getValue("x_IVFCycleNO");
+		if (!$this->IVFCycleNO->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->IVFCycleNO->Visible = FALSE; // Disable update for API request
+			else
+				$this->IVFCycleNO->setFormValue($val);
+		}
+
+		// Check field name 'RESULT' first before field var 'x_RESULT'
+		$val = $CurrentForm->hasValue("RESULT") ? $CurrentForm->getValue("RESULT") : $CurrentForm->getValue("x_RESULT");
+		if (!$this->RESULT->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->RESULT->Visible = FALSE; // Disable update for API request
+			else
+				$this->RESULT->setFormValue($val);
+		}
+
+		// Check field name 'status' first before field var 'x_status'
+		$val = $CurrentForm->hasValue("status") ? $CurrentForm->getValue("status") : $CurrentForm->getValue("x_status");
+		if (!$this->status->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->status->Visible = FALSE; // Disable update for API request
+			else
+				$this->status->setFormValue($val);
+		}
+
+		// Check field name 'createdby' first before field var 'x_createdby'
+		$val = $CurrentForm->hasValue("createdby") ? $CurrentForm->getValue("createdby") : $CurrentForm->getValue("x_createdby");
+		if (!$this->createdby->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->createdby->Visible = FALSE; // Disable update for API request
+			else
+				$this->createdby->setFormValue($val);
+		}
+
+		// Check field name 'createddatetime' first before field var 'x_createddatetime'
+		$val = $CurrentForm->hasValue("createddatetime") ? $CurrentForm->getValue("createddatetime") : $CurrentForm->getValue("x_createddatetime");
+		if (!$this->createddatetime->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->createddatetime->Visible = FALSE; // Disable update for API request
+			else
+				$this->createddatetime->setFormValue($val);
+			$this->createddatetime->CurrentValue = UnFormatDateTime($this->createddatetime->CurrentValue, 0);
+		}
+
+		// Check field name 'TreatementStopDate' first before field var 'x_TreatementStopDate'
+		$val = $CurrentForm->hasValue("TreatementStopDate") ? $CurrentForm->getValue("TreatementStopDate") : $CurrentForm->getValue("x_TreatementStopDate");
+		if (!$this->TreatementStopDate->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->TreatementStopDate->Visible = FALSE; // Disable update for API request
+			else
+				$this->TreatementStopDate->setFormValue($val);
+			$this->TreatementStopDate->CurrentValue = UnFormatDateTime($this->TreatementStopDate->CurrentValue, 7);
+		}
+
+		// Check field name 'TypePatient' first before field var 'x_TypePatient'
+		$val = $CurrentForm->hasValue("TypePatient") ? $CurrentForm->getValue("TypePatient") : $CurrentForm->getValue("x_TypePatient");
+		if (!$this->TypePatient->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->TypePatient->Visible = FALSE; // Disable update for API request
+			else
+				$this->TypePatient->setFormValue($val);
+		}
+
+		// Check field name 'Treatment' first before field var 'x_Treatment'
+		$val = $CurrentForm->hasValue("Treatment") ? $CurrentForm->getValue("Treatment") : $CurrentForm->getValue("x_Treatment");
+		if (!$this->Treatment->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Treatment->Visible = FALSE; // Disable update for API request
+			else
+				$this->Treatment->setFormValue($val);
+		}
+
+		// Check field name 'TreatmentTec' first before field var 'x_TreatmentTec'
+		$val = $CurrentForm->hasValue("TreatmentTec") ? $CurrentForm->getValue("TreatmentTec") : $CurrentForm->getValue("x_TreatmentTec");
+		if (!$this->TreatmentTec->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->TreatmentTec->Visible = FALSE; // Disable update for API request
+			else
+				$this->TreatmentTec->setFormValue($val);
+		}
+
+		// Check field name 'TypeOfCycle' first before field var 'x_TypeOfCycle'
+		$val = $CurrentForm->hasValue("TypeOfCycle") ? $CurrentForm->getValue("TypeOfCycle") : $CurrentForm->getValue("x_TypeOfCycle");
+		if (!$this->TypeOfCycle->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->TypeOfCycle->Visible = FALSE; // Disable update for API request
+			else
+				$this->TypeOfCycle->setFormValue($val);
+		}
+
+		// Check field name 'SpermOrgin' first before field var 'x_SpermOrgin'
+		$val = $CurrentForm->hasValue("SpermOrgin") ? $CurrentForm->getValue("SpermOrgin") : $CurrentForm->getValue("x_SpermOrgin");
+		if (!$this->SpermOrgin->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->SpermOrgin->Visible = FALSE; // Disable update for API request
+			else
+				$this->SpermOrgin->setFormValue($val);
+		}
+
+		// Check field name 'State' first before field var 'x_State'
+		$val = $CurrentForm->hasValue("State") ? $CurrentForm->getValue("State") : $CurrentForm->getValue("x_State");
+		if (!$this->State->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->State->Visible = FALSE; // Disable update for API request
+			else
+				$this->State->setFormValue($val);
+		}
+
+		// Check field name 'Origin' first before field var 'x_Origin'
+		$val = $CurrentForm->hasValue("Origin") ? $CurrentForm->getValue("Origin") : $CurrentForm->getValue("x_Origin");
+		if (!$this->Origin->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Origin->Visible = FALSE; // Disable update for API request
+			else
+				$this->Origin->setFormValue($val);
+		}
+
+		// Check field name 'MACS' first before field var 'x_MACS'
+		$val = $CurrentForm->hasValue("MACS") ? $CurrentForm->getValue("MACS") : $CurrentForm->getValue("x_MACS");
+		if (!$this->MACS->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->MACS->Visible = FALSE; // Disable update for API request
+			else
+				$this->MACS->setFormValue($val);
+		}
+
+		// Check field name 'Technique' first before field var 'x_Technique'
+		$val = $CurrentForm->hasValue("Technique") ? $CurrentForm->getValue("Technique") : $CurrentForm->getValue("x_Technique");
+		if (!$this->Technique->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Technique->Visible = FALSE; // Disable update for API request
+			else
+				$this->Technique->setFormValue($val);
+		}
+
+		// Check field name 'PgdPlanning' first before field var 'x_PgdPlanning'
+		$val = $CurrentForm->hasValue("PgdPlanning") ? $CurrentForm->getValue("PgdPlanning") : $CurrentForm->getValue("x_PgdPlanning");
+		if (!$this->PgdPlanning->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->PgdPlanning->Visible = FALSE; // Disable update for API request
+			else
+				$this->PgdPlanning->setFormValue($val);
+		}
+
+		// Check field name 'IMSI' first before field var 'x_IMSI'
+		$val = $CurrentForm->hasValue("IMSI") ? $CurrentForm->getValue("IMSI") : $CurrentForm->getValue("x_IMSI");
+		if (!$this->IMSI->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->IMSI->Visible = FALSE; // Disable update for API request
+			else
+				$this->IMSI->setFormValue($val);
+		}
+
+		// Check field name 'SequentialCulture' first before field var 'x_SequentialCulture'
+		$val = $CurrentForm->hasValue("SequentialCulture") ? $CurrentForm->getValue("SequentialCulture") : $CurrentForm->getValue("x_SequentialCulture");
+		if (!$this->SequentialCulture->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->SequentialCulture->Visible = FALSE; // Disable update for API request
+			else
+				$this->SequentialCulture->setFormValue($val);
+		}
+
+		// Check field name 'TimeLapse' first before field var 'x_TimeLapse'
+		$val = $CurrentForm->hasValue("TimeLapse") ? $CurrentForm->getValue("TimeLapse") : $CurrentForm->getValue("x_TimeLapse");
+		if (!$this->TimeLapse->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->TimeLapse->Visible = FALSE; // Disable update for API request
+			else
+				$this->TimeLapse->setFormValue($val);
+		}
+
+		// Check field name 'AH' first before field var 'x_AH'
+		$val = $CurrentForm->hasValue("AH") ? $CurrentForm->getValue("AH") : $CurrentForm->getValue("x_AH");
+		if (!$this->AH->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->AH->Visible = FALSE; // Disable update for API request
+			else
+				$this->AH->setFormValue($val);
+		}
+
+		// Check field name 'Weight' first before field var 'x_Weight'
+		$val = $CurrentForm->hasValue("Weight") ? $CurrentForm->getValue("Weight") : $CurrentForm->getValue("x_Weight");
+		if (!$this->Weight->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Weight->Visible = FALSE; // Disable update for API request
+			else
+				$this->Weight->setFormValue($val);
+		}
+
+		// Check field name 'BMI' first before field var 'x_BMI'
+		$val = $CurrentForm->hasValue("BMI") ? $CurrentForm->getValue("BMI") : $CurrentForm->getValue("x_BMI");
+		if (!$this->BMI->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->BMI->Visible = FALSE; // Disable update for API request
+			else
+				$this->BMI->setFormValue($val);
+		}
+
+		// Check field name 'MaleIndications' first before field var 'x_MaleIndications'
+		$val = $CurrentForm->hasValue("MaleIndications") ? $CurrentForm->getValue("MaleIndications") : $CurrentForm->getValue("x_MaleIndications");
+		if (!$this->MaleIndications->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->MaleIndications->Visible = FALSE; // Disable update for API request
+			else
+				$this->MaleIndications->setFormValue($val);
+		}
+
+		// Check field name 'FemaleIndications' first before field var 'x_FemaleIndications'
+		$val = $CurrentForm->hasValue("FemaleIndications") ? $CurrentForm->getValue("FemaleIndications") : $CurrentForm->getValue("x_FemaleIndications");
+		if (!$this->FemaleIndications->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->FemaleIndications->Visible = FALSE; // Disable update for API request
+			else
+				$this->FemaleIndications->setFormValue($val);
+		}
+
+		// Check field name 'UseOfThe' first before field var 'x_UseOfThe'
+		$val = $CurrentForm->hasValue("UseOfThe") ? $CurrentForm->getValue("UseOfThe") : $CurrentForm->getValue("x_UseOfThe");
+		if (!$this->UseOfThe->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->UseOfThe->Visible = FALSE; // Disable update for API request
+			else
+				$this->UseOfThe->setFormValue($val);
+		}
+
+		// Check field name 'Ectopic' first before field var 'x_Ectopic'
+		$val = $CurrentForm->hasValue("Ectopic") ? $CurrentForm->getValue("Ectopic") : $CurrentForm->getValue("x_Ectopic");
+		if (!$this->Ectopic->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Ectopic->Visible = FALSE; // Disable update for API request
+			else
+				$this->Ectopic->setFormValue($val);
+		}
+
+		// Check field name 'Heterotopic' first before field var 'x_Heterotopic'
+		$val = $CurrentForm->hasValue("Heterotopic") ? $CurrentForm->getValue("Heterotopic") : $CurrentForm->getValue("x_Heterotopic");
+		if (!$this->Heterotopic->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Heterotopic->Visible = FALSE; // Disable update for API request
+			else
+				$this->Heterotopic->setFormValue($val);
+		}
+
+		// Check field name 'TransferDFE' first before field var 'x_TransferDFE'
+		$val = $CurrentForm->hasValue("TransferDFE") ? $CurrentForm->getValue("TransferDFE") : $CurrentForm->getValue("x_TransferDFE");
+		if (!$this->TransferDFE->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->TransferDFE->Visible = FALSE; // Disable update for API request
+			else
+				$this->TransferDFE->setFormValue($val);
+		}
+
+		// Check field name 'Evolutive' first before field var 'x_Evolutive'
+		$val = $CurrentForm->hasValue("Evolutive") ? $CurrentForm->getValue("Evolutive") : $CurrentForm->getValue("x_Evolutive");
+		if (!$this->Evolutive->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Evolutive->Visible = FALSE; // Disable update for API request
+			else
+				$this->Evolutive->setFormValue($val);
+		}
+
+		// Check field name 'Number' first before field var 'x_Number'
+		$val = $CurrentForm->hasValue("Number") ? $CurrentForm->getValue("Number") : $CurrentForm->getValue("x_Number");
+		if (!$this->Number->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Number->Visible = FALSE; // Disable update for API request
+			else
+				$this->Number->setFormValue($val);
+		}
+
+		// Check field name 'SequentialCult' first before field var 'x_SequentialCult'
+		$val = $CurrentForm->hasValue("SequentialCult") ? $CurrentForm->getValue("SequentialCult") : $CurrentForm->getValue("x_SequentialCult");
+		if (!$this->SequentialCult->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->SequentialCult->Visible = FALSE; // Disable update for API request
+			else
+				$this->SequentialCult->setFormValue($val);
+		}
+
+		// Check field name 'TineLapse' first before field var 'x_TineLapse'
+		$val = $CurrentForm->hasValue("TineLapse") ? $CurrentForm->getValue("TineLapse") : $CurrentForm->getValue("x_TineLapse");
+		if (!$this->TineLapse->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->TineLapse->Visible = FALSE; // Disable update for API request
+			else
+				$this->TineLapse->setFormValue($val);
+		}
+
+		// Check field name 'PatientName' first before field var 'x_PatientName'
+		$val = $CurrentForm->hasValue("PatientName") ? $CurrentForm->getValue("PatientName") : $CurrentForm->getValue("x_PatientName");
+		if (!$this->PatientName->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->PatientName->Visible = FALSE; // Disable update for API request
+			else
+				$this->PatientName->setFormValue($val);
+		}
+
+		// Check field name 'PatientID' first before field var 'x_PatientID'
+		$val = $CurrentForm->hasValue("PatientID") ? $CurrentForm->getValue("PatientID") : $CurrentForm->getValue("x_PatientID");
+		if (!$this->PatientID->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->PatientID->Visible = FALSE; // Disable update for API request
+			else
+				$this->PatientID->setFormValue($val);
+		}
+
+		// Check field name 'PartnerName' first before field var 'x_PartnerName'
+		$val = $CurrentForm->hasValue("PartnerName") ? $CurrentForm->getValue("PartnerName") : $CurrentForm->getValue("x_PartnerName");
+		if (!$this->PartnerName->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->PartnerName->Visible = FALSE; // Disable update for API request
+			else
+				$this->PartnerName->setFormValue($val);
+		}
+
+		// Check field name 'PartnerID' first before field var 'x_PartnerID'
+		$val = $CurrentForm->hasValue("PartnerID") ? $CurrentForm->getValue("PartnerID") : $CurrentForm->getValue("x_PartnerID");
+		if (!$this->PartnerID->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->PartnerID->Visible = FALSE; // Disable update for API request
+			else
+				$this->PartnerID->setFormValue($val);
+		}
+
+		// Check field name 'WifeCell' first before field var 'x_WifeCell'
+		$val = $CurrentForm->hasValue("WifeCell") ? $CurrentForm->getValue("WifeCell") : $CurrentForm->getValue("x_WifeCell");
+		if (!$this->WifeCell->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->WifeCell->Visible = FALSE; // Disable update for API request
+			else
+				$this->WifeCell->setFormValue($val);
+		}
+
+		// Check field name 'HusbandCell' first before field var 'x_HusbandCell'
+		$val = $CurrentForm->hasValue("HusbandCell") ? $CurrentForm->getValue("HusbandCell") : $CurrentForm->getValue("x_HusbandCell");
+		if (!$this->HusbandCell->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->HusbandCell->Visible = FALSE; // Disable update for API request
+			else
+				$this->HusbandCell->setFormValue($val);
+		}
+
+		// Check field name 'CoupleID' first before field var 'x_CoupleID'
+		$val = $CurrentForm->hasValue("CoupleID") ? $CurrentForm->getValue("CoupleID") : $CurrentForm->getValue("x_CoupleID");
+		if (!$this->CoupleID->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->CoupleID->Visible = FALSE; // Disable update for API request
+			else
+				$this->CoupleID->setFormValue($val);
+		}
+
+		// Check field name 'id' first before field var 'x_id'
+		$val = $CurrentForm->hasValue("id") ? $CurrentForm->getValue("id") : $CurrentForm->getValue("x_id");
+	}
+
+	// Restore form values
+	public function restoreFormValues()
+	{
+		global $CurrentForm;
+		$this->RIDNO->CurrentValue = $this->RIDNO->FormValue;
+		$this->Name->CurrentValue = $this->Name->FormValue;
+		$this->TreatmentStartDate->CurrentValue = $this->TreatmentStartDate->FormValue;
+		$this->TreatmentStartDate->CurrentValue = UnFormatDateTime($this->TreatmentStartDate->CurrentValue, 7);
+		$this->Age->CurrentValue = $this->Age->FormValue;
+		$this->treatment_status->CurrentValue = $this->treatment_status->FormValue;
+		$this->ARTCYCLE->CurrentValue = $this->ARTCYCLE->FormValue;
+		$this->IVFCycleNO->CurrentValue = $this->IVFCycleNO->FormValue;
+		$this->RESULT->CurrentValue = $this->RESULT->FormValue;
+		$this->status->CurrentValue = $this->status->FormValue;
+		$this->createdby->CurrentValue = $this->createdby->FormValue;
+		$this->createddatetime->CurrentValue = $this->createddatetime->FormValue;
+		$this->createddatetime->CurrentValue = UnFormatDateTime($this->createddatetime->CurrentValue, 0);
+		$this->TreatementStopDate->CurrentValue = $this->TreatementStopDate->FormValue;
+		$this->TreatementStopDate->CurrentValue = UnFormatDateTime($this->TreatementStopDate->CurrentValue, 7);
+		$this->TypePatient->CurrentValue = $this->TypePatient->FormValue;
+		$this->Treatment->CurrentValue = $this->Treatment->FormValue;
+		$this->TreatmentTec->CurrentValue = $this->TreatmentTec->FormValue;
+		$this->TypeOfCycle->CurrentValue = $this->TypeOfCycle->FormValue;
+		$this->SpermOrgin->CurrentValue = $this->SpermOrgin->FormValue;
+		$this->State->CurrentValue = $this->State->FormValue;
+		$this->Origin->CurrentValue = $this->Origin->FormValue;
+		$this->MACS->CurrentValue = $this->MACS->FormValue;
+		$this->Technique->CurrentValue = $this->Technique->FormValue;
+		$this->PgdPlanning->CurrentValue = $this->PgdPlanning->FormValue;
+		$this->IMSI->CurrentValue = $this->IMSI->FormValue;
+		$this->SequentialCulture->CurrentValue = $this->SequentialCulture->FormValue;
+		$this->TimeLapse->CurrentValue = $this->TimeLapse->FormValue;
+		$this->AH->CurrentValue = $this->AH->FormValue;
+		$this->Weight->CurrentValue = $this->Weight->FormValue;
+		$this->BMI->CurrentValue = $this->BMI->FormValue;
+		$this->MaleIndications->CurrentValue = $this->MaleIndications->FormValue;
+		$this->FemaleIndications->CurrentValue = $this->FemaleIndications->FormValue;
+		$this->UseOfThe->CurrentValue = $this->UseOfThe->FormValue;
+		$this->Ectopic->CurrentValue = $this->Ectopic->FormValue;
+		$this->Heterotopic->CurrentValue = $this->Heterotopic->FormValue;
+		$this->TransferDFE->CurrentValue = $this->TransferDFE->FormValue;
+		$this->Evolutive->CurrentValue = $this->Evolutive->FormValue;
+		$this->Number->CurrentValue = $this->Number->FormValue;
+		$this->SequentialCult->CurrentValue = $this->SequentialCult->FormValue;
+		$this->TineLapse->CurrentValue = $this->TineLapse->FormValue;
+		$this->PatientName->CurrentValue = $this->PatientName->FormValue;
+		$this->PatientID->CurrentValue = $this->PatientID->FormValue;
+		$this->PartnerName->CurrentValue = $this->PartnerName->FormValue;
+		$this->PartnerID->CurrentValue = $this->PartnerID->FormValue;
+		$this->WifeCell->CurrentValue = $this->WifeCell->FormValue;
+		$this->HusbandCell->CurrentValue = $this->HusbandCell->FormValue;
+		$this->CoupleID->CurrentValue = $this->CoupleID->FormValue;
+	}
+
+	// Load row based on key values
+	public function loadRow()
+	{
+		global $Security, $Language;
+		$filter = $this->getRecordFilter();
+
+		// Call Row Selecting event
+		$this->Row_Selecting($filter);
+
+		// Load SQL based on filter
+		$this->CurrentFilter = $filter;
+		$sql = $this->getCurrentSql();
+		$conn = &$this->getConnection();
+		$res = FALSE;
+		$rs = LoadRecordset($sql, $conn);
+		if ($rs && !$rs->EOF) {
+			$res = TRUE;
+			$this->loadRowValues($rs); // Load row values
+			$rs->close();
+		}
+		return $res;
+	}
+
+	// Load row values from recordset
+	public function loadRowValues($rs = NULL)
+	{
+		if ($rs && !$rs->EOF)
+			$row = $rs->fields;
+		else
+			$row = $this->newRow();
+
+		// Call Row Selected event
+		$this->Row_Selected($row);
+		if (!$rs || $rs->EOF)
+			return;
+		$this->id->setDbValue($row['id']);
+		$this->RIDNO->setDbValue($row['RIDNO']);
+		$this->Name->setDbValue($row['Name']);
+		$this->TreatmentStartDate->setDbValue($row['TreatmentStartDate']);
+		$this->Age->setDbValue($row['Age']);
+		$this->treatment_status->setDbValue($row['treatment_status']);
+		$this->ARTCYCLE->setDbValue($row['ARTCYCLE']);
+		$this->IVFCycleNO->setDbValue($row['IVFCycleNO']);
+		$this->RESULT->setDbValue($row['RESULT']);
+		$this->status->setDbValue($row['status']);
+		$this->createdby->setDbValue($row['createdby']);
+		$this->createddatetime->setDbValue($row['createddatetime']);
+		$this->modifiedby->setDbValue($row['modifiedby']);
+		$this->modifieddatetime->setDbValue($row['modifieddatetime']);
+		$this->TreatementStopDate->setDbValue($row['TreatementStopDate']);
+		$this->TypePatient->setDbValue($row['TypePatient']);
+		$this->Treatment->setDbValue($row['Treatment']);
+		$this->TreatmentTec->setDbValue($row['TreatmentTec']);
+		$this->TypeOfCycle->setDbValue($row['TypeOfCycle']);
+		$this->SpermOrgin->setDbValue($row['SpermOrgin']);
+		$this->State->setDbValue($row['State']);
+		$this->Origin->setDbValue($row['Origin']);
+		$this->MACS->setDbValue($row['MACS']);
+		$this->Technique->setDbValue($row['Technique']);
+		$this->PgdPlanning->setDbValue($row['PgdPlanning']);
+		$this->IMSI->setDbValue($row['IMSI']);
+		$this->SequentialCulture->setDbValue($row['SequentialCulture']);
+		$this->TimeLapse->setDbValue($row['TimeLapse']);
+		$this->AH->setDbValue($row['AH']);
+		$this->Weight->setDbValue($row['Weight']);
+		$this->BMI->setDbValue($row['BMI']);
+		$this->MaleIndications->setDbValue($row['MaleIndications']);
+		$this->FemaleIndications->setDbValue($row['FemaleIndications']);
+		$this->UseOfThe->setDbValue($row['UseOfThe']);
+		$this->Ectopic->setDbValue($row['Ectopic']);
+		$this->Heterotopic->setDbValue($row['Heterotopic']);
+		$this->TransferDFE->setDbValue($row['TransferDFE']);
+		$this->Evolutive->setDbValue($row['Evolutive']);
+		$this->Number->setDbValue($row['Number']);
+		$this->SequentialCult->setDbValue($row['SequentialCult']);
+		$this->TineLapse->setDbValue($row['TineLapse']);
+		$this->PatientName->setDbValue($row['PatientName']);
+		$this->PatientID->setDbValue($row['PatientID']);
+		$this->PartnerName->setDbValue($row['PartnerName']);
+		$this->PartnerID->setDbValue($row['PartnerID']);
+		$this->WifeCell->setDbValue($row['WifeCell']);
+		$this->HusbandCell->setDbValue($row['HusbandCell']);
+		$this->CoupleID->setDbValue($row['CoupleID']);
+	}
+
+	// Return a row with default values
+	protected function newRow()
+	{
+		$this->loadDefaultValues();
+		$row = [];
+		$row['id'] = $this->id->CurrentValue;
+		$row['RIDNO'] = $this->RIDNO->CurrentValue;
+		$row['Name'] = $this->Name->CurrentValue;
+		$row['TreatmentStartDate'] = $this->TreatmentStartDate->CurrentValue;
+		$row['Age'] = $this->Age->CurrentValue;
+		$row['treatment_status'] = $this->treatment_status->CurrentValue;
+		$row['ARTCYCLE'] = $this->ARTCYCLE->CurrentValue;
+		$row['IVFCycleNO'] = $this->IVFCycleNO->CurrentValue;
+		$row['RESULT'] = $this->RESULT->CurrentValue;
+		$row['status'] = $this->status->CurrentValue;
+		$row['createdby'] = $this->createdby->CurrentValue;
+		$row['createddatetime'] = $this->createddatetime->CurrentValue;
+		$row['modifiedby'] = $this->modifiedby->CurrentValue;
+		$row['modifieddatetime'] = $this->modifieddatetime->CurrentValue;
+		$row['TreatementStopDate'] = $this->TreatementStopDate->CurrentValue;
+		$row['TypePatient'] = $this->TypePatient->CurrentValue;
+		$row['Treatment'] = $this->Treatment->CurrentValue;
+		$row['TreatmentTec'] = $this->TreatmentTec->CurrentValue;
+		$row['TypeOfCycle'] = $this->TypeOfCycle->CurrentValue;
+		$row['SpermOrgin'] = $this->SpermOrgin->CurrentValue;
+		$row['State'] = $this->State->CurrentValue;
+		$row['Origin'] = $this->Origin->CurrentValue;
+		$row['MACS'] = $this->MACS->CurrentValue;
+		$row['Technique'] = $this->Technique->CurrentValue;
+		$row['PgdPlanning'] = $this->PgdPlanning->CurrentValue;
+		$row['IMSI'] = $this->IMSI->CurrentValue;
+		$row['SequentialCulture'] = $this->SequentialCulture->CurrentValue;
+		$row['TimeLapse'] = $this->TimeLapse->CurrentValue;
+		$row['AH'] = $this->AH->CurrentValue;
+		$row['Weight'] = $this->Weight->CurrentValue;
+		$row['BMI'] = $this->BMI->CurrentValue;
+		$row['MaleIndications'] = $this->MaleIndications->CurrentValue;
+		$row['FemaleIndications'] = $this->FemaleIndications->CurrentValue;
+		$row['UseOfThe'] = $this->UseOfThe->CurrentValue;
+		$row['Ectopic'] = $this->Ectopic->CurrentValue;
+		$row['Heterotopic'] = $this->Heterotopic->CurrentValue;
+		$row['TransferDFE'] = $this->TransferDFE->CurrentValue;
+		$row['Evolutive'] = $this->Evolutive->CurrentValue;
+		$row['Number'] = $this->Number->CurrentValue;
+		$row['SequentialCult'] = $this->SequentialCult->CurrentValue;
+		$row['TineLapse'] = $this->TineLapse->CurrentValue;
+		$row['PatientName'] = $this->PatientName->CurrentValue;
+		$row['PatientID'] = $this->PatientID->CurrentValue;
+		$row['PartnerName'] = $this->PartnerName->CurrentValue;
+		$row['PartnerID'] = $this->PartnerID->CurrentValue;
+		$row['WifeCell'] = $this->WifeCell->CurrentValue;
+		$row['HusbandCell'] = $this->HusbandCell->CurrentValue;
+		$row['CoupleID'] = $this->CoupleID->CurrentValue;
+		return $row;
+	}
+
+	// Load old record
+	protected function loadOldRecord()
+	{
+
+		// Load key values from Session
+		$validKey = TRUE;
+		if (strval($this->getKey("id")) <> "")
+			$this->id->CurrentValue = $this->getKey("id"); // id
+		else
+			$validKey = FALSE;
+
+		// Load old record
+		$this->OldRecordset = NULL;
+		if ($validKey) {
+			$this->CurrentFilter = $this->getRecordFilter();
+			$sql = $this->getCurrentSql();
+			$conn = &$this->getConnection();
+			$this->OldRecordset = LoadRecordset($sql, $conn);
+		}
+		$this->loadRowValues($this->OldRecordset); // Load row values
+		return $validKey;
+	}
+
+	// Render row values based on field settings
+	public function renderRow()
+	{
+		global $Security, $Language, $CurrentLanguage;
+
+		// Initialize URLs
+		// Call Row_Rendering event
+
+		$this->Row_Rendering();
+
+		// Common render codes for all row types
+		// id
+		// RIDNO
+		// Name
+		// TreatmentStartDate
+		// Age
+		// treatment_status
+		// ARTCYCLE
+		// IVFCycleNO
+		// RESULT
+		// status
+		// createdby
+		// createddatetime
+		// modifiedby
+		// modifieddatetime
+		// TreatementStopDate
+		// TypePatient
+		// Treatment
+		// TreatmentTec
+		// TypeOfCycle
+		// SpermOrgin
+		// State
+		// Origin
+		// MACS
+		// Technique
+		// PgdPlanning
+		// IMSI
+		// SequentialCulture
+		// TimeLapse
+		// AH
+		// Weight
+		// BMI
+		// MaleIndications
+		// FemaleIndications
+		// UseOfThe
+		// Ectopic
+		// Heterotopic
+		// TransferDFE
+		// Evolutive
+		// Number
+		// SequentialCult
+		// TineLapse
+		// PatientName
+		// PatientID
+		// PartnerName
+		// PartnerID
+		// WifeCell
+		// HusbandCell
+		// CoupleID
+
+		if ($this->RowType == ROWTYPE_VIEW) { // View row
+
+			// id
+			$this->id->ViewValue = $this->id->CurrentValue;
+			$this->id->ViewCustomAttributes = "";
+
+			// RIDNO
+			$this->RIDNO->ViewValue = $this->RIDNO->CurrentValue;
+			$this->RIDNO->ViewValue = FormatNumber($this->RIDNO->ViewValue, 0, -2, -2, -2);
+			$this->RIDNO->ViewCustomAttributes = "";
+
+			// Name
+			$this->Name->ViewValue = $this->Name->CurrentValue;
+			$this->Name->ViewCustomAttributes = "";
+
+			// TreatmentStartDate
+			$this->TreatmentStartDate->ViewValue = $this->TreatmentStartDate->CurrentValue;
+			$this->TreatmentStartDate->ViewValue = FormatDateTime($this->TreatmentStartDate->ViewValue, 7);
+			$this->TreatmentStartDate->ViewCustomAttributes = "";
+
+			// Age
+			$this->Age->ViewValue = $this->Age->CurrentValue;
+			$this->Age->ViewCustomAttributes = "";
+
+			// treatment_status
+			if (strval($this->treatment_status->CurrentValue) <> "") {
+				$this->treatment_status->ViewValue = $this->treatment_status->optionCaption($this->treatment_status->CurrentValue);
+			} else {
+				$this->treatment_status->ViewValue = NULL;
+			}
+			$this->treatment_status->ViewCustomAttributes = "";
+
+			// ARTCYCLE
+			if (strval($this->ARTCYCLE->CurrentValue) <> "") {
+				$this->ARTCYCLE->ViewValue = $this->ARTCYCLE->optionCaption($this->ARTCYCLE->CurrentValue);
+			} else {
+				$this->ARTCYCLE->ViewValue = NULL;
+			}
+			$this->ARTCYCLE->ViewCustomAttributes = "";
+
+			// IVFCycleNO
+			$this->IVFCycleNO->ViewValue = $this->IVFCycleNO->CurrentValue;
+			$this->IVFCycleNO->ViewCustomAttributes = "";
+
+			// RESULT
+			if (strval($this->RESULT->CurrentValue) <> "") {
+				$this->RESULT->ViewValue = $this->RESULT->optionCaption($this->RESULT->CurrentValue);
+			} else {
+				$this->RESULT->ViewValue = NULL;
+			}
+			$this->RESULT->ViewCustomAttributes = "";
+
+			// status
+			$curVal = strval($this->status->CurrentValue);
+			if ($curVal <> "") {
+				$this->status->ViewValue = $this->status->lookupCacheOption($curVal);
+				if ($this->status->ViewValue === NULL) { // Lookup from database
+					$filterWrk = "`id`" . SearchString("=", $curVal, DATATYPE_NUMBER, "");
+					$sqlWrk = $this->status->Lookup->getSql(FALSE, $filterWrk, '', $this);
+					$rswrk = Conn()->execute($sqlWrk);
+					if ($rswrk && !$rswrk->EOF) { // Lookup values found
+						$arwrk = array();
+						$arwrk[1] = $rswrk->fields('df');
+						$this->status->ViewValue = $this->status->displayValue($arwrk);
+						$rswrk->Close();
+					} else {
+						$this->status->ViewValue = $this->status->CurrentValue;
+					}
+				}
+			} else {
+				$this->status->ViewValue = NULL;
+			}
+			$this->status->ViewCustomAttributes = "";
+
+			// createdby
+			$this->createdby->ViewValue = $this->createdby->CurrentValue;
+			$this->createdby->ViewValue = FormatNumber($this->createdby->ViewValue, 0, -2, -2, -2);
+			$this->createdby->ViewCustomAttributes = "";
+
+			// createddatetime
+			$this->createddatetime->ViewValue = $this->createddatetime->CurrentValue;
+			$this->createddatetime->ViewValue = FormatDateTime($this->createddatetime->ViewValue, 0);
+			$this->createddatetime->ViewCustomAttributes = "";
+
+			// modifiedby
+			$this->modifiedby->ViewValue = $this->modifiedby->CurrentValue;
+			$this->modifiedby->ViewValue = FormatNumber($this->modifiedby->ViewValue, 0, -2, -2, -2);
+			$this->modifiedby->ViewCustomAttributes = "";
+
+			// modifieddatetime
+			$this->modifieddatetime->ViewValue = $this->modifieddatetime->CurrentValue;
+			$this->modifieddatetime->ViewValue = FormatDateTime($this->modifieddatetime->ViewValue, 0);
+			$this->modifieddatetime->ViewCustomAttributes = "";
+
+			// TreatementStopDate
+			$this->TreatementStopDate->ViewValue = $this->TreatementStopDate->CurrentValue;
+			$this->TreatementStopDate->ViewValue = FormatDateTime($this->TreatementStopDate->ViewValue, 7);
+			$this->TreatementStopDate->ViewCustomAttributes = "";
+
+			// TypePatient
+			$this->TypePatient->ViewValue = $this->TypePatient->CurrentValue;
+			$this->TypePatient->ViewCustomAttributes = "";
+
+			// Treatment
+			if (strval($this->Treatment->CurrentValue) <> "") {
+				$this->Treatment->ViewValue = $this->Treatment->optionCaption($this->Treatment->CurrentValue);
+			} else {
+				$this->Treatment->ViewValue = NULL;
+			}
+			$this->Treatment->ViewCustomAttributes = "";
+
+			// TreatmentTec
+			$this->TreatmentTec->ViewValue = $this->TreatmentTec->CurrentValue;
+			$this->TreatmentTec->ViewCustomAttributes = "";
+
+			// TypeOfCycle
+			if (strval($this->TypeOfCycle->CurrentValue) <> "") {
+				$this->TypeOfCycle->ViewValue = $this->TypeOfCycle->optionCaption($this->TypeOfCycle->CurrentValue);
+			} else {
+				$this->TypeOfCycle->ViewValue = NULL;
+			}
+			$this->TypeOfCycle->ViewCustomAttributes = "";
+
+			// SpermOrgin
+			if (strval($this->SpermOrgin->CurrentValue) <> "") {
+				$this->SpermOrgin->ViewValue = $this->SpermOrgin->optionCaption($this->SpermOrgin->CurrentValue);
+			} else {
+				$this->SpermOrgin->ViewValue = NULL;
+			}
+			$this->SpermOrgin->ViewCustomAttributes = "";
+
+			// State
+			if (strval($this->State->CurrentValue) <> "") {
+				$this->State->ViewValue = $this->State->optionCaption($this->State->CurrentValue);
+			} else {
+				$this->State->ViewValue = NULL;
+			}
+			$this->State->ViewCustomAttributes = "";
+
+			// Origin
+			if (strval($this->Origin->CurrentValue) <> "") {
+				$this->Origin->ViewValue = $this->Origin->optionCaption($this->Origin->CurrentValue);
+			} else {
+				$this->Origin->ViewValue = NULL;
+			}
+			$this->Origin->ViewCustomAttributes = "";
+
+			// MACS
+			if (strval($this->MACS->CurrentValue) <> "") {
+				$this->MACS->ViewValue = $this->MACS->optionCaption($this->MACS->CurrentValue);
+			} else {
+				$this->MACS->ViewValue = NULL;
+			}
+			$this->MACS->ViewCustomAttributes = "";
+
+			// Technique
+			$this->Technique->ViewValue = $this->Technique->CurrentValue;
+			$this->Technique->ViewCustomAttributes = "";
+
+			// PgdPlanning
+			if (strval($this->PgdPlanning->CurrentValue) <> "") {
+				$this->PgdPlanning->ViewValue = $this->PgdPlanning->optionCaption($this->PgdPlanning->CurrentValue);
+			} else {
+				$this->PgdPlanning->ViewValue = NULL;
+			}
+			$this->PgdPlanning->ViewCustomAttributes = "";
+
+			// IMSI
+			$this->IMSI->ViewValue = $this->IMSI->CurrentValue;
+			$this->IMSI->ViewCustomAttributes = "";
+
+			// SequentialCulture
+			$this->SequentialCulture->ViewValue = $this->SequentialCulture->CurrentValue;
+			$this->SequentialCulture->ViewCustomAttributes = "";
+
+			// TimeLapse
+			$this->TimeLapse->ViewValue = $this->TimeLapse->CurrentValue;
+			$this->TimeLapse->ViewCustomAttributes = "";
+
+			// AH
+			$this->AH->ViewValue = $this->AH->CurrentValue;
+			$this->AH->ViewCustomAttributes = "";
+
+			// Weight
+			$this->Weight->ViewValue = $this->Weight->CurrentValue;
+			$this->Weight->ViewCustomAttributes = "";
+
+			// BMI
+			$this->BMI->ViewValue = $this->BMI->CurrentValue;
+			$this->BMI->ViewCustomAttributes = "";
+
+			// MaleIndications
+			if (strval($this->MaleIndications->CurrentValue) <> "") {
+				$this->MaleIndications->ViewValue = $this->MaleIndications->optionCaption($this->MaleIndications->CurrentValue);
+			} else {
+				$this->MaleIndications->ViewValue = NULL;
+			}
+			$this->MaleIndications->ViewCustomAttributes = "";
+
+			// FemaleIndications
+			if (strval($this->FemaleIndications->CurrentValue) <> "") {
+				$this->FemaleIndications->ViewValue = $this->FemaleIndications->optionCaption($this->FemaleIndications->CurrentValue);
+			} else {
+				$this->FemaleIndications->ViewValue = NULL;
+			}
+			$this->FemaleIndications->ViewCustomAttributes = "";
+
+			// UseOfThe
+			$this->UseOfThe->ViewValue = $this->UseOfThe->CurrentValue;
+			$this->UseOfThe->ViewCustomAttributes = "";
+
+			// Ectopic
+			$this->Ectopic->ViewValue = $this->Ectopic->CurrentValue;
+			$this->Ectopic->ViewCustomAttributes = "";
+
+			// Heterotopic
+			if (strval($this->Heterotopic->CurrentValue) <> "") {
+				$this->Heterotopic->ViewValue = $this->Heterotopic->optionCaption($this->Heterotopic->CurrentValue);
+			} else {
+				$this->Heterotopic->ViewValue = NULL;
+			}
+			$this->Heterotopic->ViewCustomAttributes = "";
+
+			// TransferDFE
+			if (strval($this->TransferDFE->CurrentValue) <> "") {
+				$this->TransferDFE->ViewValue = new OptionValues();
+				$arwrk = explode(",", strval($this->TransferDFE->CurrentValue));
+				$cnt = count($arwrk);
+				for ($ari = 0; $ari < $cnt; $ari++)
+					$this->TransferDFE->ViewValue->add($this->TransferDFE->optionCaption(trim($arwrk[$ari])));
+			} else {
+				$this->TransferDFE->ViewValue = NULL;
+			}
+			$this->TransferDFE->ViewCustomAttributes = "";
+
+			// Evolutive
+			$this->Evolutive->ViewValue = $this->Evolutive->CurrentValue;
+			$this->Evolutive->ViewCustomAttributes = "";
+
+			// Number
+			$this->Number->ViewValue = $this->Number->CurrentValue;
+			$this->Number->ViewCustomAttributes = "";
+
+			// SequentialCult
+			$this->SequentialCult->ViewValue = $this->SequentialCult->CurrentValue;
+			$this->SequentialCult->ViewCustomAttributes = "";
+
+			// TineLapse
+			if (strval($this->TineLapse->CurrentValue) <> "") {
+				$this->TineLapse->ViewValue = $this->TineLapse->optionCaption($this->TineLapse->CurrentValue);
+			} else {
+				$this->TineLapse->ViewValue = NULL;
+			}
+			$this->TineLapse->ViewCustomAttributes = "";
+
+			// PatientName
+			$this->PatientName->ViewValue = $this->PatientName->CurrentValue;
+			$this->PatientName->ViewCustomAttributes = "";
+
+			// PatientID
+			$this->PatientID->ViewValue = $this->PatientID->CurrentValue;
+			$this->PatientID->ViewCustomAttributes = "";
+
+			// PartnerName
+			$this->PartnerName->ViewValue = $this->PartnerName->CurrentValue;
+			$this->PartnerName->ViewCustomAttributes = "";
+
+			// PartnerID
+			$this->PartnerID->ViewValue = $this->PartnerID->CurrentValue;
+			$this->PartnerID->ViewCustomAttributes = "";
+
+			// WifeCell
+			$this->WifeCell->ViewValue = $this->WifeCell->CurrentValue;
+			$this->WifeCell->ViewCustomAttributes = "";
+
+			// HusbandCell
+			$this->HusbandCell->ViewValue = $this->HusbandCell->CurrentValue;
+			$this->HusbandCell->ViewCustomAttributes = "";
+
+			// CoupleID
+			$this->CoupleID->ViewValue = $this->CoupleID->CurrentValue;
+			$this->CoupleID->ViewCustomAttributes = "";
+
+			// RIDNO
+			$this->RIDNO->LinkCustomAttributes = "";
+			$this->RIDNO->HrefValue = "";
+			$this->RIDNO->TooltipValue = "";
+
+			// Name
+			$this->Name->LinkCustomAttributes = "";
+			$this->Name->HrefValue = "";
+			$this->Name->TooltipValue = "";
+
+			// TreatmentStartDate
+			$this->TreatmentStartDate->LinkCustomAttributes = "";
+			$this->TreatmentStartDate->HrefValue = "";
+			$this->TreatmentStartDate->TooltipValue = "";
+
+			// Age
+			$this->Age->LinkCustomAttributes = "";
+			$this->Age->HrefValue = "";
+			$this->Age->TooltipValue = "";
+
+			// treatment_status
+			$this->treatment_status->LinkCustomAttributes = "";
+			$this->treatment_status->HrefValue = "";
+			$this->treatment_status->TooltipValue = "";
+
+			// ARTCYCLE
+			$this->ARTCYCLE->LinkCustomAttributes = "";
+			$this->ARTCYCLE->HrefValue = "";
+			$this->ARTCYCLE->TooltipValue = "";
+
+			// IVFCycleNO
+			$this->IVFCycleNO->LinkCustomAttributes = "";
+			$this->IVFCycleNO->HrefValue = "";
+			$this->IVFCycleNO->TooltipValue = "";
+
+			// RESULT
+			$this->RESULT->LinkCustomAttributes = "";
+			$this->RESULT->HrefValue = "";
+			$this->RESULT->TooltipValue = "";
+
+			// status
+			$this->status->LinkCustomAttributes = "";
+			$this->status->HrefValue = "";
+			$this->status->TooltipValue = "";
+
+			// createdby
+			$this->createdby->LinkCustomAttributes = "";
+			$this->createdby->HrefValue = "";
+			$this->createdby->TooltipValue = "";
+
+			// createddatetime
+			$this->createddatetime->LinkCustomAttributes = "";
+			$this->createddatetime->HrefValue = "";
+			$this->createddatetime->TooltipValue = "";
+
+			// TreatementStopDate
+			$this->TreatementStopDate->LinkCustomAttributes = "";
+			$this->TreatementStopDate->HrefValue = "";
+			$this->TreatementStopDate->TooltipValue = "";
+
+			// TypePatient
+			$this->TypePatient->LinkCustomAttributes = "";
+			$this->TypePatient->HrefValue = "";
+			$this->TypePatient->TooltipValue = "";
+
+			// Treatment
+			$this->Treatment->LinkCustomAttributes = "";
+			$this->Treatment->HrefValue = "";
+			$this->Treatment->TooltipValue = "";
+
+			// TreatmentTec
+			$this->TreatmentTec->LinkCustomAttributes = "";
+			$this->TreatmentTec->HrefValue = "";
+			$this->TreatmentTec->TooltipValue = "";
+
+			// TypeOfCycle
+			$this->TypeOfCycle->LinkCustomAttributes = "";
+			$this->TypeOfCycle->HrefValue = "";
+			$this->TypeOfCycle->TooltipValue = "";
+
+			// SpermOrgin
+			$this->SpermOrgin->LinkCustomAttributes = "";
+			$this->SpermOrgin->HrefValue = "";
+			$this->SpermOrgin->TooltipValue = "";
+
+			// State
+			$this->State->LinkCustomAttributes = "";
+			$this->State->HrefValue = "";
+			$this->State->TooltipValue = "";
+
+			// Origin
+			$this->Origin->LinkCustomAttributes = "";
+			$this->Origin->HrefValue = "";
+			$this->Origin->TooltipValue = "";
+
+			// MACS
+			$this->MACS->LinkCustomAttributes = "";
+			$this->MACS->HrefValue = "";
+			$this->MACS->TooltipValue = "";
+
+			// Technique
+			$this->Technique->LinkCustomAttributes = "";
+			$this->Technique->HrefValue = "";
+			$this->Technique->TooltipValue = "";
+
+			// PgdPlanning
+			$this->PgdPlanning->LinkCustomAttributes = "";
+			$this->PgdPlanning->HrefValue = "";
+			$this->PgdPlanning->TooltipValue = "";
+
+			// IMSI
+			$this->IMSI->LinkCustomAttributes = "";
+			$this->IMSI->HrefValue = "";
+			$this->IMSI->TooltipValue = "";
+
+			// SequentialCulture
+			$this->SequentialCulture->LinkCustomAttributes = "";
+			$this->SequentialCulture->HrefValue = "";
+			$this->SequentialCulture->TooltipValue = "";
+
+			// TimeLapse
+			$this->TimeLapse->LinkCustomAttributes = "";
+			$this->TimeLapse->HrefValue = "";
+			$this->TimeLapse->TooltipValue = "";
+
+			// AH
+			$this->AH->LinkCustomAttributes = "";
+			$this->AH->HrefValue = "";
+			$this->AH->TooltipValue = "";
+
+			// Weight
+			$this->Weight->LinkCustomAttributes = "";
+			$this->Weight->HrefValue = "";
+			$this->Weight->TooltipValue = "";
+
+			// BMI
+			$this->BMI->LinkCustomAttributes = "";
+			$this->BMI->HrefValue = "";
+			$this->BMI->TooltipValue = "";
+
+			// MaleIndications
+			$this->MaleIndications->LinkCustomAttributes = "";
+			$this->MaleIndications->HrefValue = "";
+			$this->MaleIndications->TooltipValue = "";
+
+			// FemaleIndications
+			$this->FemaleIndications->LinkCustomAttributes = "";
+			$this->FemaleIndications->HrefValue = "";
+			$this->FemaleIndications->TooltipValue = "";
+
+			// UseOfThe
+			$this->UseOfThe->LinkCustomAttributes = "";
+			$this->UseOfThe->HrefValue = "";
+			$this->UseOfThe->TooltipValue = "";
+
+			// Ectopic
+			$this->Ectopic->LinkCustomAttributes = "";
+			$this->Ectopic->HrefValue = "";
+			$this->Ectopic->TooltipValue = "";
+
+			// Heterotopic
+			$this->Heterotopic->LinkCustomAttributes = "";
+			$this->Heterotopic->HrefValue = "";
+			$this->Heterotopic->TooltipValue = "";
+
+			// TransferDFE
+			$this->TransferDFE->LinkCustomAttributes = "";
+			$this->TransferDFE->HrefValue = "";
+			$this->TransferDFE->TooltipValue = "";
+
+			// Evolutive
+			$this->Evolutive->LinkCustomAttributes = "";
+			$this->Evolutive->HrefValue = "";
+			$this->Evolutive->TooltipValue = "";
+
+			// Number
+			$this->Number->LinkCustomAttributes = "";
+			$this->Number->HrefValue = "";
+			$this->Number->TooltipValue = "";
+
+			// SequentialCult
+			$this->SequentialCult->LinkCustomAttributes = "";
+			$this->SequentialCult->HrefValue = "";
+			$this->SequentialCult->TooltipValue = "";
+
+			// TineLapse
+			$this->TineLapse->LinkCustomAttributes = "";
+			$this->TineLapse->HrefValue = "";
+			$this->TineLapse->TooltipValue = "";
+
+			// PatientName
+			$this->PatientName->LinkCustomAttributes = "";
+			$this->PatientName->HrefValue = "";
+			$this->PatientName->TooltipValue = "";
+
+			// PatientID
+			$this->PatientID->LinkCustomAttributes = "";
+			$this->PatientID->HrefValue = "";
+			$this->PatientID->TooltipValue = "";
+
+			// PartnerName
+			$this->PartnerName->LinkCustomAttributes = "";
+			$this->PartnerName->HrefValue = "";
+			$this->PartnerName->TooltipValue = "";
+
+			// PartnerID
+			$this->PartnerID->LinkCustomAttributes = "";
+			$this->PartnerID->HrefValue = "";
+			$this->PartnerID->TooltipValue = "";
+
+			// WifeCell
+			$this->WifeCell->LinkCustomAttributes = "";
+			$this->WifeCell->HrefValue = "";
+			$this->WifeCell->TooltipValue = "";
+
+			// HusbandCell
+			$this->HusbandCell->LinkCustomAttributes = "";
+			$this->HusbandCell->HrefValue = "";
+			$this->HusbandCell->TooltipValue = "";
+
+			// CoupleID
+			$this->CoupleID->LinkCustomAttributes = "";
+			$this->CoupleID->HrefValue = "";
+			$this->CoupleID->TooltipValue = "";
+		} elseif ($this->RowType == ROWTYPE_ADD) { // Add row
+
+			// RIDNO
+			$this->RIDNO->EditAttrs["class"] = "form-control";
+			$this->RIDNO->EditCustomAttributes = "";
+			if ($this->RIDNO->getSessionValue() <> "") {
+				$this->RIDNO->CurrentValue = $this->RIDNO->getSessionValue();
+			$this->RIDNO->ViewValue = $this->RIDNO->CurrentValue;
+			$this->RIDNO->ViewValue = FormatNumber($this->RIDNO->ViewValue, 0, -2, -2, -2);
+			$this->RIDNO->ViewCustomAttributes = "";
+			} else {
+			$this->RIDNO->EditValue = HtmlEncode($this->RIDNO->CurrentValue);
+			$this->RIDNO->PlaceHolder = RemoveHtml($this->RIDNO->caption());
+			}
+
+			// Name
+			$this->Name->EditAttrs["class"] = "form-control";
+			$this->Name->EditCustomAttributes = "";
+			if ($this->Name->getSessionValue() <> "") {
+				$this->Name->CurrentValue = $this->Name->getSessionValue();
+			$this->Name->ViewValue = $this->Name->CurrentValue;
+			$this->Name->ViewCustomAttributes = "";
+			} else {
+			if (REMOVE_XSS)
+				$this->Name->CurrentValue = HtmlDecode($this->Name->CurrentValue);
+			$this->Name->EditValue = HtmlEncode($this->Name->CurrentValue);
+			$this->Name->PlaceHolder = RemoveHtml($this->Name->caption());
+			}
+
+			// TreatmentStartDate
+			$this->TreatmentStartDate->EditAttrs["class"] = "form-control";
+			$this->TreatmentStartDate->EditCustomAttributes = "";
+			$this->TreatmentStartDate->EditValue = HtmlEncode(FormatDateTime($this->TreatmentStartDate->CurrentValue, 7));
+			$this->TreatmentStartDate->PlaceHolder = RemoveHtml($this->TreatmentStartDate->caption());
+
+			// Age
+			$this->Age->EditAttrs["class"] = "form-control";
+			$this->Age->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Age->CurrentValue = HtmlDecode($this->Age->CurrentValue);
+			$this->Age->EditValue = HtmlEncode($this->Age->CurrentValue);
+			$this->Age->PlaceHolder = RemoveHtml($this->Age->caption());
+
+			// treatment_status
+			$this->treatment_status->EditAttrs["class"] = "form-control";
+			$this->treatment_status->EditCustomAttributes = "";
+			$this->treatment_status->EditValue = $this->treatment_status->options(TRUE);
+
+			// ARTCYCLE
+			$this->ARTCYCLE->EditCustomAttributes = "";
+			$this->ARTCYCLE->EditValue = $this->ARTCYCLE->options(FALSE);
+
+			// IVFCycleNO
+			$this->IVFCycleNO->EditAttrs["class"] = "form-control";
+			$this->IVFCycleNO->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->IVFCycleNO->CurrentValue = HtmlDecode($this->IVFCycleNO->CurrentValue);
+			$this->IVFCycleNO->EditValue = HtmlEncode($this->IVFCycleNO->CurrentValue);
+			$this->IVFCycleNO->PlaceHolder = RemoveHtml($this->IVFCycleNO->caption());
+
+			// RESULT
+			$this->RESULT->EditAttrs["class"] = "form-control";
+			$this->RESULT->EditCustomAttributes = "";
+			$this->RESULT->EditValue = $this->RESULT->options(TRUE);
+
+			// status
+			$this->status->EditAttrs["class"] = "form-control";
+			$this->status->EditCustomAttributes = "";
+			$curVal = trim(strval($this->status->CurrentValue));
+			if ($curVal <> "")
+				$this->status->ViewValue = $this->status->lookupCacheOption($curVal);
+			else
+				$this->status->ViewValue = $this->status->Lookup !== NULL && is_array($this->status->Lookup->Options) ? $curVal : NULL;
+			if ($this->status->ViewValue !== NULL) { // Load from cache
+				$this->status->EditValue = array_values($this->status->Lookup->Options);
+			} else { // Lookup from database
+				if ($curVal == "") {
+					$filterWrk = "0=1";
+				} else {
+					$filterWrk = "`id`" . SearchString("=", $this->status->CurrentValue, DATATYPE_NUMBER, "");
+				}
+				$sqlWrk = $this->status->Lookup->getSql(TRUE, $filterWrk, '', $this);
+				$rswrk = Conn()->execute($sqlWrk);
+				$arwrk = ($rswrk) ? $rswrk->GetRows() : array();
+				if ($rswrk) $rswrk->Close();
+				$this->status->EditValue = $arwrk;
+			}
+
+			// createdby
+			// createddatetime
+			// TreatementStopDate
+
+			$this->TreatementStopDate->EditAttrs["class"] = "form-control";
+			$this->TreatementStopDate->EditCustomAttributes = "";
+			$this->TreatementStopDate->EditValue = HtmlEncode(FormatDateTime($this->TreatementStopDate->CurrentValue, 7));
+			$this->TreatementStopDate->PlaceHolder = RemoveHtml($this->TreatementStopDate->caption());
+
+			// TypePatient
+			$this->TypePatient->EditAttrs["class"] = "form-control";
+			$this->TypePatient->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->TypePatient->CurrentValue = HtmlDecode($this->TypePatient->CurrentValue);
+			$this->TypePatient->EditValue = HtmlEncode($this->TypePatient->CurrentValue);
+			$this->TypePatient->PlaceHolder = RemoveHtml($this->TypePatient->caption());
+
+			// Treatment
+			$this->Treatment->EditAttrs["class"] = "form-control";
+			$this->Treatment->EditCustomAttributes = "";
+			$this->Treatment->EditValue = $this->Treatment->options(TRUE);
+
+			// TreatmentTec
+			$this->TreatmentTec->EditAttrs["class"] = "form-control";
+			$this->TreatmentTec->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->TreatmentTec->CurrentValue = HtmlDecode($this->TreatmentTec->CurrentValue);
+			$this->TreatmentTec->EditValue = HtmlEncode($this->TreatmentTec->CurrentValue);
+			$this->TreatmentTec->PlaceHolder = RemoveHtml($this->TreatmentTec->caption());
+
+			// TypeOfCycle
+			$this->TypeOfCycle->EditCustomAttributes = "";
+			$this->TypeOfCycle->EditValue = $this->TypeOfCycle->options(FALSE);
+
+			// SpermOrgin
+			$this->SpermOrgin->EditAttrs["class"] = "form-control";
+			$this->SpermOrgin->EditCustomAttributes = "";
+			$this->SpermOrgin->EditValue = $this->SpermOrgin->options(TRUE);
+
+			// State
+			$this->State->EditAttrs["class"] = "form-control";
+			$this->State->EditCustomAttributes = "";
+			$this->State->EditValue = $this->State->options(TRUE);
+
+			// Origin
+			$this->Origin->EditAttrs["class"] = "form-control";
+			$this->Origin->EditCustomAttributes = "";
+			$this->Origin->EditValue = $this->Origin->options(TRUE);
+
+			// MACS
+			$this->MACS->EditCustomAttributes = "";
+			$this->MACS->EditValue = $this->MACS->options(FALSE);
+
+			// Technique
+			$this->Technique->EditAttrs["class"] = "form-control";
+			$this->Technique->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Technique->CurrentValue = HtmlDecode($this->Technique->CurrentValue);
+			$this->Technique->EditValue = HtmlEncode($this->Technique->CurrentValue);
+			$this->Technique->PlaceHolder = RemoveHtml($this->Technique->caption());
+
+			// PgdPlanning
+			$this->PgdPlanning->EditCustomAttributes = "";
+			$this->PgdPlanning->EditValue = $this->PgdPlanning->options(FALSE);
+
+			// IMSI
+			$this->IMSI->EditAttrs["class"] = "form-control";
+			$this->IMSI->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->IMSI->CurrentValue = HtmlDecode($this->IMSI->CurrentValue);
+			$this->IMSI->EditValue = HtmlEncode($this->IMSI->CurrentValue);
+			$this->IMSI->PlaceHolder = RemoveHtml($this->IMSI->caption());
+
+			// SequentialCulture
+			$this->SequentialCulture->EditAttrs["class"] = "form-control";
+			$this->SequentialCulture->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->SequentialCulture->CurrentValue = HtmlDecode($this->SequentialCulture->CurrentValue);
+			$this->SequentialCulture->EditValue = HtmlEncode($this->SequentialCulture->CurrentValue);
+			$this->SequentialCulture->PlaceHolder = RemoveHtml($this->SequentialCulture->caption());
+
+			// TimeLapse
+			$this->TimeLapse->EditAttrs["class"] = "form-control";
+			$this->TimeLapse->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->TimeLapse->CurrentValue = HtmlDecode($this->TimeLapse->CurrentValue);
+			$this->TimeLapse->EditValue = HtmlEncode($this->TimeLapse->CurrentValue);
+			$this->TimeLapse->PlaceHolder = RemoveHtml($this->TimeLapse->caption());
+
+			// AH
+			$this->AH->EditAttrs["class"] = "form-control";
+			$this->AH->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->AH->CurrentValue = HtmlDecode($this->AH->CurrentValue);
+			$this->AH->EditValue = HtmlEncode($this->AH->CurrentValue);
+			$this->AH->PlaceHolder = RemoveHtml($this->AH->caption());
+
+			// Weight
+			$this->Weight->EditAttrs["class"] = "form-control";
+			$this->Weight->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Weight->CurrentValue = HtmlDecode($this->Weight->CurrentValue);
+			$this->Weight->EditValue = HtmlEncode($this->Weight->CurrentValue);
+			$this->Weight->PlaceHolder = RemoveHtml($this->Weight->caption());
+
+			// BMI
+			$this->BMI->EditAttrs["class"] = "form-control";
+			$this->BMI->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->BMI->CurrentValue = HtmlDecode($this->BMI->CurrentValue);
+			$this->BMI->EditValue = HtmlEncode($this->BMI->CurrentValue);
+			$this->BMI->PlaceHolder = RemoveHtml($this->BMI->caption());
+
+			// MaleIndications
+			$this->MaleIndications->EditAttrs["class"] = "form-control";
+			$this->MaleIndications->EditCustomAttributes = "";
+			$this->MaleIndications->EditValue = $this->MaleIndications->options(TRUE);
+
+			// FemaleIndications
+			$this->FemaleIndications->EditAttrs["class"] = "form-control";
+			$this->FemaleIndications->EditCustomAttributes = "";
+			$this->FemaleIndications->EditValue = $this->FemaleIndications->options(TRUE);
+
+			// UseOfThe
+			$this->UseOfThe->EditAttrs["class"] = "form-control";
+			$this->UseOfThe->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->UseOfThe->CurrentValue = HtmlDecode($this->UseOfThe->CurrentValue);
+			$this->UseOfThe->EditValue = HtmlEncode($this->UseOfThe->CurrentValue);
+			$this->UseOfThe->PlaceHolder = RemoveHtml($this->UseOfThe->caption());
+
+			// Ectopic
+			$this->Ectopic->EditAttrs["class"] = "form-control";
+			$this->Ectopic->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Ectopic->CurrentValue = HtmlDecode($this->Ectopic->CurrentValue);
+			$this->Ectopic->EditValue = HtmlEncode($this->Ectopic->CurrentValue);
+			$this->Ectopic->PlaceHolder = RemoveHtml($this->Ectopic->caption());
+
+			// Heterotopic
+			$this->Heterotopic->EditAttrs["class"] = "form-control";
+			$this->Heterotopic->EditCustomAttributes = "";
+			$this->Heterotopic->EditValue = $this->Heterotopic->options(TRUE);
+
+			// TransferDFE
+			$this->TransferDFE->EditCustomAttributes = "";
+			$this->TransferDFE->EditValue = $this->TransferDFE->options(FALSE);
+
+			// Evolutive
+			$this->Evolutive->EditAttrs["class"] = "form-control";
+			$this->Evolutive->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Evolutive->CurrentValue = HtmlDecode($this->Evolutive->CurrentValue);
+			$this->Evolutive->EditValue = HtmlEncode($this->Evolutive->CurrentValue);
+			$this->Evolutive->PlaceHolder = RemoveHtml($this->Evolutive->caption());
+
+			// Number
+			$this->Number->EditAttrs["class"] = "form-control";
+			$this->Number->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Number->CurrentValue = HtmlDecode($this->Number->CurrentValue);
+			$this->Number->EditValue = HtmlEncode($this->Number->CurrentValue);
+			$this->Number->PlaceHolder = RemoveHtml($this->Number->caption());
+
+			// SequentialCult
+			$this->SequentialCult->EditAttrs["class"] = "form-control";
+			$this->SequentialCult->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->SequentialCult->CurrentValue = HtmlDecode($this->SequentialCult->CurrentValue);
+			$this->SequentialCult->EditValue = HtmlEncode($this->SequentialCult->CurrentValue);
+			$this->SequentialCult->PlaceHolder = RemoveHtml($this->SequentialCult->caption());
+
+			// TineLapse
+			$this->TineLapse->EditAttrs["class"] = "form-control";
+			$this->TineLapse->EditCustomAttributes = "";
+			$this->TineLapse->EditValue = $this->TineLapse->options(TRUE);
+
+			// PatientName
+			$this->PatientName->EditAttrs["class"] = "form-control";
+			$this->PatientName->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->PatientName->CurrentValue = HtmlDecode($this->PatientName->CurrentValue);
+			$this->PatientName->EditValue = HtmlEncode($this->PatientName->CurrentValue);
+			$this->PatientName->PlaceHolder = RemoveHtml($this->PatientName->caption());
+
+			// PatientID
+			$this->PatientID->EditAttrs["class"] = "form-control";
+			$this->PatientID->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->PatientID->CurrentValue = HtmlDecode($this->PatientID->CurrentValue);
+			$this->PatientID->EditValue = HtmlEncode($this->PatientID->CurrentValue);
+			$this->PatientID->PlaceHolder = RemoveHtml($this->PatientID->caption());
+
+			// PartnerName
+			$this->PartnerName->EditAttrs["class"] = "form-control";
+			$this->PartnerName->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->PartnerName->CurrentValue = HtmlDecode($this->PartnerName->CurrentValue);
+			$this->PartnerName->EditValue = HtmlEncode($this->PartnerName->CurrentValue);
+			$this->PartnerName->PlaceHolder = RemoveHtml($this->PartnerName->caption());
+
+			// PartnerID
+			$this->PartnerID->EditAttrs["class"] = "form-control";
+			$this->PartnerID->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->PartnerID->CurrentValue = HtmlDecode($this->PartnerID->CurrentValue);
+			$this->PartnerID->EditValue = HtmlEncode($this->PartnerID->CurrentValue);
+			$this->PartnerID->PlaceHolder = RemoveHtml($this->PartnerID->caption());
+
+			// WifeCell
+			$this->WifeCell->EditAttrs["class"] = "form-control";
+			$this->WifeCell->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->WifeCell->CurrentValue = HtmlDecode($this->WifeCell->CurrentValue);
+			$this->WifeCell->EditValue = HtmlEncode($this->WifeCell->CurrentValue);
+			$this->WifeCell->PlaceHolder = RemoveHtml($this->WifeCell->caption());
+
+			// HusbandCell
+			$this->HusbandCell->EditAttrs["class"] = "form-control";
+			$this->HusbandCell->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->HusbandCell->CurrentValue = HtmlDecode($this->HusbandCell->CurrentValue);
+			$this->HusbandCell->EditValue = HtmlEncode($this->HusbandCell->CurrentValue);
+			$this->HusbandCell->PlaceHolder = RemoveHtml($this->HusbandCell->caption());
+
+			// CoupleID
+			$this->CoupleID->EditAttrs["class"] = "form-control";
+			$this->CoupleID->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->CoupleID->CurrentValue = HtmlDecode($this->CoupleID->CurrentValue);
+			$this->CoupleID->EditValue = HtmlEncode($this->CoupleID->CurrentValue);
+			$this->CoupleID->PlaceHolder = RemoveHtml($this->CoupleID->caption());
+
+			// Add refer script
+			// RIDNO
+
+			$this->RIDNO->LinkCustomAttributes = "";
+			$this->RIDNO->HrefValue = "";
+
+			// Name
+			$this->Name->LinkCustomAttributes = "";
+			$this->Name->HrefValue = "";
+
+			// TreatmentStartDate
+			$this->TreatmentStartDate->LinkCustomAttributes = "";
+			$this->TreatmentStartDate->HrefValue = "";
+
+			// Age
+			$this->Age->LinkCustomAttributes = "";
+			$this->Age->HrefValue = "";
+
+			// treatment_status
+			$this->treatment_status->LinkCustomAttributes = "";
+			$this->treatment_status->HrefValue = "";
+
+			// ARTCYCLE
+			$this->ARTCYCLE->LinkCustomAttributes = "";
+			$this->ARTCYCLE->HrefValue = "";
+
+			// IVFCycleNO
+			$this->IVFCycleNO->LinkCustomAttributes = "";
+			$this->IVFCycleNO->HrefValue = "";
+
+			// RESULT
+			$this->RESULT->LinkCustomAttributes = "";
+			$this->RESULT->HrefValue = "";
+
+			// status
+			$this->status->LinkCustomAttributes = "";
+			$this->status->HrefValue = "";
+
+			// createdby
+			$this->createdby->LinkCustomAttributes = "";
+			$this->createdby->HrefValue = "";
+
+			// createddatetime
+			$this->createddatetime->LinkCustomAttributes = "";
+			$this->createddatetime->HrefValue = "";
+
+			// TreatementStopDate
+			$this->TreatementStopDate->LinkCustomAttributes = "";
+			$this->TreatementStopDate->HrefValue = "";
+
+			// TypePatient
+			$this->TypePatient->LinkCustomAttributes = "";
+			$this->TypePatient->HrefValue = "";
+
+			// Treatment
+			$this->Treatment->LinkCustomAttributes = "";
+			$this->Treatment->HrefValue = "";
+
+			// TreatmentTec
+			$this->TreatmentTec->LinkCustomAttributes = "";
+			$this->TreatmentTec->HrefValue = "";
+
+			// TypeOfCycle
+			$this->TypeOfCycle->LinkCustomAttributes = "";
+			$this->TypeOfCycle->HrefValue = "";
+
+			// SpermOrgin
+			$this->SpermOrgin->LinkCustomAttributes = "";
+			$this->SpermOrgin->HrefValue = "";
+
+			// State
+			$this->State->LinkCustomAttributes = "";
+			$this->State->HrefValue = "";
+
+			// Origin
+			$this->Origin->LinkCustomAttributes = "";
+			$this->Origin->HrefValue = "";
+
+			// MACS
+			$this->MACS->LinkCustomAttributes = "";
+			$this->MACS->HrefValue = "";
+
+			// Technique
+			$this->Technique->LinkCustomAttributes = "";
+			$this->Technique->HrefValue = "";
+
+			// PgdPlanning
+			$this->PgdPlanning->LinkCustomAttributes = "";
+			$this->PgdPlanning->HrefValue = "";
+
+			// IMSI
+			$this->IMSI->LinkCustomAttributes = "";
+			$this->IMSI->HrefValue = "";
+
+			// SequentialCulture
+			$this->SequentialCulture->LinkCustomAttributes = "";
+			$this->SequentialCulture->HrefValue = "";
+
+			// TimeLapse
+			$this->TimeLapse->LinkCustomAttributes = "";
+			$this->TimeLapse->HrefValue = "";
+
+			// AH
+			$this->AH->LinkCustomAttributes = "";
+			$this->AH->HrefValue = "";
+
+			// Weight
+			$this->Weight->LinkCustomAttributes = "";
+			$this->Weight->HrefValue = "";
+
+			// BMI
+			$this->BMI->LinkCustomAttributes = "";
+			$this->BMI->HrefValue = "";
+
+			// MaleIndications
+			$this->MaleIndications->LinkCustomAttributes = "";
+			$this->MaleIndications->HrefValue = "";
+
+			// FemaleIndications
+			$this->FemaleIndications->LinkCustomAttributes = "";
+			$this->FemaleIndications->HrefValue = "";
+
+			// UseOfThe
+			$this->UseOfThe->LinkCustomAttributes = "";
+			$this->UseOfThe->HrefValue = "";
+
+			// Ectopic
+			$this->Ectopic->LinkCustomAttributes = "";
+			$this->Ectopic->HrefValue = "";
+
+			// Heterotopic
+			$this->Heterotopic->LinkCustomAttributes = "";
+			$this->Heterotopic->HrefValue = "";
+
+			// TransferDFE
+			$this->TransferDFE->LinkCustomAttributes = "";
+			$this->TransferDFE->HrefValue = "";
+
+			// Evolutive
+			$this->Evolutive->LinkCustomAttributes = "";
+			$this->Evolutive->HrefValue = "";
+
+			// Number
+			$this->Number->LinkCustomAttributes = "";
+			$this->Number->HrefValue = "";
+
+			// SequentialCult
+			$this->SequentialCult->LinkCustomAttributes = "";
+			$this->SequentialCult->HrefValue = "";
+
+			// TineLapse
+			$this->TineLapse->LinkCustomAttributes = "";
+			$this->TineLapse->HrefValue = "";
+
+			// PatientName
+			$this->PatientName->LinkCustomAttributes = "";
+			$this->PatientName->HrefValue = "";
+
+			// PatientID
+			$this->PatientID->LinkCustomAttributes = "";
+			$this->PatientID->HrefValue = "";
+
+			// PartnerName
+			$this->PartnerName->LinkCustomAttributes = "";
+			$this->PartnerName->HrefValue = "";
+
+			// PartnerID
+			$this->PartnerID->LinkCustomAttributes = "";
+			$this->PartnerID->HrefValue = "";
+
+			// WifeCell
+			$this->WifeCell->LinkCustomAttributes = "";
+			$this->WifeCell->HrefValue = "";
+
+			// HusbandCell
+			$this->HusbandCell->LinkCustomAttributes = "";
+			$this->HusbandCell->HrefValue = "";
+
+			// CoupleID
+			$this->CoupleID->LinkCustomAttributes = "";
+			$this->CoupleID->HrefValue = "";
+		}
+		if ($this->RowType == ROWTYPE_ADD || $this->RowType == ROWTYPE_EDIT || $this->RowType == ROWTYPE_SEARCH) // Add/Edit/Search row
+			$this->setupFieldTitles();
+
+		// Call Row Rendered event
+		if ($this->RowType <> ROWTYPE_AGGREGATEINIT)
+			$this->Row_Rendered();
+
+		// Save data for Custom Template
+		if ($this->RowType == ROWTYPE_VIEW || $this->RowType == ROWTYPE_EDIT || $this->RowType == ROWTYPE_ADD)
+			$this->Rows[] = $this->customTemplateFieldValues();
+	}
+
+	// Validate form
+	protected function validateForm()
+	{
+		global $Language, $FormError;
+
+		// Initialize form error message
+		$FormError = "";
+
+		// Check if validation required
+		if (!SERVER_VALIDATE)
+			return ($FormError == "");
+		if ($this->id->Required) {
+			if (!$this->id->IsDetailKey && $this->id->FormValue != NULL && $this->id->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->id->caption(), $this->id->RequiredErrorMessage));
+			}
+		}
+		if ($this->RIDNO->Required) {
+			if (!$this->RIDNO->IsDetailKey && $this->RIDNO->FormValue != NULL && $this->RIDNO->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->RIDNO->caption(), $this->RIDNO->RequiredErrorMessage));
+			}
+		}
+		if (!CheckInteger($this->RIDNO->FormValue)) {
+			AddMessage($FormError, $this->RIDNO->errorMessage());
+		}
+		if ($this->Name->Required) {
+			if (!$this->Name->IsDetailKey && $this->Name->FormValue != NULL && $this->Name->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Name->caption(), $this->Name->RequiredErrorMessage));
+			}
+		}
+		if ($this->TreatmentStartDate->Required) {
+			if (!$this->TreatmentStartDate->IsDetailKey && $this->TreatmentStartDate->FormValue != NULL && $this->TreatmentStartDate->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->TreatmentStartDate->caption(), $this->TreatmentStartDate->RequiredErrorMessage));
+			}
+		}
+		if (!CheckEuroDate($this->TreatmentStartDate->FormValue)) {
+			AddMessage($FormError, $this->TreatmentStartDate->errorMessage());
+		}
+		if ($this->Age->Required) {
+			if (!$this->Age->IsDetailKey && $this->Age->FormValue != NULL && $this->Age->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Age->caption(), $this->Age->RequiredErrorMessage));
+			}
+		}
+		if ($this->treatment_status->Required) {
+			if (!$this->treatment_status->IsDetailKey && $this->treatment_status->FormValue != NULL && $this->treatment_status->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->treatment_status->caption(), $this->treatment_status->RequiredErrorMessage));
+			}
+		}
+		if ($this->ARTCYCLE->Required) {
+			if ($this->ARTCYCLE->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->ARTCYCLE->caption(), $this->ARTCYCLE->RequiredErrorMessage));
+			}
+		}
+		if ($this->IVFCycleNO->Required) {
+			if (!$this->IVFCycleNO->IsDetailKey && $this->IVFCycleNO->FormValue != NULL && $this->IVFCycleNO->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->IVFCycleNO->caption(), $this->IVFCycleNO->RequiredErrorMessage));
+			}
+		}
+		if ($this->RESULT->Required) {
+			if (!$this->RESULT->IsDetailKey && $this->RESULT->FormValue != NULL && $this->RESULT->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->RESULT->caption(), $this->RESULT->RequiredErrorMessage));
+			}
+		}
+		if ($this->status->Required) {
+			if (!$this->status->IsDetailKey && $this->status->FormValue != NULL && $this->status->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->status->caption(), $this->status->RequiredErrorMessage));
+			}
+		}
+		if ($this->createdby->Required) {
+			if (!$this->createdby->IsDetailKey && $this->createdby->FormValue != NULL && $this->createdby->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->createdby->caption(), $this->createdby->RequiredErrorMessage));
+			}
+		}
+		if ($this->createddatetime->Required) {
+			if (!$this->createddatetime->IsDetailKey && $this->createddatetime->FormValue != NULL && $this->createddatetime->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->createddatetime->caption(), $this->createddatetime->RequiredErrorMessage));
+			}
+		}
+		if ($this->modifiedby->Required) {
+			if (!$this->modifiedby->IsDetailKey && $this->modifiedby->FormValue != NULL && $this->modifiedby->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->modifiedby->caption(), $this->modifiedby->RequiredErrorMessage));
+			}
+		}
+		if ($this->modifieddatetime->Required) {
+			if (!$this->modifieddatetime->IsDetailKey && $this->modifieddatetime->FormValue != NULL && $this->modifieddatetime->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->modifieddatetime->caption(), $this->modifieddatetime->RequiredErrorMessage));
+			}
+		}
+		if ($this->TreatementStopDate->Required) {
+			if (!$this->TreatementStopDate->IsDetailKey && $this->TreatementStopDate->FormValue != NULL && $this->TreatementStopDate->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->TreatementStopDate->caption(), $this->TreatementStopDate->RequiredErrorMessage));
+			}
+		}
+		if (!CheckEuroDate($this->TreatementStopDate->FormValue)) {
+			AddMessage($FormError, $this->TreatementStopDate->errorMessage());
+		}
+		if ($this->TypePatient->Required) {
+			if (!$this->TypePatient->IsDetailKey && $this->TypePatient->FormValue != NULL && $this->TypePatient->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->TypePatient->caption(), $this->TypePatient->RequiredErrorMessage));
+			}
+		}
+		if ($this->Treatment->Required) {
+			if (!$this->Treatment->IsDetailKey && $this->Treatment->FormValue != NULL && $this->Treatment->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Treatment->caption(), $this->Treatment->RequiredErrorMessage));
+			}
+		}
+		if ($this->TreatmentTec->Required) {
+			if (!$this->TreatmentTec->IsDetailKey && $this->TreatmentTec->FormValue != NULL && $this->TreatmentTec->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->TreatmentTec->caption(), $this->TreatmentTec->RequiredErrorMessage));
+			}
+		}
+		if ($this->TypeOfCycle->Required) {
+			if ($this->TypeOfCycle->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->TypeOfCycle->caption(), $this->TypeOfCycle->RequiredErrorMessage));
+			}
+		}
+		if ($this->SpermOrgin->Required) {
+			if (!$this->SpermOrgin->IsDetailKey && $this->SpermOrgin->FormValue != NULL && $this->SpermOrgin->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->SpermOrgin->caption(), $this->SpermOrgin->RequiredErrorMessage));
+			}
+		}
+		if ($this->State->Required) {
+			if (!$this->State->IsDetailKey && $this->State->FormValue != NULL && $this->State->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->State->caption(), $this->State->RequiredErrorMessage));
+			}
+		}
+		if ($this->Origin->Required) {
+			if (!$this->Origin->IsDetailKey && $this->Origin->FormValue != NULL && $this->Origin->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Origin->caption(), $this->Origin->RequiredErrorMessage));
+			}
+		}
+		if ($this->MACS->Required) {
+			if ($this->MACS->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->MACS->caption(), $this->MACS->RequiredErrorMessage));
+			}
+		}
+		if ($this->Technique->Required) {
+			if (!$this->Technique->IsDetailKey && $this->Technique->FormValue != NULL && $this->Technique->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Technique->caption(), $this->Technique->RequiredErrorMessage));
+			}
+		}
+		if ($this->PgdPlanning->Required) {
+			if ($this->PgdPlanning->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->PgdPlanning->caption(), $this->PgdPlanning->RequiredErrorMessage));
+			}
+		}
+		if ($this->IMSI->Required) {
+			if (!$this->IMSI->IsDetailKey && $this->IMSI->FormValue != NULL && $this->IMSI->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->IMSI->caption(), $this->IMSI->RequiredErrorMessage));
+			}
+		}
+		if ($this->SequentialCulture->Required) {
+			if (!$this->SequentialCulture->IsDetailKey && $this->SequentialCulture->FormValue != NULL && $this->SequentialCulture->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->SequentialCulture->caption(), $this->SequentialCulture->RequiredErrorMessage));
+			}
+		}
+		if ($this->TimeLapse->Required) {
+			if (!$this->TimeLapse->IsDetailKey && $this->TimeLapse->FormValue != NULL && $this->TimeLapse->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->TimeLapse->caption(), $this->TimeLapse->RequiredErrorMessage));
+			}
+		}
+		if ($this->AH->Required) {
+			if (!$this->AH->IsDetailKey && $this->AH->FormValue != NULL && $this->AH->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->AH->caption(), $this->AH->RequiredErrorMessage));
+			}
+		}
+		if ($this->Weight->Required) {
+			if (!$this->Weight->IsDetailKey && $this->Weight->FormValue != NULL && $this->Weight->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Weight->caption(), $this->Weight->RequiredErrorMessage));
+			}
+		}
+		if ($this->BMI->Required) {
+			if (!$this->BMI->IsDetailKey && $this->BMI->FormValue != NULL && $this->BMI->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->BMI->caption(), $this->BMI->RequiredErrorMessage));
+			}
+		}
+		if ($this->MaleIndications->Required) {
+			if (!$this->MaleIndications->IsDetailKey && $this->MaleIndications->FormValue != NULL && $this->MaleIndications->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->MaleIndications->caption(), $this->MaleIndications->RequiredErrorMessage));
+			}
+		}
+		if ($this->FemaleIndications->Required) {
+			if (!$this->FemaleIndications->IsDetailKey && $this->FemaleIndications->FormValue != NULL && $this->FemaleIndications->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->FemaleIndications->caption(), $this->FemaleIndications->RequiredErrorMessage));
+			}
+		}
+		if ($this->UseOfThe->Required) {
+			if (!$this->UseOfThe->IsDetailKey && $this->UseOfThe->FormValue != NULL && $this->UseOfThe->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->UseOfThe->caption(), $this->UseOfThe->RequiredErrorMessage));
+			}
+		}
+		if ($this->Ectopic->Required) {
+			if (!$this->Ectopic->IsDetailKey && $this->Ectopic->FormValue != NULL && $this->Ectopic->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Ectopic->caption(), $this->Ectopic->RequiredErrorMessage));
+			}
+		}
+		if ($this->Heterotopic->Required) {
+			if (!$this->Heterotopic->IsDetailKey && $this->Heterotopic->FormValue != NULL && $this->Heterotopic->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Heterotopic->caption(), $this->Heterotopic->RequiredErrorMessage));
+			}
+		}
+		if ($this->TransferDFE->Required) {
+			if ($this->TransferDFE->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->TransferDFE->caption(), $this->TransferDFE->RequiredErrorMessage));
+			}
+		}
+		if ($this->Evolutive->Required) {
+			if (!$this->Evolutive->IsDetailKey && $this->Evolutive->FormValue != NULL && $this->Evolutive->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Evolutive->caption(), $this->Evolutive->RequiredErrorMessage));
+			}
+		}
+		if ($this->Number->Required) {
+			if (!$this->Number->IsDetailKey && $this->Number->FormValue != NULL && $this->Number->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Number->caption(), $this->Number->RequiredErrorMessage));
+			}
+		}
+		if ($this->SequentialCult->Required) {
+			if (!$this->SequentialCult->IsDetailKey && $this->SequentialCult->FormValue != NULL && $this->SequentialCult->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->SequentialCult->caption(), $this->SequentialCult->RequiredErrorMessage));
+			}
+		}
+		if ($this->TineLapse->Required) {
+			if (!$this->TineLapse->IsDetailKey && $this->TineLapse->FormValue != NULL && $this->TineLapse->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->TineLapse->caption(), $this->TineLapse->RequiredErrorMessage));
+			}
+		}
+		if ($this->PatientName->Required) {
+			if (!$this->PatientName->IsDetailKey && $this->PatientName->FormValue != NULL && $this->PatientName->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->PatientName->caption(), $this->PatientName->RequiredErrorMessage));
+			}
+		}
+		if ($this->PatientID->Required) {
+			if (!$this->PatientID->IsDetailKey && $this->PatientID->FormValue != NULL && $this->PatientID->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->PatientID->caption(), $this->PatientID->RequiredErrorMessage));
+			}
+		}
+		if ($this->PartnerName->Required) {
+			if (!$this->PartnerName->IsDetailKey && $this->PartnerName->FormValue != NULL && $this->PartnerName->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->PartnerName->caption(), $this->PartnerName->RequiredErrorMessage));
+			}
+		}
+		if ($this->PartnerID->Required) {
+			if (!$this->PartnerID->IsDetailKey && $this->PartnerID->FormValue != NULL && $this->PartnerID->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->PartnerID->caption(), $this->PartnerID->RequiredErrorMessage));
+			}
+		}
+		if ($this->WifeCell->Required) {
+			if (!$this->WifeCell->IsDetailKey && $this->WifeCell->FormValue != NULL && $this->WifeCell->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->WifeCell->caption(), $this->WifeCell->RequiredErrorMessage));
+			}
+		}
+		if ($this->HusbandCell->Required) {
+			if (!$this->HusbandCell->IsDetailKey && $this->HusbandCell->FormValue != NULL && $this->HusbandCell->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->HusbandCell->caption(), $this->HusbandCell->RequiredErrorMessage));
+			}
+		}
+		if ($this->CoupleID->Required) {
+			if (!$this->CoupleID->IsDetailKey && $this->CoupleID->FormValue != NULL && $this->CoupleID->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->CoupleID->caption(), $this->CoupleID->RequiredErrorMessage));
+			}
+		}
+
+		// Validate detail grid
+		$detailTblVar = explode(",", $this->getCurrentDetailTable());
+		if (in_array("ivf_outcome", $detailTblVar) && $GLOBALS["ivf_outcome"]->DetailAdd) {
+			if (!isset($GLOBALS["ivf_outcome_grid"]))
+				$GLOBALS["ivf_outcome_grid"] = new ivf_outcome_grid(); // Get detail page object
+			$GLOBALS["ivf_outcome_grid"]->validateGridForm();
+		}
+		if (in_array("ivf_stimulation_chart", $detailTblVar) && $GLOBALS["ivf_stimulation_chart"]->DetailAdd) {
+			if (!isset($GLOBALS["ivf_stimulation_chart_grid"]))
+				$GLOBALS["ivf_stimulation_chart_grid"] = new ivf_stimulation_chart_grid(); // Get detail page object
+			$GLOBALS["ivf_stimulation_chart_grid"]->validateGridForm();
+		}
+		if (in_array("ivf_semenanalysisreport", $detailTblVar) && $GLOBALS["ivf_semenanalysisreport"]->DetailAdd) {
+			if (!isset($GLOBALS["ivf_semenanalysisreport_grid"]))
+				$GLOBALS["ivf_semenanalysisreport_grid"] = new ivf_semenanalysisreport_grid(); // Get detail page object
+			$GLOBALS["ivf_semenanalysisreport_grid"]->validateGridForm();
+		}
+		if (in_array("ivf_embryology_chart", $detailTblVar) && $GLOBALS["ivf_embryology_chart"]->DetailAdd) {
+			if (!isset($GLOBALS["ivf_embryology_chart_grid"]))
+				$GLOBALS["ivf_embryology_chart_grid"] = new ivf_embryology_chart_grid(); // Get detail page object
+			$GLOBALS["ivf_embryology_chart_grid"]->validateGridForm();
+		}
+
+		// Return validate result
+		$validateForm = ($FormError == "");
+
+		// Call Form_CustomValidate event
+		$formCustomError = "";
+		$validateForm = $validateForm && $this->Form_CustomValidate($formCustomError);
+		if ($formCustomError <> "") {
+			AddMessage($FormError, $formCustomError);
+		}
+		return $validateForm;
+	}
+
+	// Add record
+	protected function addRow($rsold = NULL)
+	{
+		global $Language, $Security;
+		$conn = &$this->getConnection();
+
+		// Begin transaction
+		if ($this->getCurrentDetailTable() <> "")
+			$conn->beginTrans();
+
+		// Load db values from rsold
+		$this->loadDbValues($rsold);
+		if ($rsold) {
+		}
+		$rsnew = [];
+
+		// RIDNO
+		$this->RIDNO->setDbValueDef($rsnew, $this->RIDNO->CurrentValue, NULL, FALSE);
+
+		// Name
+		$this->Name->setDbValueDef($rsnew, $this->Name->CurrentValue, NULL, FALSE);
+
+		// TreatmentStartDate
+		$this->TreatmentStartDate->setDbValueDef($rsnew, UnFormatDateTime($this->TreatmentStartDate->CurrentValue, 7), NULL, FALSE);
+
+		// Age
+		$this->Age->setDbValueDef($rsnew, $this->Age->CurrentValue, NULL, FALSE);
+
+		// treatment_status
+		$this->treatment_status->setDbValueDef($rsnew, $this->treatment_status->CurrentValue, NULL, strval($this->treatment_status->CurrentValue) == "");
+
+		// ARTCYCLE
+		$this->ARTCYCLE->setDbValueDef($rsnew, $this->ARTCYCLE->CurrentValue, NULL, FALSE);
+
+		// IVFCycleNO
+		$this->IVFCycleNO->setDbValueDef($rsnew, $this->IVFCycleNO->CurrentValue, NULL, FALSE);
+
+		// RESULT
+		$this->RESULT->setDbValueDef($rsnew, $this->RESULT->CurrentValue, NULL, FALSE);
+
+		// status
+		$this->status->setDbValueDef($rsnew, $this->status->CurrentValue, NULL, FALSE);
+
+		// createdby
+		$this->createdby->setDbValueDef($rsnew, CurrentUserName(), NULL);
+		$rsnew['createdby'] = &$this->createdby->DbValue;
+
+		// createddatetime
+		$this->createddatetime->setDbValueDef($rsnew, CurrentDateTime(), NULL);
+		$rsnew['createddatetime'] = &$this->createddatetime->DbValue;
+
+		// TreatementStopDate
+		$this->TreatementStopDate->setDbValueDef($rsnew, UnFormatDateTime($this->TreatementStopDate->CurrentValue, 7), NULL, FALSE);
+
+		// TypePatient
+		$this->TypePatient->setDbValueDef($rsnew, $this->TypePatient->CurrentValue, NULL, FALSE);
+
+		// Treatment
+		$this->Treatment->setDbValueDef($rsnew, $this->Treatment->CurrentValue, NULL, FALSE);
+
+		// TreatmentTec
+		$this->TreatmentTec->setDbValueDef($rsnew, $this->TreatmentTec->CurrentValue, NULL, FALSE);
+
+		// TypeOfCycle
+		$this->TypeOfCycle->setDbValueDef($rsnew, $this->TypeOfCycle->CurrentValue, NULL, FALSE);
+
+		// SpermOrgin
+		$this->SpermOrgin->setDbValueDef($rsnew, $this->SpermOrgin->CurrentValue, NULL, FALSE);
+
+		// State
+		$this->State->setDbValueDef($rsnew, $this->State->CurrentValue, NULL, FALSE);
+
+		// Origin
+		$this->Origin->setDbValueDef($rsnew, $this->Origin->CurrentValue, NULL, FALSE);
+
+		// MACS
+		$this->MACS->setDbValueDef($rsnew, $this->MACS->CurrentValue, NULL, FALSE);
+
+		// Technique
+		$this->Technique->setDbValueDef($rsnew, $this->Technique->CurrentValue, NULL, FALSE);
+
+		// PgdPlanning
+		$this->PgdPlanning->setDbValueDef($rsnew, $this->PgdPlanning->CurrentValue, NULL, FALSE);
+
+		// IMSI
+		$this->IMSI->setDbValueDef($rsnew, $this->IMSI->CurrentValue, NULL, FALSE);
+
+		// SequentialCulture
+		$this->SequentialCulture->setDbValueDef($rsnew, $this->SequentialCulture->CurrentValue, NULL, FALSE);
+
+		// TimeLapse
+		$this->TimeLapse->setDbValueDef($rsnew, $this->TimeLapse->CurrentValue, NULL, FALSE);
+
+		// AH
+		$this->AH->setDbValueDef($rsnew, $this->AH->CurrentValue, NULL, FALSE);
+
+		// Weight
+		$this->Weight->setDbValueDef($rsnew, $this->Weight->CurrentValue, NULL, FALSE);
+
+		// BMI
+		$this->BMI->setDbValueDef($rsnew, $this->BMI->CurrentValue, NULL, FALSE);
+
+		// MaleIndications
+		$this->MaleIndications->setDbValueDef($rsnew, $this->MaleIndications->CurrentValue, NULL, FALSE);
+
+		// FemaleIndications
+		$this->FemaleIndications->setDbValueDef($rsnew, $this->FemaleIndications->CurrentValue, NULL, FALSE);
+
+		// UseOfThe
+		$this->UseOfThe->setDbValueDef($rsnew, $this->UseOfThe->CurrentValue, NULL, FALSE);
+
+		// Ectopic
+		$this->Ectopic->setDbValueDef($rsnew, $this->Ectopic->CurrentValue, NULL, FALSE);
+
+		// Heterotopic
+		$this->Heterotopic->setDbValueDef($rsnew, $this->Heterotopic->CurrentValue, NULL, FALSE);
+
+		// TransferDFE
+		$this->TransferDFE->setDbValueDef($rsnew, $this->TransferDFE->CurrentValue, NULL, FALSE);
+
+		// Evolutive
+		$this->Evolutive->setDbValueDef($rsnew, $this->Evolutive->CurrentValue, NULL, FALSE);
+
+		// Number
+		$this->Number->setDbValueDef($rsnew, $this->Number->CurrentValue, NULL, FALSE);
+
+		// SequentialCult
+		$this->SequentialCult->setDbValueDef($rsnew, $this->SequentialCult->CurrentValue, NULL, FALSE);
+
+		// TineLapse
+		$this->TineLapse->setDbValueDef($rsnew, $this->TineLapse->CurrentValue, NULL, FALSE);
+
+		// PatientName
+		$this->PatientName->setDbValueDef($rsnew, $this->PatientName->CurrentValue, NULL, FALSE);
+
+		// PatientID
+		$this->PatientID->setDbValueDef($rsnew, $this->PatientID->CurrentValue, NULL, FALSE);
+
+		// PartnerName
+		$this->PartnerName->setDbValueDef($rsnew, $this->PartnerName->CurrentValue, NULL, FALSE);
+
+		// PartnerID
+		$this->PartnerID->setDbValueDef($rsnew, $this->PartnerID->CurrentValue, NULL, FALSE);
+
+		// WifeCell
+		$this->WifeCell->setDbValueDef($rsnew, $this->WifeCell->CurrentValue, NULL, FALSE);
+
+		// HusbandCell
+		$this->HusbandCell->setDbValueDef($rsnew, $this->HusbandCell->CurrentValue, NULL, FALSE);
+
+		// CoupleID
+		$this->CoupleID->setDbValueDef($rsnew, $this->CoupleID->CurrentValue, NULL, FALSE);
+
+		// Call Row Inserting event
+		$rs = ($rsold) ? $rsold->fields : NULL;
+		$insertRow = $this->Row_Inserting($rs, $rsnew);
+		if ($insertRow) {
+			$conn->raiseErrorFn = $GLOBALS["ERROR_FUNC"];
+			$addRow = $this->insert($rsnew);
+			$conn->raiseErrorFn = '';
+			if ($addRow) {
+			}
+		} else {
+			if ($this->getSuccessMessage() <> "" || $this->getFailureMessage() <> "") {
+
+				// Use the message, do nothing
+			} elseif ($this->CancelMessage <> "") {
+				$this->setFailureMessage($this->CancelMessage);
+				$this->CancelMessage = "";
+			} else {
+				$this->setFailureMessage($Language->phrase("InsertCancelled"));
+			}
+			$addRow = FALSE;
+		}
+
+		// Add detail records
+		if ($addRow) {
+			$detailTblVar = explode(",", $this->getCurrentDetailTable());
+			if (in_array("ivf_outcome", $detailTblVar) && $GLOBALS["ivf_outcome"]->DetailAdd) {
+				$GLOBALS["ivf_outcome"]->RIDNO->setSessionValue($this->RIDNO->CurrentValue); // Set master key
+				$GLOBALS["ivf_outcome"]->Name->setSessionValue($this->Name->CurrentValue); // Set master key
+				$GLOBALS["ivf_outcome"]->TidNo->setSessionValue($this->id->CurrentValue); // Set master key
+				if (!isset($GLOBALS["ivf_outcome_grid"]))
+					$GLOBALS["ivf_outcome_grid"] = new ivf_outcome_grid(); // Get detail page object
+				$Security->loadCurrentUserLevel($this->ProjectID . "ivf_outcome"); // Load user level of detail table
+				$addRow = $GLOBALS["ivf_outcome_grid"]->gridInsert();
+				$Security->loadCurrentUserLevel($this->ProjectID . $this->TableName); // Restore user level of master table
+				if (!$addRow)
+					$GLOBALS["ivf_outcome"]->TidNo->setSessionValue(""); // Clear master key if insert failed
+			}
+			if (in_array("ivf_stimulation_chart", $detailTblVar) && $GLOBALS["ivf_stimulation_chart"]->DetailAdd) {
+				$GLOBALS["ivf_stimulation_chart"]->RIDNo->setSessionValue($this->RIDNO->CurrentValue); // Set master key
+				$GLOBALS["ivf_stimulation_chart"]->Name->setSessionValue($this->Name->CurrentValue); // Set master key
+				$GLOBALS["ivf_stimulation_chart"]->TidNo->setSessionValue($this->id->CurrentValue); // Set master key
+				if (!isset($GLOBALS["ivf_stimulation_chart_grid"]))
+					$GLOBALS["ivf_stimulation_chart_grid"] = new ivf_stimulation_chart_grid(); // Get detail page object
+				$Security->loadCurrentUserLevel($this->ProjectID . "ivf_stimulation_chart"); // Load user level of detail table
+				$addRow = $GLOBALS["ivf_stimulation_chart_grid"]->gridInsert();
+				$Security->loadCurrentUserLevel($this->ProjectID . $this->TableName); // Restore user level of master table
+				if (!$addRow)
+					$GLOBALS["ivf_stimulation_chart"]->TidNo->setSessionValue(""); // Clear master key if insert failed
+			}
+			if (in_array("ivf_semenanalysisreport", $detailTblVar) && $GLOBALS["ivf_semenanalysisreport"]->DetailAdd) {
+				$GLOBALS["ivf_semenanalysisreport"]->RIDNo->setSessionValue($this->RIDNO->CurrentValue); // Set master key
+				$GLOBALS["ivf_semenanalysisreport"]->PatientName->setSessionValue($this->Name->CurrentValue); // Set master key
+				$GLOBALS["ivf_semenanalysisreport"]->TidNo->setSessionValue($this->id->CurrentValue); // Set master key
+				if (!isset($GLOBALS["ivf_semenanalysisreport_grid"]))
+					$GLOBALS["ivf_semenanalysisreport_grid"] = new ivf_semenanalysisreport_grid(); // Get detail page object
+				$Security->loadCurrentUserLevel($this->ProjectID . "ivf_semenanalysisreport"); // Load user level of detail table
+				$addRow = $GLOBALS["ivf_semenanalysisreport_grid"]->gridInsert();
+				$Security->loadCurrentUserLevel($this->ProjectID . $this->TableName); // Restore user level of master table
+				if (!$addRow)
+					$GLOBALS["ivf_semenanalysisreport"]->TidNo->setSessionValue(""); // Clear master key if insert failed
+			}
+			if (in_array("ivf_embryology_chart", $detailTblVar) && $GLOBALS["ivf_embryology_chart"]->DetailAdd) {
+				$GLOBALS["ivf_embryology_chart"]->RIDNo->setSessionValue($this->RIDNO->CurrentValue); // Set master key
+				$GLOBALS["ivf_embryology_chart"]->Name->setSessionValue($this->Name->CurrentValue); // Set master key
+				$GLOBALS["ivf_embryology_chart"]->TidNo->setSessionValue($this->id->CurrentValue); // Set master key
+				if (!isset($GLOBALS["ivf_embryology_chart_grid"]))
+					$GLOBALS["ivf_embryology_chart_grid"] = new ivf_embryology_chart_grid(); // Get detail page object
+				$Security->loadCurrentUserLevel($this->ProjectID . "ivf_embryology_chart"); // Load user level of detail table
+				$addRow = $GLOBALS["ivf_embryology_chart_grid"]->gridInsert();
+				$Security->loadCurrentUserLevel($this->ProjectID . $this->TableName); // Restore user level of master table
+				if (!$addRow)
+					$GLOBALS["ivf_embryology_chart"]->TidNo->setSessionValue(""); // Clear master key if insert failed
+			}
+		}
+
+		// Commit/Rollback transaction
+		if ($this->getCurrentDetailTable() <> "") {
+			if ($addRow) {
+				$conn->commitTrans(); // Commit transaction
+			} else {
+				$conn->rollbackTrans(); // Rollback transaction
+			}
+		}
+		if ($addRow) {
+
+			// Call Row Inserted event
+			$rs = ($rsold) ? $rsold->fields : NULL;
+			$this->Row_Inserted($rs, $rsnew);
+		}
+
+		// Write JSON for API request
+		if (IsApi() && $addRow) {
+			$row = $this->getRecordsFromRecordset([$rsnew], TRUE);
+			WriteJson(["success" => TRUE, $this->TableVar => $row]);
+		}
+		return $addRow;
+	}
+
+	// Set up master/detail based on QueryString
+	protected function setupMasterParms()
+	{
+		$validMaster = FALSE;
+
+		// Get the keys for master table
+		if (Get(TABLE_SHOW_MASTER) !== NULL) {
+			$masterTblVar = Get(TABLE_SHOW_MASTER);
+			if ($masterTblVar == "") {
+				$validMaster = TRUE;
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+			}
+			if ($masterTblVar == "ivf") {
+				$validMaster = TRUE;
+				if (Get("fk_id") !== NULL) {
+					$this->RIDNO->setQueryStringValue(Get("fk_id"));
+					$this->RIDNO->setSessionValue($this->RIDNO->QueryStringValue);
+					if (!is_numeric($this->RIDNO->QueryStringValue))
+						$validMaster = FALSE;
+				} else {
+					$validMaster = FALSE;
+				}
+				if (Get("fk_Female") !== NULL) {
+					$this->Name->setQueryStringValue(Get("fk_Female"));
+					$this->Name->setSessionValue($this->Name->QueryStringValue);
+					if (!is_numeric($this->Name->QueryStringValue))
+						$validMaster = FALSE;
+				} else {
+					$validMaster = FALSE;
+				}
+			}
+			if ($masterTblVar == "view_donor_ivf") {
+				$validMaster = TRUE;
+				if (Get("fk_id") !== NULL) {
+					$this->RIDNO->setQueryStringValue(Get("fk_id"));
+					$this->RIDNO->setSessionValue($this->RIDNO->QueryStringValue);
+					if (!is_numeric($this->RIDNO->QueryStringValue))
+						$validMaster = FALSE;
+				} else {
+					$validMaster = FALSE;
+				}
+				if (Get("fk_Female") !== NULL) {
+					$this->Name->setQueryStringValue(Get("fk_Female"));
+					$this->Name->setSessionValue($this->Name->QueryStringValue);
+					if (!is_numeric($this->Name->QueryStringValue))
+						$validMaster = FALSE;
+				} else {
+					$validMaster = FALSE;
+				}
+			}
+		} elseif (Post(TABLE_SHOW_MASTER) !== NULL) {
+			$masterTblVar = Post(TABLE_SHOW_MASTER);
+			if ($masterTblVar == "") {
+				$validMaster = TRUE;
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+			}
+			if ($masterTblVar == "ivf") {
+				$validMaster = TRUE;
+				if (Post("fk_id") !== NULL) {
+					$this->RIDNO->setFormValue(Post("fk_id"));
+					$this->RIDNO->setSessionValue($this->RIDNO->FormValue);
+					if (!is_numeric($this->RIDNO->FormValue))
+						$validMaster = FALSE;
+				} else {
+					$validMaster = FALSE;
+				}
+				if (Post("fk_Female") !== NULL) {
+					$this->Name->setFormValue(Post("fk_Female"));
+					$this->Name->setSessionValue($this->Name->FormValue);
+					if (!is_numeric($this->Name->FormValue))
+						$validMaster = FALSE;
+				} else {
+					$validMaster = FALSE;
+				}
+			}
+			if ($masterTblVar == "view_donor_ivf") {
+				$validMaster = TRUE;
+				if (Post("fk_id") !== NULL) {
+					$this->RIDNO->setFormValue(Post("fk_id"));
+					$this->RIDNO->setSessionValue($this->RIDNO->FormValue);
+					if (!is_numeric($this->RIDNO->FormValue))
+						$validMaster = FALSE;
+				} else {
+					$validMaster = FALSE;
+				}
+				if (Post("fk_Female") !== NULL) {
+					$this->Name->setFormValue(Post("fk_Female"));
+					$this->Name->setSessionValue($this->Name->FormValue);
+					if (!is_numeric($this->Name->FormValue))
+						$validMaster = FALSE;
+				} else {
+					$validMaster = FALSE;
+				}
+			}
+		}
+		if ($validMaster) {
+
+			// Save current master table
+			$this->setCurrentMasterTable($masterTblVar);
+
+			// Reset start record counter (new master key)
+			if (!$this->isAddOrEdit()) {
+				$this->StartRec = 1;
+				$this->setStartRecordNumber($this->StartRec);
+			}
+
+			// Clear previous master key from Session
+			if ($masterTblVar <> "ivf") {
+				if ($this->RIDNO->CurrentValue == "")
+					$this->RIDNO->setSessionValue("");
+				if ($this->Name->CurrentValue == "")
+					$this->Name->setSessionValue("");
+			}
+			if ($masterTblVar <> "view_donor_ivf") {
+				if ($this->RIDNO->CurrentValue == "")
+					$this->RIDNO->setSessionValue("");
+				if ($this->Name->CurrentValue == "")
+					$this->Name->setSessionValue("");
+			}
+		}
+		$this->DbMasterFilter = $this->getMasterFilter(); // Get master filter
+		$this->DbDetailFilter = $this->getDetailFilter(); // Get detail filter
+	}
+
+	// Set up detail parms based on QueryString
+	protected function setupDetailParms()
+	{
+
+		// Get the keys for master table
+		if (Get(TABLE_SHOW_DETAIL) !== NULL) {
+			$detailTblVar = Get(TABLE_SHOW_DETAIL);
+			$this->setCurrentDetailTable($detailTblVar);
+		} else {
+			$detailTblVar = $this->getCurrentDetailTable();
+		}
+		if ($detailTblVar <> "") {
+			$detailTblVar = explode(",", $detailTblVar);
+			if (in_array("ivf_outcome", $detailTblVar)) {
+				if (!isset($GLOBALS["ivf_outcome_grid"]))
+					$GLOBALS["ivf_outcome_grid"] = new ivf_outcome_grid();
+				if ($GLOBALS["ivf_outcome_grid"]->DetailAdd) {
+					if ($this->CopyRecord)
+						$GLOBALS["ivf_outcome_grid"]->CurrentMode = "copy";
+					else
+						$GLOBALS["ivf_outcome_grid"]->CurrentMode = "add";
+					$GLOBALS["ivf_outcome_grid"]->CurrentAction = "gridadd";
+
+					// Save current master table to detail table
+					$GLOBALS["ivf_outcome_grid"]->setCurrentMasterTable($this->TableVar);
+					$GLOBALS["ivf_outcome_grid"]->setStartRecordNumber(1);
+					$GLOBALS["ivf_outcome_grid"]->RIDNO->IsDetailKey = TRUE;
+					$GLOBALS["ivf_outcome_grid"]->RIDNO->CurrentValue = $this->RIDNO->CurrentValue;
+					$GLOBALS["ivf_outcome_grid"]->RIDNO->setSessionValue($GLOBALS["ivf_outcome_grid"]->RIDNO->CurrentValue);
+					$GLOBALS["ivf_outcome_grid"]->Name->IsDetailKey = TRUE;
+					$GLOBALS["ivf_outcome_grid"]->Name->CurrentValue = $this->Name->CurrentValue;
+					$GLOBALS["ivf_outcome_grid"]->Name->setSessionValue($GLOBALS["ivf_outcome_grid"]->Name->CurrentValue);
+					$GLOBALS["ivf_outcome_grid"]->TidNo->IsDetailKey = TRUE;
+					$GLOBALS["ivf_outcome_grid"]->TidNo->CurrentValue = $this->id->CurrentValue;
+					$GLOBALS["ivf_outcome_grid"]->TidNo->setSessionValue($GLOBALS["ivf_outcome_grid"]->TidNo->CurrentValue);
+				}
+			}
+			if (in_array("ivf_stimulation_chart", $detailTblVar)) {
+				if (!isset($GLOBALS["ivf_stimulation_chart_grid"]))
+					$GLOBALS["ivf_stimulation_chart_grid"] = new ivf_stimulation_chart_grid();
+				if ($GLOBALS["ivf_stimulation_chart_grid"]->DetailAdd) {
+					if ($this->CopyRecord)
+						$GLOBALS["ivf_stimulation_chart_grid"]->CurrentMode = "copy";
+					else
+						$GLOBALS["ivf_stimulation_chart_grid"]->CurrentMode = "add";
+					$GLOBALS["ivf_stimulation_chart_grid"]->CurrentAction = "gridadd";
+
+					// Save current master table to detail table
+					$GLOBALS["ivf_stimulation_chart_grid"]->setCurrentMasterTable($this->TableVar);
+					$GLOBALS["ivf_stimulation_chart_grid"]->setStartRecordNumber(1);
+					$GLOBALS["ivf_stimulation_chart_grid"]->RIDNo->IsDetailKey = TRUE;
+					$GLOBALS["ivf_stimulation_chart_grid"]->RIDNo->CurrentValue = $this->RIDNO->CurrentValue;
+					$GLOBALS["ivf_stimulation_chart_grid"]->RIDNo->setSessionValue($GLOBALS["ivf_stimulation_chart_grid"]->RIDNo->CurrentValue);
+					$GLOBALS["ivf_stimulation_chart_grid"]->Name->IsDetailKey = TRUE;
+					$GLOBALS["ivf_stimulation_chart_grid"]->Name->CurrentValue = $this->Name->CurrentValue;
+					$GLOBALS["ivf_stimulation_chart_grid"]->Name->setSessionValue($GLOBALS["ivf_stimulation_chart_grid"]->Name->CurrentValue);
+					$GLOBALS["ivf_stimulation_chart_grid"]->TidNo->IsDetailKey = TRUE;
+					$GLOBALS["ivf_stimulation_chart_grid"]->TidNo->CurrentValue = $this->id->CurrentValue;
+					$GLOBALS["ivf_stimulation_chart_grid"]->TidNo->setSessionValue($GLOBALS["ivf_stimulation_chart_grid"]->TidNo->CurrentValue);
+				}
+			}
+			if (in_array("ivf_semenanalysisreport", $detailTblVar)) {
+				if (!isset($GLOBALS["ivf_semenanalysisreport_grid"]))
+					$GLOBALS["ivf_semenanalysisreport_grid"] = new ivf_semenanalysisreport_grid();
+				if ($GLOBALS["ivf_semenanalysisreport_grid"]->DetailAdd) {
+					if ($this->CopyRecord)
+						$GLOBALS["ivf_semenanalysisreport_grid"]->CurrentMode = "copy";
+					else
+						$GLOBALS["ivf_semenanalysisreport_grid"]->CurrentMode = "add";
+					$GLOBALS["ivf_semenanalysisreport_grid"]->CurrentAction = "gridadd";
+
+					// Save current master table to detail table
+					$GLOBALS["ivf_semenanalysisreport_grid"]->setCurrentMasterTable($this->TableVar);
+					$GLOBALS["ivf_semenanalysisreport_grid"]->setStartRecordNumber(1);
+					$GLOBALS["ivf_semenanalysisreport_grid"]->RIDNo->IsDetailKey = TRUE;
+					$GLOBALS["ivf_semenanalysisreport_grid"]->RIDNo->CurrentValue = $this->RIDNO->CurrentValue;
+					$GLOBALS["ivf_semenanalysisreport_grid"]->RIDNo->setSessionValue($GLOBALS["ivf_semenanalysisreport_grid"]->RIDNo->CurrentValue);
+					$GLOBALS["ivf_semenanalysisreport_grid"]->PatientName->IsDetailKey = TRUE;
+					$GLOBALS["ivf_semenanalysisreport_grid"]->PatientName->CurrentValue = $this->Name->CurrentValue;
+					$GLOBALS["ivf_semenanalysisreport_grid"]->PatientName->setSessionValue($GLOBALS["ivf_semenanalysisreport_grid"]->PatientName->CurrentValue);
+					$GLOBALS["ivf_semenanalysisreport_grid"]->TidNo->IsDetailKey = TRUE;
+					$GLOBALS["ivf_semenanalysisreport_grid"]->TidNo->CurrentValue = $this->id->CurrentValue;
+					$GLOBALS["ivf_semenanalysisreport_grid"]->TidNo->setSessionValue($GLOBALS["ivf_semenanalysisreport_grid"]->TidNo->CurrentValue);
+				}
+			}
+			if (in_array("ivf_embryology_chart", $detailTblVar)) {
+				if (!isset($GLOBALS["ivf_embryology_chart_grid"]))
+					$GLOBALS["ivf_embryology_chart_grid"] = new ivf_embryology_chart_grid();
+				if ($GLOBALS["ivf_embryology_chart_grid"]->DetailAdd) {
+					if ($this->CopyRecord)
+						$GLOBALS["ivf_embryology_chart_grid"]->CurrentMode = "copy";
+					else
+						$GLOBALS["ivf_embryology_chart_grid"]->CurrentMode = "add";
+					$GLOBALS["ivf_embryology_chart_grid"]->CurrentAction = "gridadd";
+
+					// Save current master table to detail table
+					$GLOBALS["ivf_embryology_chart_grid"]->setCurrentMasterTable($this->TableVar);
+					$GLOBALS["ivf_embryology_chart_grid"]->setStartRecordNumber(1);
+					$GLOBALS["ivf_embryology_chart_grid"]->RIDNo->IsDetailKey = TRUE;
+					$GLOBALS["ivf_embryology_chart_grid"]->RIDNo->CurrentValue = $this->RIDNO->CurrentValue;
+					$GLOBALS["ivf_embryology_chart_grid"]->RIDNo->setSessionValue($GLOBALS["ivf_embryology_chart_grid"]->RIDNo->CurrentValue);
+					$GLOBALS["ivf_embryology_chart_grid"]->Name->IsDetailKey = TRUE;
+					$GLOBALS["ivf_embryology_chart_grid"]->Name->CurrentValue = $this->Name->CurrentValue;
+					$GLOBALS["ivf_embryology_chart_grid"]->Name->setSessionValue($GLOBALS["ivf_embryology_chart_grid"]->Name->CurrentValue);
+					$GLOBALS["ivf_embryology_chart_grid"]->TidNo->IsDetailKey = TRUE;
+					$GLOBALS["ivf_embryology_chart_grid"]->TidNo->CurrentValue = $this->id->CurrentValue;
+					$GLOBALS["ivf_embryology_chart_grid"]->TidNo->setSessionValue($GLOBALS["ivf_embryology_chart_grid"]->TidNo->CurrentValue);
+					$GLOBALS["ivf_embryology_chart_grid"]->DidNO->setSessionValue(""); // Clear session key
+				}
+			}
+		}
+	}
+
+	// Set up Breadcrumb
+	protected function setupBreadcrumb()
+	{
+		global $Breadcrumb, $Language;
+		$Breadcrumb = new Breadcrumb();
+		$url = substr(CurrentUrl(), strrpos(CurrentUrl(), "/")+1);
+		$Breadcrumb->add("list", $this->TableVar, $this->addMasterUrl("ivf_treatment_planlist.php"), "", $this->TableVar, TRUE);
+		$pageId = ($this->isCopy()) ? "Copy" : "Add";
+		$Breadcrumb->add("add", $pageId, $url);
+	}
+
+	// Setup lookup options
+	public function setupLookupOptions($fld)
+	{
+		if ($fld->Lookup !== NULL && $fld->Lookup->Options === NULL) {
+
+			// No need to check any more
+			$fld->Lookup->Options = [];
+
+			// Set up lookup SQL
+			switch ($fld->FieldVar) {
+				default:
+					$lookupFilter = "";
+					break;
+			}
+
+			// Always call to Lookup->getSql so that user can setup Lookup->Options in Lookup_Selecting server event
+			$sql = $fld->Lookup->getSql(FALSE, "", $lookupFilter, $this);
+
+			// Set up lookup cache
+			if ($fld->UseLookupCache && $sql <> "" && count($fld->Lookup->ParentFields) == 0 && count($fld->Lookup->Options) == 0) {
+				$conn = &$this->getConnection();
+				$totalCnt = $this->getRecordCount($sql);
+				if ($totalCnt > $fld->LookupCacheCount) // Total count > cache count, do not cache
+					return;
+				$rs = $conn->execute($sql);
+				$ar = [];
+				while ($rs && !$rs->EOF) {
+					$row = &$rs->fields;
+
+					// Format the field values
+					switch ($fld->FieldVar) {
+						case "x_status":
+							break;
+					}
+					$ar[strval($row[0])] = $row;
+					$rs->moveNext();
+				}
+				if ($rs)
+					$rs->close();
+				$fld->Lookup->Options = $ar;
+			}
+		}
+	}
+
+	// Page Load event
+	function Page_Load() {
+
+		//echo "Page Load";
+	}
+
+	// Page Unload event
+	function Page_Unload() {
+
+		//echo "Page Unload";
+	}
+
+	// Page Redirecting event
+	function Page_Redirecting(&$url) {
+
+		// Example:
+		//$url = "your URL";
+
+	   $PageReDirect = $_POST["Repagehistoryview"];
+	   if($PageReDirect == "EditFunction")
+	   {
+	  $url = "ivf_treatment_planview.php?showdetail=&id=".$this->id->CurrentValue."&showmaster=ivf&fk_id=".$_POST["fk_id"]."&fk_Female=".$_POST["fk_Female"];
+	   }
+	   if($PageReDirect == "ViewFunction")
+	   {
+	   		$newURL = "ivf_vitals_historyedit.php?id=";
+	   		header('Location: '.$newURL);
+	   }
+	   if($PageReDirect == "NextFunction")
+	   {
+		$url = "ivf_treatment_planview.php?showdetail=&id=".$this->id->CurrentValue."&showmaster=ivf&fk_id=".$_POST["fk_id"]."&fk_Female=".$_POST["fk_Female"];
+
+			  // $url = "ivf_stimulation_chartadd.php?showmaster=ivf_treatment_plan&fk_RIDNO=".$_POST["fk_id"]."&fk_Name=".$_POST["fk_Female"]."&fk_id=".$this->id->CurrentValue;
+	   }
+	   if($PageReDirect == "HomeFunction")
+	   {
+			$url = "FertilityHome.php?id=".$_POST["ivfRIDNO"];	   		
+	   }
+	}
+
+	// Message Showing event
+	// $type = ''|'success'|'failure'|'warning'
+	function Message_Showing(&$msg, $type) {
+		if ($type == 'success') {
+
+			//$msg = "your success message";
+		} elseif ($type == 'failure') {
+
+			//$msg = "your failure message";
+		} elseif ($type == 'warning') {
+
+			//$msg = "your warning message";
+		} else {
+
+			//$msg = "your message";
+		}
+	}
+
+	// Page Render event
+	function Page_Render() {
+
+		//echo "Page Render";
+	}
+
+	// Page Data Rendering event
+	function Page_DataRendering(&$header) {
+
+		// Example:
+		//$header = "your header";
+
+	}
+
+	// Page Data Rendered event
+	function Page_DataRendered(&$footer) {
+
+		// Example:
+		//$footer = "your footer";
+
+	}
+
+	// Form Custom Validate event
+	function Form_CustomValidate(&$customError) {
+
+		// Return error message in CustomError
+		return TRUE;
+	}
+}
+?>

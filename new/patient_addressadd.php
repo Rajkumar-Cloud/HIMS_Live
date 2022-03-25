@@ -1,0 +1,280 @@
+<?php
+namespace PHPMaker2020\HIMS;
+
+// Autoload
+include_once "autoload.php";
+
+// Session
+if (session_status() !== PHP_SESSION_ACTIVE)
+	\Delight\Cookie\Session::start(Config("COOKIE_SAMESITE")); // Init session data
+
+// Output buffering
+ob_start();
+?>
+<?php
+
+// Write header
+WriteHeader(FALSE);
+
+// Create page object
+$patient_address_add = new patient_address_add();
+
+// Run the page
+$patient_address_add->run();
+
+// Setup login status
+SetupLoginStatus();
+SetClientVar("login", LoginStatus());
+
+// Global Page Rendering event (in userfn*.php)
+Page_Rendering();
+
+// Page Rendering event
+$patient_address_add->Page_Render();
+?>
+<?php include_once "header.php"; ?>
+<script>
+var fpatient_addressadd, currentPageID;
+loadjs.ready("head", function() {
+
+	// Form object
+	currentPageID = ew.PAGE_ID = "add";
+	fpatient_addressadd = currentForm = new ew.Form("fpatient_addressadd", "add");
+
+	// Validate form
+	fpatient_addressadd.validate = function() {
+		if (!this.validateRequired)
+			return true; // Ignore validation
+		var $ = jQuery, fobj = this.getForm(), $fobj = $(fobj);
+		if ($fobj.find("#confirm").val() == "confirm")
+			return true;
+		var elm, felm, uelm, addcnt = 0;
+		var $k = $fobj.find("#" + this.formKeyCountName); // Get key_count
+		var rowcnt = ($k[0]) ? parseInt($k.val(), 10) : 1;
+		var startcnt = (rowcnt == 0) ? 0 : 1; // Check rowcnt == 0 => Inline-Add
+		var gridinsert = ["insert", "gridinsert"].includes($fobj.find("#action").val()) && $k[0];
+		for (var i = startcnt; i <= rowcnt; i++) {
+			var infix = ($k[0]) ? String(i) : "";
+			$fobj.data("rowindex", infix);
+			<?php if ($patient_address_add->patient_id->Required) { ?>
+				elm = this.getElements("x" + infix + "_patient_id");
+				if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+					return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $patient_address_add->patient_id->caption(), $patient_address_add->patient_id->RequiredErrorMessage)) ?>");
+			<?php } ?>
+				elm = this.getElements("x" + infix + "_patient_id");
+				if (elm && !ew.checkInteger(elm.value))
+					return this.onError(elm, "<?php echo JsEncode($patient_address_add->patient_id->errorMessage()) ?>");
+			<?php if ($patient_address_add->street->Required) { ?>
+				elm = this.getElements("x" + infix + "_street");
+				if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+					return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $patient_address_add->street->caption(), $patient_address_add->street->RequiredErrorMessage)) ?>");
+			<?php } ?>
+			<?php if ($patient_address_add->town->Required) { ?>
+				elm = this.getElements("x" + infix + "_town");
+				if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+					return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $patient_address_add->town->caption(), $patient_address_add->town->RequiredErrorMessage)) ?>");
+			<?php } ?>
+			<?php if ($patient_address_add->province->Required) { ?>
+				elm = this.getElements("x" + infix + "_province");
+				if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+					return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $patient_address_add->province->caption(), $patient_address_add->province->RequiredErrorMessage)) ?>");
+			<?php } ?>
+			<?php if ($patient_address_add->postal_code->Required) { ?>
+				elm = this.getElements("x" + infix + "_postal_code");
+				if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+					return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $patient_address_add->postal_code->caption(), $patient_address_add->postal_code->RequiredErrorMessage)) ?>");
+			<?php } ?>
+			<?php if ($patient_address_add->address_type->Required) { ?>
+				elm = this.getElements("x" + infix + "_address_type");
+				if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+					return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $patient_address_add->address_type->caption(), $patient_address_add->address_type->RequiredErrorMessage)) ?>");
+			<?php } ?>
+			<?php if ($patient_address_add->status->Required) { ?>
+				elm = this.getElements("x" + infix + "_status");
+				if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+					return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $patient_address_add->status->caption(), $patient_address_add->status->RequiredErrorMessage)) ?>");
+			<?php } ?>
+			<?php if ($patient_address_add->createdby->Required) { ?>
+				elm = this.getElements("x" + infix + "_createdby");
+				if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+					return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $patient_address_add->createdby->caption(), $patient_address_add->createdby->RequiredErrorMessage)) ?>");
+			<?php } ?>
+			<?php if ($patient_address_add->createddatetime->Required) { ?>
+				elm = this.getElements("x" + infix + "_createddatetime");
+				if (elm && !ew.isHidden(elm) && !ew.hasValue(elm))
+					return this.onError(elm, "<?php echo JsEncode(str_replace("%s", $patient_address_add->createddatetime->caption(), $patient_address_add->createddatetime->RequiredErrorMessage)) ?>");
+			<?php } ?>
+
+				// Call Form_CustomValidate event
+				if (!this.Form_CustomValidate(fobj))
+					return false;
+		}
+
+		// Process detail forms
+		var dfs = $fobj.find("input[name='detailpage']").get();
+		for (var i = 0; i < dfs.length; i++) {
+			var df = dfs[i], val = df.value;
+			if (val && ew.forms[val])
+				if (!ew.forms[val].validate())
+					return false;
+		}
+		return true;
+	}
+
+	// Form_CustomValidate
+	fpatient_addressadd.Form_CustomValidate = function(fobj) { // DO NOT CHANGE THIS LINE!
+
+		// Your custom validation code here, return false if invalid.
+		return true;
+	}
+
+	// Use JavaScript validation or not
+	fpatient_addressadd.validateRequired = <?php echo Config("CLIENT_VALIDATE") ? "true" : "false" ?>;
+
+	// Dynamic selection lists
+	fpatient_addressadd.lists["x_address_type"] = <?php echo $patient_address_add->address_type->Lookup->toClientList($patient_address_add) ?>;
+	fpatient_addressadd.lists["x_address_type"].options = <?php echo JsonEncode($patient_address_add->address_type->lookupOptions()) ?>;
+	fpatient_addressadd.lists["x_status"] = <?php echo $patient_address_add->status->Lookup->toClientList($patient_address_add) ?>;
+	fpatient_addressadd.lists["x_status"].options = <?php echo JsonEncode($patient_address_add->status->lookupOptions()) ?>;
+	loadjs.done("fpatient_addressadd");
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+
+	// Client script
+	// Write your client script here, no need to add script tags.
+
+});
+</script>
+<?php $patient_address_add->showPageHeader(); ?>
+<?php
+$patient_address_add->showMessage();
+?>
+<form name="fpatient_addressadd" id="fpatient_addressadd" class="<?php echo $patient_address_add->FormClassName ?>" action="<?php echo CurrentPageName() ?>" method="post">
+<?php if ($Page->CheckToken) { ?>
+<input type="hidden" name="<?php echo Config("TOKEN_NAME") ?>" value="<?php echo $Page->Token ?>">
+<?php } ?>
+<input type="hidden" name="t" value="patient_address">
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="<?php echo (int)$patient_address_add->IsModal ?>">
+<?php if ($patient_address->getCurrentMasterTable() == "patient") { ?>
+<input type="hidden" name="<?php echo Config("TABLE_SHOW_MASTER") ?>" value="patient">
+<input type="hidden" name="fk_id" value="<?php echo HtmlEncode($patient_address_add->patient_id->getSessionValue()) ?>">
+<?php } ?>
+<div class="ew-add-div"><!-- page* -->
+<?php if ($patient_address_add->patient_id->Visible) { // patient_id ?>
+	<div id="r_patient_id" class="form-group row">
+		<label id="elh_patient_address_patient_id" for="x_patient_id" class="<?php echo $patient_address_add->LeftColumnClass ?>"><?php echo $patient_address_add->patient_id->caption() ?><?php echo $patient_address_add->patient_id->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $patient_address_add->RightColumnClass ?>"><div <?php echo $patient_address_add->patient_id->cellAttributes() ?>>
+<?php if ($patient_address_add->patient_id->getSessionValue() != "") { ?>
+<span id="el_patient_address_patient_id">
+<span<?php echo $patient_address_add->patient_id->viewAttributes() ?>><input type="text" readonly class="form-control-plaintext" value="<?php echo HtmlEncode(RemoveHtml($patient_address_add->patient_id->ViewValue)) ?>"></span>
+</span>
+<input type="hidden" id="x_patient_id" name="x_patient_id" value="<?php echo HtmlEncode($patient_address_add->patient_id->CurrentValue) ?>">
+<?php } else { ?>
+<span id="el_patient_address_patient_id">
+<input type="text" data-table="patient_address" data-field="x_patient_id" name="x_patient_id" id="x_patient_id" size="30" placeholder="<?php echo HtmlEncode($patient_address_add->patient_id->getPlaceHolder()) ?>" value="<?php echo $patient_address_add->patient_id->EditValue ?>"<?php echo $patient_address_add->patient_id->editAttributes() ?>>
+</span>
+<?php } ?>
+<?php echo $patient_address_add->patient_id->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($patient_address_add->street->Visible) { // street ?>
+	<div id="r_street" class="form-group row">
+		<label id="elh_patient_address_street" for="x_street" class="<?php echo $patient_address_add->LeftColumnClass ?>"><?php echo $patient_address_add->street->caption() ?><?php echo $patient_address_add->street->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $patient_address_add->RightColumnClass ?>"><div <?php echo $patient_address_add->street->cellAttributes() ?>>
+<span id="el_patient_address_street">
+<input type="text" data-table="patient_address" data-field="x_street" name="x_street" id="x_street" size="30" maxlength="100" placeholder="<?php echo HtmlEncode($patient_address_add->street->getPlaceHolder()) ?>" value="<?php echo $patient_address_add->street->EditValue ?>"<?php echo $patient_address_add->street->editAttributes() ?>>
+</span>
+<?php echo $patient_address_add->street->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($patient_address_add->town->Visible) { // town ?>
+	<div id="r_town" class="form-group row">
+		<label id="elh_patient_address_town" for="x_town" class="<?php echo $patient_address_add->LeftColumnClass ?>"><?php echo $patient_address_add->town->caption() ?><?php echo $patient_address_add->town->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $patient_address_add->RightColumnClass ?>"><div <?php echo $patient_address_add->town->cellAttributes() ?>>
+<span id="el_patient_address_town">
+<input type="text" data-table="patient_address" data-field="x_town" name="x_town" id="x_town" size="30" maxlength="50" placeholder="<?php echo HtmlEncode($patient_address_add->town->getPlaceHolder()) ?>" value="<?php echo $patient_address_add->town->EditValue ?>"<?php echo $patient_address_add->town->editAttributes() ?>>
+</span>
+<?php echo $patient_address_add->town->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($patient_address_add->province->Visible) { // province ?>
+	<div id="r_province" class="form-group row">
+		<label id="elh_patient_address_province" for="x_province" class="<?php echo $patient_address_add->LeftColumnClass ?>"><?php echo $patient_address_add->province->caption() ?><?php echo $patient_address_add->province->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $patient_address_add->RightColumnClass ?>"><div <?php echo $patient_address_add->province->cellAttributes() ?>>
+<span id="el_patient_address_province">
+<input type="text" data-table="patient_address" data-field="x_province" name="x_province" id="x_province" size="30" maxlength="50" placeholder="<?php echo HtmlEncode($patient_address_add->province->getPlaceHolder()) ?>" value="<?php echo $patient_address_add->province->EditValue ?>"<?php echo $patient_address_add->province->editAttributes() ?>>
+</span>
+<?php echo $patient_address_add->province->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($patient_address_add->postal_code->Visible) { // postal_code ?>
+	<div id="r_postal_code" class="form-group row">
+		<label id="elh_patient_address_postal_code" for="x_postal_code" class="<?php echo $patient_address_add->LeftColumnClass ?>"><?php echo $patient_address_add->postal_code->caption() ?><?php echo $patient_address_add->postal_code->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $patient_address_add->RightColumnClass ?>"><div <?php echo $patient_address_add->postal_code->cellAttributes() ?>>
+<span id="el_patient_address_postal_code">
+<input type="text" data-table="patient_address" data-field="x_postal_code" name="x_postal_code" id="x_postal_code" size="30" maxlength="50" placeholder="<?php echo HtmlEncode($patient_address_add->postal_code->getPlaceHolder()) ?>" value="<?php echo $patient_address_add->postal_code->EditValue ?>"<?php echo $patient_address_add->postal_code->editAttributes() ?>>
+</span>
+<?php echo $patient_address_add->postal_code->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($patient_address_add->address_type->Visible) { // address_type ?>
+	<div id="r_address_type" class="form-group row">
+		<label id="elh_patient_address_address_type" for="x_address_type" class="<?php echo $patient_address_add->LeftColumnClass ?>"><?php echo $patient_address_add->address_type->caption() ?><?php echo $patient_address_add->address_type->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $patient_address_add->RightColumnClass ?>"><div <?php echo $patient_address_add->address_type->cellAttributes() ?>>
+<span id="el_patient_address_address_type">
+<div class="input-group">
+	<select class="custom-select ew-custom-select" data-table="patient_address" data-field="x_address_type" data-value-separator="<?php echo $patient_address_add->address_type->displayValueSeparatorAttribute() ?>" id="x_address_type" name="x_address_type"<?php echo $patient_address_add->address_type->editAttributes() ?>>
+			<?php echo $patient_address_add->address_type->selectOptionListHtml("x_address_type") ?>
+		</select>
+</div>
+<?php echo $patient_address_add->address_type->Lookup->getParamTag($patient_address_add, "p_x_address_type") ?>
+</span>
+<?php echo $patient_address_add->address_type->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($patient_address_add->status->Visible) { // status ?>
+	<div id="r_status" class="form-group row">
+		<label id="elh_patient_address_status" for="x_status" class="<?php echo $patient_address_add->LeftColumnClass ?>"><?php echo $patient_address_add->status->caption() ?><?php echo $patient_address_add->status->Required ? $Language->phrase("FieldRequiredIndicator") : "" ?></label>
+		<div class="<?php echo $patient_address_add->RightColumnClass ?>"><div <?php echo $patient_address_add->status->cellAttributes() ?>>
+<span id="el_patient_address_status">
+<div class="input-group">
+	<select class="custom-select ew-custom-select" data-table="patient_address" data-field="x_status" data-value-separator="<?php echo $patient_address_add->status->displayValueSeparatorAttribute() ?>" id="x_status" name="x_status"<?php echo $patient_address_add->status->editAttributes() ?>>
+			<?php echo $patient_address_add->status->selectOptionListHtml("x_status") ?>
+		</select>
+</div>
+<?php echo $patient_address_add->status->Lookup->getParamTag($patient_address_add, "p_x_status") ?>
+</span>
+<?php echo $patient_address_add->status->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+</div><!-- /page* -->
+<?php if (!$patient_address_add->IsModal) { ?>
+<div class="form-group row"><!-- buttons .form-group -->
+	<div class="<?php echo $patient_address_add->OffsetColumnClass ?>"><!-- buttons offset -->
+<button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit"><?php echo $Language->phrase("AddBtn") ?></button>
+<button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-href="<?php echo $patient_address_add->getReturnUrl() ?>"><?php echo $Language->phrase("CancelBtn") ?></button>
+	</div><!-- /buttons offset -->
+</div><!-- /buttons .form-group -->
+<?php } ?>
+</form>
+<?php
+$patient_address_add->showPageFooter();
+if (Config("DEBUG"))
+	echo GetDebugMessage();
+?>
+<script>
+loadjs.ready("load", function() {
+
+	// Startup script
+	// Write your table-specific startup script here
+	// console.log("page loaded");
+
+});
+</script>
+<?php include_once "footer.php"; ?>
+<?php
+$patient_address_add->terminate();
+?>

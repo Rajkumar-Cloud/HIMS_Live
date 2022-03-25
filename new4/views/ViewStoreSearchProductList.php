@@ -1,0 +1,535 @@
+<?php
+
+namespace PHPMaker2021\HIMS;
+
+// Page object
+$ViewStoreSearchProductList = &$Page;
+?>
+<?php if (!$Page->isExport()) { ?>
+<script>
+var currentForm, currentPageID;
+var fview_store_search_productlist;
+loadjs.ready("head", function () {
+    var $ = jQuery;
+    // Form object
+    currentPageID = ew.PAGE_ID = "list";
+    fview_store_search_productlist = currentForm = new ew.Form("fview_store_search_productlist", "list");
+    fview_store_search_productlist.formKeyCountName = '<?= $Page->FormKeyCountName ?>';
+    loadjs.done("fview_store_search_productlist");
+});
+var fview_store_search_productlistsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready("head", function () {
+    var $ = jQuery;
+    // Form object for search
+    fview_store_search_productlistsrch = currentSearchForm = new ew.Form("fview_store_search_productlistsrch");
+
+    // Dynamic selection lists
+
+    // Filters
+    fview_store_search_productlistsrch.filterList = <?= $Page->getFilterList() ?>;
+    loadjs.done("fview_store_search_productlistsrch");
+});
+</script>
+<style type="text/css">
+.ew-table-preview-row { /* main table preview row color */
+    background-color: #FFFFFF; /* preview row color */
+}
+.ew-table-preview-row .ew-grid {
+    display: table;
+}
+</style>
+<div id="ew-preview" class="d-none"><!-- preview -->
+    <div class="ew-nav-tabs"><!-- .ew-nav-tabs -->
+        <ul class="nav nav-tabs"></ul>
+        <div class="tab-content"><!-- .tab-content -->
+            <div class="tab-pane fade active show"></div>
+        </div><!-- /.tab-content -->
+    </div><!-- /.ew-nav-tabs -->
+</div><!-- /preview -->
+<script>
+loadjs.ready("head", function() {
+    ew.PREVIEW_PLACEMENT = ew.CSS_FLIP ? "left" : "right";
+    ew.PREVIEW_SINGLE_ROW = false;
+    ew.PREVIEW_OVERLAY = false;
+    loadjs(ew.PATH_BASE + "js/ewpreview.js", "preview");
+});
+</script>
+<script>
+loadjs.ready("head", function () {
+    // Write your table-specific client script here, no need to add script tags.
+});
+</script>
+<?php } ?>
+<?php if (!$Page->isExport()) { ?>
+<div class="btn-toolbar ew-toolbar">
+<?php if ($Page->TotalRecords > 0 && $Page->ExportOptions->visible()) { ?>
+<?php $Page->ExportOptions->render("body") ?>
+<?php } ?>
+<?php if ($Page->ImportOptions->visible()) { ?>
+<?php $Page->ImportOptions->render("body") ?>
+<?php } ?>
+<?php if ($Page->SearchOptions->visible()) { ?>
+<?php $Page->SearchOptions->render("body") ?>
+<?php } ?>
+<?php if ($Page->FilterOptions->visible()) { ?>
+<?php $Page->FilterOptions->render("body") ?>
+<?php } ?>
+<div class="clearfix"></div>
+</div>
+<?php } ?>
+<?php
+$Page->renderOtherOptions();
+?>
+<?php if ($Security->canSearch()) { ?>
+<?php if (!$Page->isExport() && !$Page->CurrentAction) { ?>
+<form name="fview_store_search_productlistsrch" id="fview_store_search_productlistsrch" class="form-inline ew-form ew-ext-search-form" action="<?= CurrentPageUrl(false) ?>">
+<div id="fview_store_search_productlistsrch-search-panel" class="<?= $Page->SearchPanelClass ?>">
+<input type="hidden" name="cmd" value="search">
+<input type="hidden" name="t" value="view_store_search_product">
+    <div class="ew-extended-search">
+<div id="xsr_<?= $Page->SearchRowCount + 1 ?>" class="ew-row d-sm-flex">
+    <div class="ew-quick-search input-group">
+        <input type="text" name="<?= Config("TABLE_BASIC_SEARCH") ?>" id="<?= Config("TABLE_BASIC_SEARCH") ?>" class="form-control" value="<?= HtmlEncode($Page->BasicSearch->getKeyword()) ?>" placeholder="<?= HtmlEncode($Language->phrase("Search")) ?>">
+        <input type="hidden" name="<?= Config("TABLE_BASIC_SEARCH_TYPE") ?>" id="<?= Config("TABLE_BASIC_SEARCH_TYPE") ?>" value="<?= HtmlEncode($Page->BasicSearch->getType()) ?>">
+        <div class="input-group-append">
+            <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit"><?= $Language->phrase("SearchBtn") ?></button>
+            <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false"><span id="searchtype"><?= $Page->BasicSearch->getTypeNameShort() ?></span></button>
+            <div class="dropdown-menu dropdown-menu-right">
+                <a class="dropdown-item<?php if ($Page->BasicSearch->getType() == "") { ?> active<?php } ?>" href="#" onclick="return ew.setSearchType(this);"><?= $Language->phrase("QuickSearchAuto") ?></a>
+                <a class="dropdown-item<?php if ($Page->BasicSearch->getType() == "=") { ?> active<?php } ?>" href="#" onclick="return ew.setSearchType(this, '=');"><?= $Language->phrase("QuickSearchExact") ?></a>
+                <a class="dropdown-item<?php if ($Page->BasicSearch->getType() == "AND") { ?> active<?php } ?>" href="#" onclick="return ew.setSearchType(this, 'AND');"><?= $Language->phrase("QuickSearchAll") ?></a>
+                <a class="dropdown-item<?php if ($Page->BasicSearch->getType() == "OR") { ?> active<?php } ?>" href="#" onclick="return ew.setSearchType(this, 'OR');"><?= $Language->phrase("QuickSearchAny") ?></a>
+            </div>
+        </div>
+    </div>
+</div>
+    </div><!-- /.ew-extended-search -->
+</div><!-- /.ew-search-panel -->
+</form>
+<?php } ?>
+<?php } ?>
+<?php $Page->showPageHeader(); ?>
+<?php
+$Page->showMessage();
+?>
+<?php if ($Page->TotalRecords > 0 || $Page->CurrentAction) { ?>
+<div class="card ew-card ew-grid<?php if ($Page->isAddOrEdit()) { ?> ew-grid-add-edit<?php } ?> view_store_search_product">
+<?php if (!$Page->isExport()) { ?>
+<div class="card-header ew-grid-upper-panel">
+<?php if (!$Page->isGridAdd()) { ?>
+<form name="ew-pager-form" class="form-inline ew-form ew-pager-form" action="<?= CurrentPageUrl(false) ?>">
+<?= $Page->Pager->render() ?>
+</form>
+<?php } ?>
+<div class="ew-list-other-options">
+<?php $Page->OtherOptions->render("body") ?>
+</div>
+<div class="clearfix"></div>
+</div>
+<?php } ?>
+<form name="fview_store_search_productlist" id="fview_store_search_productlist" class="form-inline ew-form ew-list-form" action="<?= CurrentPageUrl(false) ?>" method="post">
+<?php if (Config("CHECK_TOKEN")) { ?>
+<input type="hidden" name="<?= $TokenNameKey ?>" value="<?= $TokenName ?>"><!-- CSRF token name -->
+<input type="hidden" name="<?= $TokenValueKey ?>" value="<?= $TokenValue ?>"><!-- CSRF token value -->
+<?php } ?>
+<input type="hidden" name="t" value="view_store_search_product">
+<div id="gmp_view_store_search_product" class="<?= ResponsiveTableClass() ?>card-body ew-grid-middle-panel">
+<?php if ($Page->TotalRecords > 0 || $Page->isGridEdit()) { ?>
+<table id="tbl_view_store_search_productlist" class="table ew-table"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+<?php
+// Header row
+$Page->RowType = ROWTYPE_HEADER;
+
+// Render list options
+$Page->renderListOptions();
+
+// Render list options (header, left)
+$Page->ListOptions->render("header", "left");
+?>
+<?php if ($Page->id->Visible) { // id ?>
+        <th data-name="id" class="<?= $Page->id->headerCellClass() ?>"><div id="elh_view_store_search_product_id" class="view_store_search_product_id"><?= $Page->renderSort($Page->id) ?></div></th>
+<?php } ?>
+<?php if ($Page->DES->Visible) { // DES ?>
+        <th data-name="DES" class="<?= $Page->DES->headerCellClass() ?>"><div id="elh_view_store_search_product_DES" class="view_store_search_product_DES"><?= $Page->renderSort($Page->DES) ?></div></th>
+<?php } ?>
+<?php if ($Page->BATCH->Visible) { // BATCH ?>
+        <th data-name="BATCH" class="<?= $Page->BATCH->headerCellClass() ?>"><div id="elh_view_store_search_product_BATCH" class="view_store_search_product_BATCH"><?= $Page->renderSort($Page->BATCH) ?></div></th>
+<?php } ?>
+<?php if ($Page->PRC->Visible) { // PRC ?>
+        <th data-name="PRC" class="<?= $Page->PRC->headerCellClass() ?>"><div id="elh_view_store_search_product_PRC" class="view_store_search_product_PRC"><?= $Page->renderSort($Page->PRC) ?></div></th>
+<?php } ?>
+<?php if ($Page->OQ->Visible) { // OQ ?>
+        <th data-name="OQ" class="<?= $Page->OQ->headerCellClass() ?>"><div id="elh_view_store_search_product_OQ" class="view_store_search_product_OQ"><?= $Page->renderSort($Page->OQ) ?></div></th>
+<?php } ?>
+<?php if ($Page->Stock->Visible) { // Stock ?>
+        <th data-name="Stock" class="<?= $Page->Stock->headerCellClass() ?>"><div id="elh_view_store_search_product_Stock" class="view_store_search_product_Stock"><?= $Page->renderSort($Page->Stock) ?></div></th>
+<?php } ?>
+<?php if ($Page->EXPDT->Visible) { // EXPDT ?>
+        <th data-name="EXPDT" class="<?= $Page->EXPDT->headerCellClass() ?>"><div id="elh_view_store_search_product_EXPDT" class="view_store_search_product_EXPDT"><?= $Page->renderSort($Page->EXPDT) ?></div></th>
+<?php } ?>
+<?php if ($Page->GENNAME->Visible) { // GENNAME ?>
+        <th data-name="GENNAME" class="<?= $Page->GENNAME->headerCellClass() ?>"><div id="elh_view_store_search_product_GENNAME" class="view_store_search_product_GENNAME"><?= $Page->renderSort($Page->GENNAME) ?></div></th>
+<?php } ?>
+<?php if ($Page->UNIT->Visible) { // UNIT ?>
+        <th data-name="UNIT" class="<?= $Page->UNIT->headerCellClass() ?>"><div id="elh_view_store_search_product_UNIT" class="view_store_search_product_UNIT"><?= $Page->renderSort($Page->UNIT) ?></div></th>
+<?php } ?>
+<?php if ($Page->RT->Visible) { // RT ?>
+        <th data-name="RT" class="<?= $Page->RT->headerCellClass() ?>"><div id="elh_view_store_search_product_RT" class="view_store_search_product_RT"><?= $Page->renderSort($Page->RT) ?></div></th>
+<?php } ?>
+<?php if ($Page->SSGST->Visible) { // SSGST ?>
+        <th data-name="SSGST" class="<?= $Page->SSGST->headerCellClass() ?>"><div id="elh_view_store_search_product_SSGST" class="view_store_search_product_SSGST"><?= $Page->renderSort($Page->SSGST) ?></div></th>
+<?php } ?>
+<?php if ($Page->SCGST->Visible) { // SCGST ?>
+        <th data-name="SCGST" class="<?= $Page->SCGST->headerCellClass() ?>"><div id="elh_view_store_search_product_SCGST" class="view_store_search_product_SCGST"><?= $Page->renderSort($Page->SCGST) ?></div></th>
+<?php } ?>
+<?php if ($Page->MFRCODE->Visible) { // MFRCODE ?>
+        <th data-name="MFRCODE" class="<?= $Page->MFRCODE->headerCellClass() ?>"><div id="elh_view_store_search_product_MFRCODE" class="view_store_search_product_MFRCODE"><?= $Page->renderSort($Page->MFRCODE) ?></div></th>
+<?php } ?>
+<?php if ($Page->BRCODE->Visible) { // BRCODE ?>
+        <th data-name="BRCODE" class="<?= $Page->BRCODE->headerCellClass() ?>"><div id="elh_view_store_search_product_BRCODE" class="view_store_search_product_BRCODE"><?= $Page->renderSort($Page->BRCODE) ?></div></th>
+<?php } ?>
+<?php if ($Page->HospID->Visible) { // HospID ?>
+        <th data-name="HospID" class="<?= $Page->HospID->headerCellClass() ?>"><div id="elh_view_store_search_product_HospID" class="view_store_search_product_HospID"><?= $Page->renderSort($Page->HospID) ?></div></th>
+<?php } ?>
+<?php if ($Page->PUnit->Visible) { // PUnit ?>
+        <th data-name="PUnit" class="<?= $Page->PUnit->headerCellClass() ?>"><div id="elh_view_store_search_product_PUnit" class="view_store_search_product_PUnit"><?= $Page->renderSort($Page->PUnit) ?></div></th>
+<?php } ?>
+<?php if ($Page->PurRate->Visible) { // PurRate ?>
+        <th data-name="PurRate" class="<?= $Page->PurRate->headerCellClass() ?>"><div id="elh_view_store_search_product_PurRate" class="view_store_search_product_PurRate"><?= $Page->renderSort($Page->PurRate) ?></div></th>
+<?php } ?>
+<?php if ($Page->PurValue->Visible) { // PurValue ?>
+        <th data-name="PurValue" class="<?= $Page->PurValue->headerCellClass() ?>"><div id="elh_view_store_search_product_PurValue" class="view_store_search_product_PurValue"><?= $Page->renderSort($Page->PurValue) ?></div></th>
+<?php } ?>
+<?php if ($Page->SUnit->Visible) { // SUnit ?>
+        <th data-name="SUnit" class="<?= $Page->SUnit->headerCellClass() ?>"><div id="elh_view_store_search_product_SUnit" class="view_store_search_product_SUnit"><?= $Page->renderSort($Page->SUnit) ?></div></th>
+<?php } ?>
+<?php if ($Page->PSGST->Visible) { // PSGST ?>
+        <th data-name="PSGST" class="<?= $Page->PSGST->headerCellClass() ?>"><div id="elh_view_store_search_product_PSGST" class="view_store_search_product_PSGST"><?= $Page->renderSort($Page->PSGST) ?></div></th>
+<?php } ?>
+<?php if ($Page->PCGST->Visible) { // PCGST ?>
+        <th data-name="PCGST" class="<?= $Page->PCGST->headerCellClass() ?>"><div id="elh_view_store_search_product_PCGST" class="view_store_search_product_PCGST"><?= $Page->renderSort($Page->PCGST) ?></div></th>
+<?php } ?>
+<?php if ($Page->BILLDATE->Visible) { // BILLDATE ?>
+        <th data-name="BILLDATE" class="<?= $Page->BILLDATE->headerCellClass() ?>"><div id="elh_view_store_search_product_BILLDATE" class="view_store_search_product_BILLDATE"><?= $Page->renderSort($Page->BILLDATE) ?></div></th>
+<?php } ?>
+<?php
+// Render list options (header, right)
+$Page->ListOptions->render("header", "right");
+?>
+    </tr>
+</thead>
+<tbody>
+<?php
+if ($Page->ExportAll && $Page->isExport()) {
+    $Page->StopRecord = $Page->TotalRecords;
+} else {
+    // Set the last record to display
+    if ($Page->TotalRecords > $Page->StartRecord + $Page->DisplayRecords - 1) {
+        $Page->StopRecord = $Page->StartRecord + $Page->DisplayRecords - 1;
+    } else {
+        $Page->StopRecord = $Page->TotalRecords;
+    }
+}
+$Page->RecordCount = $Page->StartRecord - 1;
+if ($Page->Recordset && !$Page->Recordset->EOF) {
+    // Nothing to do
+} elseif (!$Page->AllowAddDeleteRow && $Page->StopRecord == 0) {
+    $Page->StopRecord = $Page->GridAddRowCount;
+}
+
+// Initialize aggregate
+$Page->RowType = ROWTYPE_AGGREGATEINIT;
+$Page->resetAttributes();
+$Page->renderRow();
+while ($Page->RecordCount < $Page->StopRecord) {
+    $Page->RecordCount++;
+    if ($Page->RecordCount >= $Page->StartRecord) {
+        $Page->RowCount++;
+
+        // Set up key count
+        $Page->KeyCount = $Page->RowIndex;
+
+        // Init row class and style
+        $Page->resetAttributes();
+        $Page->CssClass = "";
+        if ($Page->isGridAdd()) {
+            $Page->loadRowValues(); // Load default values
+            $Page->OldKey = "";
+            $Page->setKey($Page->OldKey);
+        } else {
+            $Page->loadRowValues($Page->Recordset); // Load row values
+            if ($Page->isGridEdit()) {
+                $Page->OldKey = $Page->getKey(true); // Get from CurrentValue
+                $Page->setKey($Page->OldKey);
+            }
+        }
+        $Page->RowType = ROWTYPE_VIEW; // Render view
+
+        // Set up row id / data-rowindex
+        $Page->RowAttrs->merge(["data-rowindex" => $Page->RowCount, "id" => "r" . $Page->RowCount . "_view_store_search_product", "data-rowtype" => $Page->RowType]);
+
+        // Render row
+        $Page->renderRow();
+
+        // Render list options
+        $Page->renderListOptions();
+?>
+    <tr <?= $Page->rowAttributes() ?>>
+<?php
+// Render list options (body, left)
+$Page->ListOptions->render("body", "left", $Page->RowCount);
+?>
+    <?php if ($Page->id->Visible) { // id ?>
+        <td data-name="id" <?= $Page->id->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_id">
+<span<?= $Page->id->viewAttributes() ?>>
+<?= $Page->id->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->DES->Visible) { // DES ?>
+        <td data-name="DES" <?= $Page->DES->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_DES">
+<span<?= $Page->DES->viewAttributes() ?>>
+<?= $Page->DES->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->BATCH->Visible) { // BATCH ?>
+        <td data-name="BATCH" <?= $Page->BATCH->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_BATCH">
+<span<?= $Page->BATCH->viewAttributes() ?>>
+<?= $Page->BATCH->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->PRC->Visible) { // PRC ?>
+        <td data-name="PRC" <?= $Page->PRC->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_PRC">
+<span<?= $Page->PRC->viewAttributes() ?>>
+<?= $Page->PRC->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->OQ->Visible) { // OQ ?>
+        <td data-name="OQ" <?= $Page->OQ->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_OQ">
+<span<?= $Page->OQ->viewAttributes() ?>>
+<?= $Page->OQ->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->Stock->Visible) { // Stock ?>
+        <td data-name="Stock" <?= $Page->Stock->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_Stock">
+<span<?= $Page->Stock->viewAttributes() ?>>
+<?= $Page->Stock->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->EXPDT->Visible) { // EXPDT ?>
+        <td data-name="EXPDT" <?= $Page->EXPDT->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_EXPDT">
+<span<?= $Page->EXPDT->viewAttributes() ?>>
+<?= $Page->EXPDT->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->GENNAME->Visible) { // GENNAME ?>
+        <td data-name="GENNAME" <?= $Page->GENNAME->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_GENNAME">
+<span<?= $Page->GENNAME->viewAttributes() ?>>
+<?= $Page->GENNAME->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->UNIT->Visible) { // UNIT ?>
+        <td data-name="UNIT" <?= $Page->UNIT->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_UNIT">
+<span<?= $Page->UNIT->viewAttributes() ?>>
+<?= $Page->UNIT->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->RT->Visible) { // RT ?>
+        <td data-name="RT" <?= $Page->RT->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_RT">
+<span<?= $Page->RT->viewAttributes() ?>>
+<?= $Page->RT->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->SSGST->Visible) { // SSGST ?>
+        <td data-name="SSGST" <?= $Page->SSGST->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_SSGST">
+<span<?= $Page->SSGST->viewAttributes() ?>>
+<?= $Page->SSGST->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->SCGST->Visible) { // SCGST ?>
+        <td data-name="SCGST" <?= $Page->SCGST->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_SCGST">
+<span<?= $Page->SCGST->viewAttributes() ?>>
+<?= $Page->SCGST->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->MFRCODE->Visible) { // MFRCODE ?>
+        <td data-name="MFRCODE" <?= $Page->MFRCODE->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_MFRCODE">
+<span<?= $Page->MFRCODE->viewAttributes() ?>>
+<?= $Page->MFRCODE->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->BRCODE->Visible) { // BRCODE ?>
+        <td data-name="BRCODE" <?= $Page->BRCODE->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_BRCODE">
+<span<?= $Page->BRCODE->viewAttributes() ?>>
+<?= $Page->BRCODE->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->HospID->Visible) { // HospID ?>
+        <td data-name="HospID" <?= $Page->HospID->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_HospID">
+<span<?= $Page->HospID->viewAttributes() ?>>
+<?= $Page->HospID->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->PUnit->Visible) { // PUnit ?>
+        <td data-name="PUnit" <?= $Page->PUnit->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_PUnit">
+<span<?= $Page->PUnit->viewAttributes() ?>>
+<?= $Page->PUnit->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->PurRate->Visible) { // PurRate ?>
+        <td data-name="PurRate" <?= $Page->PurRate->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_PurRate">
+<span<?= $Page->PurRate->viewAttributes() ?>>
+<?= $Page->PurRate->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->PurValue->Visible) { // PurValue ?>
+        <td data-name="PurValue" <?= $Page->PurValue->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_PurValue">
+<span<?= $Page->PurValue->viewAttributes() ?>>
+<?= $Page->PurValue->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->SUnit->Visible) { // SUnit ?>
+        <td data-name="SUnit" <?= $Page->SUnit->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_SUnit">
+<span<?= $Page->SUnit->viewAttributes() ?>>
+<?= $Page->SUnit->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->PSGST->Visible) { // PSGST ?>
+        <td data-name="PSGST" <?= $Page->PSGST->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_PSGST">
+<span<?= $Page->PSGST->viewAttributes() ?>>
+<?= $Page->PSGST->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->PCGST->Visible) { // PCGST ?>
+        <td data-name="PCGST" <?= $Page->PCGST->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_PCGST">
+<span<?= $Page->PCGST->viewAttributes() ?>>
+<?= $Page->PCGST->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+    <?php if ($Page->BILLDATE->Visible) { // BILLDATE ?>
+        <td data-name="BILLDATE" <?= $Page->BILLDATE->cellAttributes() ?>>
+<span id="el<?= $Page->RowCount ?>_view_store_search_product_BILLDATE">
+<span<?= $Page->BILLDATE->viewAttributes() ?>>
+<?= $Page->BILLDATE->getViewValue() ?></span>
+</span>
+</td>
+    <?php } ?>
+<?php
+// Render list options (body, right)
+$Page->ListOptions->render("body", "right", $Page->RowCount);
+?>
+    </tr>
+<?php
+    }
+    if (!$Page->isGridAdd()) {
+        $Page->Recordset->moveNext();
+    }
+}
+?>
+</tbody>
+</table><!-- /.ew-table -->
+<?php } ?>
+</div><!-- /.ew-grid-middle-panel -->
+<?php if (!$Page->CurrentAction) { ?>
+<input type="hidden" name="action" id="action" value="">
+<?php } ?>
+</form><!-- /.ew-list-form -->
+<?php
+// Close recordset
+if ($Page->Recordset) {
+    $Page->Recordset->close();
+}
+?>
+<?php if (!$Page->isExport()) { ?>
+<div class="card-footer ew-grid-lower-panel">
+<?php if (!$Page->isGridAdd()) { ?>
+<form name="ew-pager-form" class="form-inline ew-form ew-pager-form" action="<?= CurrentPageUrl(false) ?>">
+<?= $Page->Pager->render() ?>
+</form>
+<?php } ?>
+<div class="ew-list-other-options">
+<?php $Page->OtherOptions->render("body", "bottom") ?>
+</div>
+<div class="clearfix"></div>
+</div>
+<?php } ?>
+</div><!-- /.ew-grid -->
+<?php } ?>
+<?php if ($Page->TotalRecords == 0 && !$Page->CurrentAction) { // Show other options ?>
+<div class="ew-list-other-options">
+<?php $Page->OtherOptions->render("body") ?>
+</div>
+<div class="clearfix"></div>
+<?php } ?>
+<?php
+$Page->showPageFooter();
+echo GetDebugMessage();
+?>
+<?php if (!$Page->isExport()) { ?>
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("view_store_search_product");
+});
+</script>
+<script>
+loadjs.ready("load", function () {
+    // Write your table-specific startup script here, no need to add script tags.
+});
+</script>
+<?php if (!$Page->isExport()) { ?>
+<script>
+loadjs.ready("fixedheadertable", function () {
+    ew.fixedHeaderTable({
+        delay: 0,
+        container: "gmp_view_store_search_product",
+        width: "95%",
+        height: ""
+    });
+});
+</script>
+<?php } ?>
+<?php } ?>

@@ -1,0 +1,3334 @@
+<?php
+namespace PHPMaker2019\HIMS;
+
+/**
+ * Page class
+ */
+class patient_investigations_grid extends patient_investigations
+{
+
+	// Page ID
+	public $PageID = "grid";
+
+	// Project ID
+	public $ProjectID = "{EA4F6D13-AF8F-428D-9EA7-BA88D1107EC3}";
+
+	// Table name
+	public $TableName = 'patient_investigations';
+
+	// Page object name
+	public $PageObjName = "patient_investigations_grid";
+
+	// Grid form hidden field names
+	public $FormName = "fpatient_investigationsgrid";
+	public $FormActionName = "k_action";
+	public $FormKeyName = "k_key";
+	public $FormOldKeyName = "k_oldkey";
+	public $FormBlankRowName = "k_blankrow";
+	public $FormKeyCountName = "key_count";
+
+	// Page URLs
+	public $AddUrl;
+	public $EditUrl;
+	public $CopyUrl;
+	public $DeleteUrl;
+	public $ViewUrl;
+	public $ListUrl;
+	public $CancelUrl;
+
+	// Page headings
+	public $Heading = "";
+	public $Subheading = "";
+	public $PageHeader;
+	public $PageFooter;
+
+	// Token
+	public $Token = "";
+	public $TokenTimeout = 0;
+	public $CheckToken = CHECK_TOKEN;
+
+	// Messages
+	private $_message = "";
+	private $_failureMessage = "";
+	private $_successMessage = "";
+	private $_warningMessage = "";
+
+	// Page URL
+	private $_pageUrl = "";
+
+	// Page heading
+	public function pageHeading()
+	{
+		global $Language;
+		if ($this->Heading <> "")
+			return $this->Heading;
+		if (method_exists($this, "tableCaption"))
+			return $this->tableCaption();
+		return "";
+	}
+
+	// Page subheading
+	public function pageSubheading()
+	{
+		global $Language;
+		if ($this->Subheading <> "")
+			return $this->Subheading;
+		if ($this->TableName)
+			return $Language->phrase($this->PageID);
+		return "";
+	}
+
+	// Page name
+	public function pageName()
+	{
+		return CurrentPageName();
+	}
+
+	// Page URL
+	public function pageUrl()
+	{
+		if ($this->_pageUrl == "") {
+			$this->_pageUrl = CurrentPageName() . "?";
+			if ($this->UseTokenInUrl)
+				$this->_pageUrl .= "t=" . $this->TableVar . "&"; // Add page token
+		}
+		return $this->_pageUrl;
+	}
+
+	// Get message
+	public function getMessage()
+	{
+		return isset($_SESSION[SESSION_MESSAGE]) ? $_SESSION[SESSION_MESSAGE] : $this->_message;
+	}
+
+	// Set message
+	public function setMessage($v)
+	{
+		AddMessage($this->_message, $v);
+		$_SESSION[SESSION_MESSAGE] = $this->_message;
+	}
+
+	// Get failure message
+	public function getFailureMessage()
+	{
+		return isset($_SESSION[SESSION_FAILURE_MESSAGE]) ? $_SESSION[SESSION_FAILURE_MESSAGE] : $this->_failureMessage;
+	}
+
+	// Set failure message
+	public function setFailureMessage($v)
+	{
+		AddMessage($this->_failureMessage, $v);
+		$_SESSION[SESSION_FAILURE_MESSAGE] = $this->_failureMessage;
+	}
+
+	// Get success message
+	public function getSuccessMessage()
+	{
+		return isset($_SESSION[SESSION_SUCCESS_MESSAGE]) ? $_SESSION[SESSION_SUCCESS_MESSAGE] : $this->_successMessage;
+	}
+
+	// Set success message
+	public function setSuccessMessage($v)
+	{
+		AddMessage($this->_successMessage, $v);
+		$_SESSION[SESSION_SUCCESS_MESSAGE] = $this->_successMessage;
+	}
+
+	// Get warning message
+	public function getWarningMessage()
+	{
+		return isset($_SESSION[SESSION_WARNING_MESSAGE]) ? $_SESSION[SESSION_WARNING_MESSAGE] : $this->_warningMessage;
+	}
+
+	// Set warning message
+	public function setWarningMessage($v)
+	{
+		AddMessage($this->_warningMessage, $v);
+		$_SESSION[SESSION_WARNING_MESSAGE] = $this->_warningMessage;
+	}
+
+	// Clear message
+	public function clearMessage()
+	{
+		$this->_message = "";
+		$_SESSION[SESSION_MESSAGE] = "";
+	}
+
+	// Clear failure message
+	public function clearFailureMessage()
+	{
+		$this->_failureMessage = "";
+		$_SESSION[SESSION_FAILURE_MESSAGE] = "";
+	}
+
+	// Clear success message
+	public function clearSuccessMessage()
+	{
+		$this->_successMessage = "";
+		$_SESSION[SESSION_SUCCESS_MESSAGE] = "";
+	}
+
+	// Clear warning message
+	public function clearWarningMessage()
+	{
+		$this->_warningMessage = "";
+		$_SESSION[SESSION_WARNING_MESSAGE] = "";
+	}
+
+	// Clear messages
+	public function clearMessages()
+	{
+		$this->clearMessage();
+		$this->clearFailureMessage();
+		$this->clearSuccessMessage();
+		$this->clearWarningMessage();
+	}
+
+	// Show message
+	public function showMessage()
+	{
+		$hidden = FALSE;
+		$html = "";
+
+		// Message
+		$message = $this->getMessage();
+		if (method_exists($this, "Message_Showing"))
+			$this->Message_Showing($message, "");
+		if ($message <> "") { // Message in Session, display
+			if (!$hidden)
+				$message = '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $message;
+			$html .= '<div class="alert alert-info alert-dismissible ew-info"><i class="icon fa fa-info"></i>' . $message . '</div>';
+			$_SESSION[SESSION_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Warning message
+		$warningMessage = $this->getWarningMessage();
+		if (method_exists($this, "Message_Showing"))
+			$this->Message_Showing($warningMessage, "warning");
+		if ($warningMessage <> "") { // Message in Session, display
+			if (!$hidden)
+				$warningMessage = '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $warningMessage;
+			$html .= '<div class="alert alert-warning alert-dismissible ew-warning"><i class="icon fa fa-warning"></i>' . $warningMessage . '</div>';
+			$_SESSION[SESSION_WARNING_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Success message
+		$successMessage = $this->getSuccessMessage();
+		if (method_exists($this, "Message_Showing"))
+			$this->Message_Showing($successMessage, "success");
+		if ($successMessage <> "") { // Message in Session, display
+			if (!$hidden)
+				$successMessage = '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $successMessage;
+			$html .= '<div class="alert alert-success alert-dismissible ew-success"><i class="icon fa fa-check"></i>' . $successMessage . '</div>';
+			$_SESSION[SESSION_SUCCESS_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Failure message
+		$errorMessage = $this->getFailureMessage();
+		if (method_exists($this, "Message_Showing"))
+			$this->Message_Showing($errorMessage, "failure");
+		if ($errorMessage <> "") { // Message in Session, display
+			if (!$hidden)
+				$errorMessage = '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $errorMessage;
+			$html .= '<div class="alert alert-danger alert-dismissible ew-error"><i class="icon fa fa-ban"></i>' . $errorMessage . '</div>';
+			$_SESSION[SESSION_FAILURE_MESSAGE] = ""; // Clear message in Session
+		}
+		echo '<div class="ew-message-dialog' . (($hidden) ? ' d-none' : "") . '">' . $html . '</div>';
+	}
+
+	// Get message as array
+	public function getMessages()
+	{
+		$ar = array();
+
+		// Message
+		$message = $this->getMessage();
+
+		//if (method_exists($this, "Message_Showing"))
+		//	$this->Message_Showing($message, "");
+
+		if ($message <> "") { // Message in Session, display
+			$ar["message"] = $message;
+			$_SESSION[SESSION_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Warning message
+		$warningMessage = $this->getWarningMessage();
+
+		//if (method_exists($this, "Message_Showing"))
+		//	$this->Message_Showing($warningMessage, "warning");
+
+		if ($warningMessage <> "") { // Message in Session, display
+			$ar["warningMessage"] = $warningMessage;
+			$_SESSION[SESSION_WARNING_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Success message
+		$successMessage = $this->getSuccessMessage();
+
+		//if (method_exists($this, "Message_Showing"))
+		//	$this->Message_Showing($successMessage, "success");
+
+		if ($successMessage <> "") { // Message in Session, display
+			$ar["successMessage"] = $successMessage;
+			$_SESSION[SESSION_SUCCESS_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Failure message
+		$failureMessage = $this->getFailureMessage();
+
+		//if (method_exists($this, "Message_Showing"))
+		//	$this->Message_Showing($failureMessage, "failure");
+
+		if ($failureMessage <> "") { // Message in Session, display
+			$ar["failureMessage"] = $failureMessage;
+			$_SESSION[SESSION_FAILURE_MESSAGE] = ""; // Clear message in Session
+		}
+		return $ar;
+	}
+
+	// Show Page Header
+	public function showPageHeader()
+	{
+		$header = $this->PageHeader;
+		$this->Page_DataRendering($header);
+		if ($header <> "") { // Header exists, display
+			echo '<p id="ew-page-header">' . $header . '</p>';
+		}
+	}
+
+	// Show Page Footer
+	public function showPageFooter()
+	{
+		$footer = $this->PageFooter;
+		$this->Page_DataRendered($footer);
+		if ($footer <> "") { // Footer exists, display
+			echo '<p id="ew-page-footer">' . $footer . '</p>';
+		}
+	}
+
+	// Validate page request
+	protected function isPageRequest()
+	{
+		global $CurrentForm;
+		if ($this->UseTokenInUrl) {
+			if ($CurrentForm)
+				return ($this->TableVar == $CurrentForm->getValue("t"));
+			if (Get("t") !== NULL)
+				return ($this->TableVar == Get("t"));
+		}
+		return TRUE;
+	}
+
+	// Valid Post
+	protected function validPost()
+	{
+		if (!$this->CheckToken || !IsPost() || IsApi())
+			return TRUE;
+		if (Post(TOKEN_NAME) === NULL)
+			return FALSE;
+		$fn = PROJECT_NAMESPACE . CHECK_TOKEN_FUNC;
+		if (is_callable($fn))
+			return $fn(Post(TOKEN_NAME), $this->TokenTimeout);
+		return FALSE;
+	}
+
+	// Create Token
+	public function createToken()
+	{
+		global $CurrentToken;
+		$fn = PROJECT_NAMESPACE . CREATE_TOKEN_FUNC; // Always create token, required by API file/lookup request
+		if ($this->Token == "" && is_callable($fn)) // Create token
+			$this->Token = $fn();
+		$CurrentToken = $this->Token; // Save to global variable
+	}
+
+	// Constructor
+	public function __construct()
+	{
+		global $Language, $COMPOSITE_KEY_SEPARATOR;
+		global $UserTable, $UserTableConn;
+
+		// Initialize
+		$this->FormActionName .= "_" . $this->FormName;
+		$this->FormKeyName .= "_" . $this->FormName;
+		$this->FormOldKeyName .= "_" . $this->FormName;
+		$this->FormBlankRowName .= "_" . $this->FormName;
+		$this->FormKeyCountName .= "_" . $this->FormName;
+		$GLOBALS["Grid"] = &$this;
+		$this->TokenTimeout = SessionTimeoutTime();
+
+		// Language object
+		if (!isset($Language))
+			$Language = new Language();
+
+		// Parent constuctor
+		parent::__construct();
+
+		// Table object (patient_investigations)
+		if (!isset($GLOBALS["patient_investigations"]) || get_class($GLOBALS["patient_investigations"]) == PROJECT_NAMESPACE . "patient_investigations") {
+			$GLOBALS["patient_investigations"] = &$this;
+
+			// $GLOBALS["MasterTable"] = &$GLOBALS["Table"];
+			// if (!isset($GLOBALS["Table"]))
+			// 	$GLOBALS["Table"] = &$GLOBALS["patient_investigations"];
+
+		}
+		$this->AddUrl = "patient_investigationsadd.php";
+		$this->CancelUrl = $this->pageUrl() . "action=cancel";
+
+		// Table object (user_login)
+		if (!isset($GLOBALS['user_login']))
+			$GLOBALS['user_login'] = new user_login();
+
+		// Page ID
+		if (!defined(PROJECT_NAMESPACE . "PAGE_ID"))
+			define(PROJECT_NAMESPACE . "PAGE_ID", 'grid');
+
+		// Table name (for backward compatibility)
+		if (!defined(PROJECT_NAMESPACE . "TABLE_NAME"))
+			define(PROJECT_NAMESPACE . "TABLE_NAME", 'patient_investigations');
+
+		// Start timer
+		if (!isset($GLOBALS["DebugTimer"]))
+			$GLOBALS["DebugTimer"] = new Timer();
+
+		// Debug message
+		LoadDebugMessage();
+
+		// Open connection
+		if (!isset($GLOBALS["Conn"]))
+			$GLOBALS["Conn"] = &$this->getConnection();
+
+		// User table object (user_login)
+		if (!isset($UserTable)) {
+			$UserTable = new user_login();
+			$UserTableConn = Conn($UserTable->Dbid);
+		}
+
+		// List options
+		$this->ListOptions = new ListOptions();
+		$this->ListOptions->TableVar = $this->TableVar;
+
+		// Other options
+		if (!$this->OtherOptions)
+			$this->OtherOptions = new ListOptionsArray();
+		$this->OtherOptions["addedit"] = new ListOptions();
+		$this->OtherOptions["addedit"]->Tag = "div";
+		$this->OtherOptions["addedit"]->TagClassName = "ew-add-edit-option";
+	}
+
+	// Terminate page
+	public function terminate($url = "")
+	{
+		global $ExportFileName, $TempImages;
+
+		// Export
+		global $EXPORT, $patient_investigations;
+		if ($this->CustomExport && $this->CustomExport == $this->Export && array_key_exists($this->CustomExport, $EXPORT)) {
+				$content = ob_get_contents();
+			if ($ExportFileName == "")
+				$ExportFileName = $this->TableVar;
+			$class = PROJECT_NAMESPACE . $EXPORT[$this->CustomExport];
+			if (class_exists($class)) {
+				$doc = new $class($patient_investigations);
+				$doc->Text = @$content;
+				if ($this->isExport("email"))
+					echo $this->exportEmail($doc->Text);
+				else
+					$doc->export();
+				DeleteTempImages(); // Delete temp images
+				exit();
+			}
+		}
+
+//		$GLOBALS["Table"] = &$GLOBALS["MasterTable"];
+		unset($GLOBALS["Grid"]);
+		if ($url === "")
+			return;
+		if (!IsApi())
+			$this->Page_Redirecting($url);
+
+		// Return for API
+		if (IsApi()) {
+			$res = $url === TRUE;
+			if (!$res) // Show error
+				WriteJson(array_merge(["success" => FALSE], $this->getMessages()));
+			return;
+		}
+
+		// Go to URL if specified
+		if ($url <> "") {
+			if (!DEBUG_ENABLED && ob_get_length())
+				ob_end_clean();
+			SaveDebugMessage();
+			AddHeader("Location", $url);
+		}
+		exit();
+	}
+
+	// Get records from recordset
+	protected function getRecordsFromRecordset($rs, $current = FALSE)
+	{
+		$rows = array();
+		if (is_object($rs)) { // Recordset
+			while ($rs && !$rs->EOF) {
+				$this->loadRowValues($rs); // Set up DbValue/CurrentValue
+				$row = $this->getRecordFromArray($rs->fields);
+				if ($current)
+					return $row;
+				else
+					$rows[] = $row;
+				$rs->moveNext();
+			}
+		} elseif (is_array($rs)) {
+			foreach ($rs as $ar) {
+				$row = $this->getRecordFromArray($ar);
+				if ($current)
+					return $row;
+				else
+					$rows[] = $row;
+			}
+		}
+		return $rows;
+	}
+
+	// Get record from array
+	protected function getRecordFromArray($ar)
+	{
+		$row = array();
+		if (is_array($ar)) {
+			foreach ($ar as $fldname => $val) {
+				if (array_key_exists($fldname, $this->fields) && ($this->fields[$fldname]->Visible || $this->fields[$fldname]->IsPrimaryKey)) { // Primary key or Visible
+					$fld = &$this->fields[$fldname];
+					if ($fld->HtmlTag == "FILE") { // Upload field
+						if (EmptyValue($val)) {
+							$row[$fldname] = NULL;
+						} else {
+							if ($fld->DataType == DATATYPE_BLOB) {
+
+								//$url = FullUrl($fld->TableVar . "/" . API_FILE_ACTION . "/" . $fld->Param . "/" . rawurlencode($this->getRecordKeyValue($ar))); // URL rewrite format
+								$url = FullUrl(GetPageName(API_URL) . "?" . API_OBJECT_NAME . "=" . $fld->TableVar . "&" . API_ACTION_NAME . "=" . API_FILE_ACTION . "&" . API_FIELD_NAME . "=" . $fld->Param . "&" . API_KEY_NAME . "=" . rawurlencode($this->getRecordKeyValue($ar))); // Query string format
+								$row[$fldname] = ["mimeType" => ContentType($val), "url" => $url];
+							} elseif (!$fld->UploadMultiple || !ContainsString($val, MULTIPLE_UPLOAD_SEPARATOR)) { // Single file
+								$row[$fldname] = ["mimeType" => MimeContentType($val), "url" => FullUrl($fld->hrefPath() . $val)];
+							} else { // Multiple files
+								$files = explode(MULTIPLE_UPLOAD_SEPARATOR, $val);
+								$ar = [];
+								foreach ($files as $file) {
+									if (!EmptyValue($file))
+										$ar[] = ["type" => MimeContentType($file), "url" => FullUrl($fld->hrefPath() . $file)];
+								}
+								$row[$fldname] = $ar;
+							}
+						}
+					} else {
+						$row[$fldname] = $val;
+					}
+				}
+			}
+		}
+		return $row;
+	}
+
+	// Get record key value from array
+	protected function getRecordKeyValue($ar)
+	{
+		global $COMPOSITE_KEY_SEPARATOR;
+		$key = "";
+		if (is_array($ar)) {
+			$key .= @$ar['id'];
+		}
+		return $key;
+	}
+
+	/**
+	 * Hide fields for add/edit
+	 *
+	 * @return void
+	 */
+	protected function hideFieldsForAddEdit()
+	{
+		if ($this->isAdd() || $this->isCopy() || $this->isGridAdd())
+			$this->id->Visible = FALSE;
+	}
+
+	// Class variables
+	public $ListOptions; // List options
+	public $ExportOptions; // Export options
+	public $SearchOptions; // Search options
+	public $OtherOptions; // Other options
+	public $FilterOptions; // Filter options
+	public $ImportOptions; // Import options
+	public $ListActions; // List actions
+	public $SelectedCount = 0;
+	public $SelectedIndex = 0;
+	public $ShowOtherOptions = FALSE;
+	public $DisplayRecs = 20;
+	public $StartRec;
+	public $StopRec;
+	public $TotalRecs = 0;
+	public $RecRange = 10;
+	public $Pager;
+	public $AutoHidePager = AUTO_HIDE_PAGER;
+	public $AutoHidePageSizeSelector = AUTO_HIDE_PAGE_SIZE_SELECTOR;
+	public $DefaultSearchWhere = ""; // Default search WHERE clause
+	public $SearchWhere = ""; // Search WHERE clause
+	public $RecCnt = 0; // Record count
+	public $EditRowCnt;
+	public $StartRowCnt = 1;
+	public $RowCnt = 0;
+	public $Attrs = array(); // Row attributes and cell attributes
+	public $RowIndex = 0; // Row index
+	public $KeyCount = 0; // Key count
+	public $RowAction = ""; // Row action
+	public $RowOldKey = ""; // Row old key (for copy)
+	public $MultiColumnClass = "col-sm";
+	public $MultiColumnEditClass = "w-100";
+	public $DbMasterFilter = ""; // Master filter
+	public $DbDetailFilter = ""; // Detail filter
+	public $MasterRecordExists;
+	public $MultiSelectKey;
+	public $Command;
+	public $RestoreSearch = FALSE;
+	public $DetailPages;
+	public $OldRecordset;
+
+	//
+	// Page run
+	//
+
+	public function run()
+	{
+		global $ExportType, $CustomExportType, $ExportFileName, $UserProfile, $Language, $Security, $RequestSecurity, $CurrentForm,
+			$FormError, $SearchError, $EXPORT;
+
+		// Init Session data for API request if token found
+		if (IsApi() && session_status() !== PHP_SESSION_ACTIVE) {
+			$func = PROJECT_NAMESPACE . CHECK_TOKEN_FUNC;
+			if (is_callable($func) && Param(TOKEN_NAME) !== NULL && $func(Param(TOKEN_NAME), SessionTimeoutTime()))
+				session_start();
+		}
+
+		// User profile
+		$UserProfile = new UserProfile();
+
+		// Security
+		$Security = new AdvancedSecurity();
+		$validRequest = FALSE;
+
+		// Check security for API request
+		If (IsApi()) {
+
+			// Check token first
+			$func = PROJECT_NAMESPACE . CHECK_TOKEN_FUNC;
+			if (is_callable($func) && Post(TOKEN_NAME) !== NULL)
+				$validRequest = $func(Post(TOKEN_NAME), SessionTimeoutTime());
+			elseif (is_array($RequestSecurity) && @$RequestSecurity["username"] <> "") // Login user for API request
+				$Security->loginUser(@$RequestSecurity["username"], @$RequestSecurity["userid"], @$RequestSecurity["parentuserid"], @$RequestSecurity["userlevelid"]);
+		}
+		if (!$validRequest) {
+			if (!$Security->isLoggedIn())
+				$Security->autoLogin();
+			if ($Security->isLoggedIn())
+				$Security->TablePermission_Loading();
+			$Security->loadCurrentUserLevel($this->ProjectID . $this->TableName);
+			if ($Security->isLoggedIn())
+				$Security->TablePermission_Loaded();
+			if (!$Security->canList()) {
+				$Security->saveLastUrl();
+				$this->setFailureMessage(DeniedMessage()); // Set no permission
+				$this->terminate(GetUrl("index.php"));
+				return;
+			}
+		}
+
+		// Get grid add count
+		$gridaddcnt = Get(TABLE_GRID_ADD_ROW_COUNT, "");
+		if (is_numeric($gridaddcnt) && $gridaddcnt > 0)
+			$this->GridAddRowCount = $gridaddcnt;
+
+		// Set up list options
+		$this->setupListOptions();
+		$this->id->setVisibility();
+		$this->Reception->Visible = FALSE;
+		$this->PatientId->Visible = FALSE;
+		$this->PatientName->Visible = FALSE;
+		$this->Investigation->setVisibility();
+		$this->Value->setVisibility();
+		$this->NormalRange->setVisibility();
+		$this->mrnno->setVisibility();
+		$this->Age->setVisibility();
+		$this->Gender->setVisibility();
+		$this->profilePic->Visible = FALSE;
+		$this->SampleCollected->setVisibility();
+		$this->SampleCollectedBy->setVisibility();
+		$this->ResultedDate->setVisibility();
+		$this->ResultedBy->setVisibility();
+		$this->Modified->setVisibility();
+		$this->ModifiedBy->setVisibility();
+		$this->Created->setVisibility();
+		$this->CreatedBy->setVisibility();
+		$this->GroupHead->setVisibility();
+		$this->Cost->setVisibility();
+		$this->PaymentStatus->setVisibility();
+		$this->PayMode->setVisibility();
+		$this->VoucherNo->setVisibility();
+		$this->InvestigationMultiselect->Visible = FALSE;
+		$this->hideFieldsForAddEdit();
+
+		// Global Page Loading event (in userfn*.php)
+		Page_Loading();
+
+		// Page Load event
+		$this->Page_Load();
+
+		// Check token
+		if (!$this->validPost()) {
+			Write($Language->phrase("InvalidPostRequest"));
+			$this->terminate();
+		}
+
+		// Create Token
+		$this->createToken();
+
+		// Set up master detail parameters
+		$this->setupMasterParms();
+
+		// Setup other options
+		$this->setupOtherOptions();
+
+		// Set up lookup cache
+		// Search filters
+
+		$srchAdvanced = ""; // Advanced search filter
+		$srchBasic = ""; // Basic search filter
+		$filter = "";
+
+		// Get command
+		$this->Command = strtolower(Get("cmd"));
+		if ($this->isPageRequest()) { // Validate request
+
+			// Set up records per page
+			$this->setupDisplayRecs();
+
+			// Handle reset command
+			$this->resetCmd();
+
+			// Hide list options
+			if ($this->isExport()) {
+				$this->ListOptions->hideAllOptions(array("sequence"));
+				$this->ListOptions->UseDropDownButton = FALSE; // Disable drop down button
+				$this->ListOptions->UseButtonGroup = FALSE; // Disable button group
+			} elseif ($this->isGridAdd() || $this->isGridEdit()) {
+				$this->ListOptions->hideAllOptions();
+				$this->ListOptions->UseDropDownButton = FALSE; // Disable drop down button
+				$this->ListOptions->UseButtonGroup = FALSE; // Disable button group
+			}
+
+			// Show grid delete link for grid add / grid edit
+			if ($this->AllowAddDeleteRow) {
+				if ($this->isGridAdd() || $this->isGridEdit()) {
+					$item = &$this->ListOptions->getItem("griddelete");
+					if ($item)
+						$item->Visible = TRUE;
+				}
+			}
+
+			// Set up sorting order
+			$this->setupSortOrder();
+		}
+
+		// Restore display records
+		if ($this->Command <> "json" && $this->getRecordsPerPage() <> "") {
+			$this->DisplayRecs = $this->getRecordsPerPage(); // Restore from Session
+		} else {
+			$this->DisplayRecs = 20; // Load default
+		}
+
+		// Load Sorting Order
+		if ($this->Command <> "json")
+			$this->loadSortOrder();
+
+		// Build filter
+		$filter = "";
+		if (!$Security->canList())
+			$filter = "(0=1)"; // Filter all records
+
+		// Restore master/detail filter
+		$this->DbMasterFilter = $this->getMasterFilter(); // Restore master filter
+		$this->DbDetailFilter = $this->getDetailFilter(); // Restore detail filter
+		AddFilter($filter, $this->DbDetailFilter);
+		AddFilter($filter, $this->SearchWhere);
+
+		// Load master record
+		if ($this->CurrentMode <> "add" && $this->getMasterFilter() <> "" && $this->getCurrentMasterTable() == "ip_admission") {
+			global $ip_admission;
+			$rsmaster = $ip_admission->loadRs($this->DbMasterFilter);
+			$this->MasterRecordExists = ($rsmaster && !$rsmaster->EOF);
+			if (!$this->MasterRecordExists) {
+				$this->setFailureMessage($Language->phrase("NoRecord")); // Set no record found
+				$this->terminate("ip_admissionlist.php"); // Return to master page
+			} else {
+				$ip_admission->loadListRowValues($rsmaster);
+				$ip_admission->RowType = ROWTYPE_MASTER; // Master row
+				$ip_admission->renderListRow();
+				$rsmaster->close();
+			}
+		}
+
+		// Set up filter
+		if ($this->Command == "json") {
+			$this->UseSessionForListSql = FALSE; // Do not use session for ListSQL
+			$this->CurrentFilter = $filter;
+		} else {
+			$this->setSessionWhere($filter);
+			$this->CurrentFilter = "";
+		}
+		if ($this->isGridAdd()) {
+			if ($this->CurrentMode == "copy") {
+				$selectLimit = $this->UseSelectLimit;
+				if ($selectLimit) {
+					$this->TotalRecs = $this->listRecordCount();
+					$this->Recordset = $this->loadRecordset($this->StartRec - 1, $this->DisplayRecs);
+				} else {
+					if ($this->Recordset = $this->loadRecordset())
+						$this->TotalRecs = $this->Recordset->RecordCount();
+				}
+				$this->StartRec = 1;
+				$this->DisplayRecs = $this->TotalRecs;
+			} else {
+				$this->CurrentFilter = "0=1";
+				$this->StartRec = 1;
+				$this->DisplayRecs = $this->GridAddRowCount;
+			}
+			$this->TotalRecs = $this->DisplayRecs;
+			$this->StopRec = $this->DisplayRecs;
+		} else {
+			$selectLimit = $this->UseSelectLimit;
+			if ($selectLimit) {
+				$this->TotalRecs = $this->listRecordCount();
+			} else {
+				if ($this->Recordset = $this->loadRecordset())
+					$this->TotalRecs = $this->Recordset->RecordCount();
+			}
+			$this->StartRec = 1;
+			$this->DisplayRecs = $this->TotalRecs; // Display all records
+			if ($selectLimit)
+				$this->Recordset = $this->loadRecordset($this->StartRec - 1, $this->DisplayRecs);
+
+			// Set no record found message
+			if (!$this->CurrentAction && $this->TotalRecs == 0) {
+				if (!$Security->canList())
+					$this->setWarningMessage(DeniedMessage());
+				if ($this->SearchWhere == "0=101")
+					$this->setWarningMessage($Language->phrase("EnterSearchCriteria"));
+				else
+					$this->setWarningMessage($Language->phrase("NoRecord"));
+			}
+		}
+
+		// Normal return
+		if (IsApi()) {
+			$rows = $this->getRecordsFromRecordset($this->Recordset);
+			$this->Recordset->close();
+			WriteJson(["success" => TRUE, $this->TableVar => $rows, "totalRecordCount" => $this->TotalRecs]);
+			$this->terminate(TRUE);
+		}
+	}
+
+	// Set up number of records displayed per page
+	protected function setupDisplayRecs()
+	{
+		$wrk = Get(TABLE_REC_PER_PAGE, "");
+		if ($wrk <> "") {
+			if (is_numeric($wrk)) {
+				$this->DisplayRecs = (int)$wrk;
+			} else {
+				if (SameText($wrk, "all")) { // Display all records
+					$this->DisplayRecs = -1;
+				} else {
+					$this->DisplayRecs = 20; // Non-numeric, load default
+				}
+			}
+			$this->setRecordsPerPage($this->DisplayRecs); // Save to Session
+
+			// Reset start position
+			$this->StartRec = 1;
+			$this->setStartRecordNumber($this->StartRec);
+		}
+	}
+
+	// Exit inline mode
+	protected function clearInlineMode()
+	{
+		$this->Cost->FormValue = ""; // Clear form value
+		$this->LastAction = $this->CurrentAction; // Save last action
+		$this->CurrentAction = ""; // Clear action
+		$_SESSION[SESSION_INLINE_MODE] = ""; // Clear inline mode
+	}
+
+	// Switch to Grid Add mode
+	protected function gridAddMode()
+	{
+		$this->CurrentAction = "gridadd";
+		$_SESSION[SESSION_INLINE_MODE] = "gridadd";
+		$this->hideFieldsForAddEdit();
+	}
+
+	// Switch to Grid Edit mode
+	protected function gridEditMode()
+	{
+		$this->CurrentAction = "gridedit";
+		$_SESSION[SESSION_INLINE_MODE] = "gridedit";
+		$this->hideFieldsForAddEdit();
+	}
+
+	// Perform update to grid
+	public function gridUpdate()
+	{
+		global $Language, $CurrentForm, $FormError;
+		$gridUpdate = TRUE;
+
+		// Get old recordset
+		$this->CurrentFilter = $this->buildKeyFilter();
+		if ($this->CurrentFilter == "")
+			$this->CurrentFilter = "0=1";
+		$sql = $this->getCurrentSql();
+		$conn = &$this->getConnection();
+		if ($rs = $conn->execute($sql)) {
+			$rsold = $rs->getRows();
+			$rs->close();
+		}
+
+		// Call Grid Updating event
+		if (!$this->Grid_Updating($rsold)) {
+			if ($this->getFailureMessage() == "")
+				$this->setFailureMessage($Language->phrase("GridEditCancelled")); // Set grid edit cancelled message
+			return FALSE;
+		}
+		$key = "";
+
+		// Update row index and get row key
+		$CurrentForm->Index = -1;
+		$rowcnt = strval($CurrentForm->getValue($this->FormKeyCountName));
+		if ($rowcnt == "" || !is_numeric($rowcnt))
+			$rowcnt = 0;
+
+		// Update all rows based on key
+		for ($rowindex = 1; $rowindex <= $rowcnt; $rowindex++) {
+			$CurrentForm->Index = $rowindex;
+			$rowkey = strval($CurrentForm->getValue($this->FormKeyName));
+			$rowaction = strval($CurrentForm->getValue($this->FormActionName));
+
+			// Load all values and keys
+			if ($rowaction <> "insertdelete") { // Skip insert then deleted rows
+				$this->loadFormValues(); // Get form values
+				if ($rowaction == "" || $rowaction == "edit" || $rowaction == "delete") {
+					$gridUpdate = $this->setupKeyValues($rowkey); // Set up key values
+				} else {
+					$gridUpdate = TRUE;
+				}
+
+				// Skip empty row
+				if ($rowaction == "insert" && $this->emptyRow()) {
+
+					// No action required
+				// Validate form and insert/update/delete record
+
+				} elseif ($gridUpdate) {
+					if ($rowaction == "delete") {
+						$this->CurrentFilter = $this->getRecordFilter();
+						$gridUpdate = $this->deleteRows(); // Delete this row
+					} else if (!$this->validateForm()) {
+						$gridUpdate = FALSE; // Form error, reset action
+						$this->setFailureMessage($FormError);
+					} else {
+						if ($rowaction == "insert") {
+							$gridUpdate = $this->addRow(); // Insert this row
+						} else {
+							if ($rowkey <> "") {
+								$this->SendEmail = FALSE; // Do not send email on update success
+								$gridUpdate = $this->editRow(); // Update this row
+							}
+						} // End update
+					}
+				}
+				if ($gridUpdate) {
+					if ($key <> "")
+						$key .= ", ";
+					$key .= $rowkey;
+				} else {
+					break;
+				}
+			}
+		}
+		if ($gridUpdate) {
+
+			// Get new recordset
+			if ($rs = $conn->execute($sql)) {
+				$rsnew = $rs->getRows();
+				$rs->close();
+			}
+
+			// Call Grid_Updated event
+			$this->Grid_Updated($rsold, $rsnew);
+			$this->clearInlineMode(); // Clear inline edit mode
+		} else {
+			if ($this->getFailureMessage() == "")
+				$this->setFailureMessage($Language->phrase("UpdateFailed")); // Set update failed message
+		}
+		return $gridUpdate;
+	}
+
+	// Build filter for all keys
+	protected function buildKeyFilter()
+	{
+		global $CurrentForm;
+		$wrkFilter = "";
+
+		// Update row index and get row key
+		$rowindex = 1;
+		$CurrentForm->Index = $rowindex;
+		$thisKey = strval($CurrentForm->getValue($this->FormKeyName));
+		while ($thisKey <> "") {
+			if ($this->setupKeyValues($thisKey)) {
+				$filter = $this->getRecordFilter();
+				if ($wrkFilter <> "")
+					$wrkFilter .= " OR ";
+				$wrkFilter .= $filter;
+			} else {
+				$wrkFilter = "0=1";
+				break;
+			}
+
+			// Update row index and get row key
+			$rowindex++; // Next row
+			$CurrentForm->Index = $rowindex;
+			$thisKey = strval($CurrentForm->getValue($this->FormKeyName));
+		}
+		return $wrkFilter;
+	}
+
+	// Set up key values
+	protected function setupKeyValues($key)
+	{
+		$arKeyFlds = explode($GLOBALS["COMPOSITE_KEY_SEPARATOR"], $key);
+		if (count($arKeyFlds) >= 1) {
+			$this->id->setFormValue($arKeyFlds[0]);
+			if (!is_numeric($this->id->FormValue))
+				return FALSE;
+		}
+		return TRUE;
+	}
+
+	// Perform Grid Add
+	public function gridInsert()
+	{
+		global $Language, $CurrentForm, $FormError;
+		$rowindex = 1;
+		$gridInsert = FALSE;
+		$conn = &$this->getConnection();
+
+		// Call Grid Inserting event
+		if (!$this->Grid_Inserting()) {
+			if ($this->getFailureMessage() == "")
+				$this->setFailureMessage($Language->phrase("GridAddCancelled")); // Set grid add cancelled message
+			return FALSE;
+		}
+
+		// Init key filter
+		$wrkfilter = "";
+		$addcnt = 0;
+		$key = "";
+
+		// Get row count
+		$CurrentForm->Index = -1;
+		$rowcnt = strval($CurrentForm->getValue($this->FormKeyCountName));
+		if ($rowcnt == "" || !is_numeric($rowcnt))
+			$rowcnt = 0;
+
+		// Insert all rows
+		for ($rowindex = 1; $rowindex <= $rowcnt; $rowindex++) {
+
+			// Load current row values
+			$CurrentForm->Index = $rowindex;
+			$rowaction = strval($CurrentForm->getValue($this->FormActionName));
+			if ($rowaction <> "" && $rowaction <> "insert")
+				continue; // Skip
+			if ($rowaction == "insert") {
+				$this->RowOldKey = strval($CurrentForm->getValue($this->FormOldKeyName));
+				$this->loadOldRecord(); // Load old record
+			}
+			$this->loadFormValues(); // Get form values
+			if (!$this->emptyRow()) {
+				$addcnt++;
+				$this->SendEmail = FALSE; // Do not send email on insert success
+
+				// Validate form
+				if (!$this->validateForm()) {
+					$gridInsert = FALSE; // Form error, reset action
+					$this->setFailureMessage($FormError);
+				} else {
+					$gridInsert = $this->addRow($this->OldRecordset); // Insert this row
+				}
+				if ($gridInsert) {
+					if ($key <> "")
+						$key .= $GLOBALS["COMPOSITE_KEY_SEPARATOR"];
+					$key .= $this->id->CurrentValue;
+
+					// Add filter for this record
+					$filter = $this->getRecordFilter();
+					if ($wrkfilter <> "")
+						$wrkfilter .= " OR ";
+					$wrkfilter .= $filter;
+				} else {
+					break;
+				}
+			}
+		}
+		if ($addcnt == 0) { // No record inserted
+			$this->clearInlineMode(); // Clear grid add mode and return
+			return TRUE;
+		}
+		if ($gridInsert) {
+
+			// Get new recordset
+			$this->CurrentFilter = $wrkfilter;
+			$sql = $this->getCurrentSql();
+			if ($rs = $conn->execute($sql)) {
+				$rsnew = $rs->getRows();
+				$rs->close();
+			}
+
+			// Call Grid_Inserted event
+			$this->Grid_Inserted($rsnew);
+			$this->clearInlineMode(); // Clear grid add mode
+		} else {
+			if ($this->getFailureMessage() == "")
+				$this->setFailureMessage($Language->phrase("InsertFailed")); // Set insert failed message
+		}
+		return $gridInsert;
+	}
+
+	// Check if empty row
+	public function emptyRow()
+	{
+		global $CurrentForm;
+		if ($CurrentForm->hasValue("x_Investigation") && $CurrentForm->hasValue("o_Investigation") && $this->Investigation->CurrentValue <> $this->Investigation->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Value") && $CurrentForm->hasValue("o_Value") && $this->Value->CurrentValue <> $this->Value->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_NormalRange") && $CurrentForm->hasValue("o_NormalRange") && $this->NormalRange->CurrentValue <> $this->NormalRange->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_mrnno") && $CurrentForm->hasValue("o_mrnno") && $this->mrnno->CurrentValue <> $this->mrnno->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Age") && $CurrentForm->hasValue("o_Age") && $this->Age->CurrentValue <> $this->Age->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Gender") && $CurrentForm->hasValue("o_Gender") && $this->Gender->CurrentValue <> $this->Gender->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_SampleCollected") && $CurrentForm->hasValue("o_SampleCollected") && $this->SampleCollected->CurrentValue <> $this->SampleCollected->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_SampleCollectedBy") && $CurrentForm->hasValue("o_SampleCollectedBy") && $this->SampleCollectedBy->CurrentValue <> $this->SampleCollectedBy->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_ResultedDate") && $CurrentForm->hasValue("o_ResultedDate") && $this->ResultedDate->CurrentValue <> $this->ResultedDate->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_ResultedBy") && $CurrentForm->hasValue("o_ResultedBy") && $this->ResultedBy->CurrentValue <> $this->ResultedBy->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Modified") && $CurrentForm->hasValue("o_Modified") && $this->Modified->CurrentValue <> $this->Modified->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_ModifiedBy") && $CurrentForm->hasValue("o_ModifiedBy") && $this->ModifiedBy->CurrentValue <> $this->ModifiedBy->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Created") && $CurrentForm->hasValue("o_Created") && $this->Created->CurrentValue <> $this->Created->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_CreatedBy") && $CurrentForm->hasValue("o_CreatedBy") && $this->CreatedBy->CurrentValue <> $this->CreatedBy->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_GroupHead") && $CurrentForm->hasValue("o_GroupHead") && $this->GroupHead->CurrentValue <> $this->GroupHead->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Cost") && $CurrentForm->hasValue("o_Cost") && $this->Cost->CurrentValue <> $this->Cost->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_PaymentStatus") && $CurrentForm->hasValue("o_PaymentStatus") && $this->PaymentStatus->CurrentValue <> $this->PaymentStatus->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_PayMode") && $CurrentForm->hasValue("o_PayMode") && $this->PayMode->CurrentValue <> $this->PayMode->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_VoucherNo") && $CurrentForm->hasValue("o_VoucherNo") && $this->VoucherNo->CurrentValue <> $this->VoucherNo->OldValue)
+			return FALSE;
+		return TRUE;
+	}
+
+	// Validate grid form
+	public function validateGridForm()
+	{
+		global $CurrentForm;
+
+		// Get row count
+		$CurrentForm->Index = -1;
+		$rowcnt = strval($CurrentForm->getValue($this->FormKeyCountName));
+		if ($rowcnt == "" || !is_numeric($rowcnt))
+			$rowcnt = 0;
+
+		// Validate all records
+		for ($rowindex = 1; $rowindex <= $rowcnt; $rowindex++) {
+
+			// Load current row values
+			$CurrentForm->Index = $rowindex;
+			$rowaction = strval($CurrentForm->getValue($this->FormActionName));
+			if ($rowaction <> "delete" && $rowaction <> "insertdelete") {
+				$this->loadFormValues(); // Get form values
+				if ($rowaction == "insert" && $this->emptyRow()) {
+
+					// Ignore
+				} else if (!$this->validateForm()) {
+					return FALSE;
+				}
+			}
+		}
+		return TRUE;
+	}
+
+	// Get all form values of the grid
+	public function getGridFormValues()
+	{
+		global $CurrentForm;
+
+		// Get row count
+		$CurrentForm->Index = -1;
+		$rowcnt = strval($CurrentForm->getValue($this->FormKeyCountName));
+		if ($rowcnt == "" || !is_numeric($rowcnt))
+			$rowcnt = 0;
+		$rows = array();
+
+		// Loop through all records
+		for ($rowindex = 1; $rowindex <= $rowcnt; $rowindex++) {
+
+			// Load current row values
+			$CurrentForm->Index = $rowindex;
+			$rowaction = strval($CurrentForm->getValue($this->FormActionName));
+			if ($rowaction <> "delete" && $rowaction <> "insertdelete") {
+				$this->loadFormValues(); // Get form values
+				if ($rowaction == "insert" && $this->emptyRow()) {
+
+					// Ignore
+				} else {
+					$rows[] = $this->getFieldValues("FormValue"); // Return row as array
+				}
+			}
+		}
+		return $rows; // Return as array of array
+	}
+
+	// Restore form values for current row
+	public function restoreCurrentRowFormValues($idx)
+	{
+		global $CurrentForm;
+
+		// Get row based on current index
+		$CurrentForm->Index = $idx;
+		$this->loadFormValues(); // Load form values
+	}
+
+	// Set up sort parameters
+	protected function setupSortOrder()
+	{
+
+		// Check for "order" parameter
+		if (Get("order") !== NULL) {
+			$this->CurrentOrder = Get("order");
+			$this->CurrentOrderType = Get("ordertype", "");
+			$this->setStartRecordNumber(1); // Reset start position
+		}
+	}
+
+	// Load sort order parameters
+	protected function loadSortOrder()
+	{
+		$orderBy = $this->getSessionOrderBy(); // Get ORDER BY from Session
+		if ($orderBy == "") {
+			if ($this->getSqlOrderBy() <> "") {
+				$orderBy = $this->getSqlOrderBy();
+				$this->setSessionOrderBy($orderBy);
+				$this->id->setSort("DESC");
+			}
+		}
+	}
+
+	// Reset command
+	// - cmd=reset (Reset search parameters)
+	// - cmd=resetall (Reset search and master/detail parameters)
+	// - cmd=resetsort (Reset sort parameters)
+
+	protected function resetCmd()
+	{
+
+		// Check if reset command
+		if (substr($this->Command,0,5) == "reset") {
+
+			// Reset master/detail keys
+			if ($this->Command == "resetall") {
+				$this->setCurrentMasterTable(""); // Clear master table
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+				$this->Reception->setSessionValue("");
+				$this->PatientId->setSessionValue("");
+				$this->mrnno->setSessionValue("");
+			}
+
+			// Reset sorting order
+			if ($this->Command == "resetsort") {
+				$orderBy = "";
+				$this->setSessionOrderBy($orderBy);
+			}
+
+			// Reset start position
+			$this->StartRec = 1;
+			$this->setStartRecordNumber($this->StartRec);
+		}
+	}
+
+	// Set up list options
+	protected function setupListOptions()
+	{
+		global $Security, $Language;
+
+		// "griddelete"
+		if ($this->AllowAddDeleteRow) {
+			$item = &$this->ListOptions->add("griddelete");
+			$item->CssClass = "text-nowrap";
+			$item->OnLeft = TRUE;
+			$item->Visible = FALSE; // Default hidden
+		}
+
+		// Add group option item
+		$item = &$this->ListOptions->add($this->ListOptions->GroupOptionName);
+		$item->Body = "";
+		$item->OnLeft = TRUE;
+		$item->Visible = FALSE;
+
+		// "view"
+		$item = &$this->ListOptions->add("view");
+		$item->CssClass = "text-nowrap";
+		$item->Visible = $Security->canView();
+		$item->OnLeft = TRUE;
+
+		// "edit"
+		$item = &$this->ListOptions->add("edit");
+		$item->CssClass = "text-nowrap";
+		$item->Visible = $Security->canEdit();
+		$item->OnLeft = TRUE;
+
+		// "copy"
+		$item = &$this->ListOptions->add("copy");
+		$item->CssClass = "text-nowrap";
+		$item->Visible = $Security->canAdd();
+		$item->OnLeft = TRUE;
+
+		// "delete"
+		$item = &$this->ListOptions->add("delete");
+		$item->CssClass = "text-nowrap";
+		$item->Visible = $Security->canDelete();
+		$item->OnLeft = TRUE;
+
+		// Drop down button for ListOptions
+		$this->ListOptions->UseDropDownButton = FALSE;
+		$this->ListOptions->DropDownButtonPhrase = $Language->phrase("ButtonListOptions");
+		$this->ListOptions->UseButtonGroup = FALSE;
+		if ($this->ListOptions->UseButtonGroup && IsMobile())
+			$this->ListOptions->UseDropDownButton = TRUE;
+
+		//$this->ListOptions->ButtonClass = ""; // Class for button group
+		// Call ListOptions_Load event
+
+		$this->ListOptions_Load();
+		$item = &$this->ListOptions->getItem($this->ListOptions->GroupOptionName);
+		$item->Visible = $this->ListOptions->groupOptionVisible();
+	}
+
+	// Render list options
+	public function renderListOptions()
+	{
+		global $Security, $Language, $CurrentForm;
+		$this->ListOptions->loadDefault();
+
+		// Call ListOptions_Rendering event
+		$this->ListOptions_Rendering();
+
+		// Set up row action and key
+		if (is_numeric($this->RowIndex) && $this->CurrentMode <> "view") {
+			$CurrentForm->Index = $this->RowIndex;
+			$actionName = str_replace("k_", "k" . $this->RowIndex . "_", $this->FormActionName);
+			$oldKeyName = str_replace("k_", "k" . $this->RowIndex . "_", $this->FormOldKeyName);
+			$keyName = str_replace("k_", "k" . $this->RowIndex . "_", $this->FormKeyName);
+			$blankRowName = str_replace("k_", "k" . $this->RowIndex . "_", $this->FormBlankRowName);
+			if ($this->RowAction <> "")
+				$this->MultiSelectKey .= "<input type=\"hidden\" name=\"" . $actionName . "\" id=\"" . $actionName . "\" value=\"" . $this->RowAction . "\">";
+			if ($CurrentForm->hasValue($this->FormOldKeyName))
+				$this->RowOldKey = strval($CurrentForm->getValue($this->FormOldKeyName));
+			if ($this->RowOldKey <> "")
+				$this->MultiSelectKey .= "<input type=\"hidden\" name=\"" . $oldKeyName . "\" id=\"" . $oldKeyName . "\" value=\"" . HtmlEncode($this->RowOldKey) . "\">";
+			if ($this->RowAction == "delete") {
+				$rowkey = $CurrentForm->getValue($this->FormKeyName);
+				$this->setupKeyValues($rowkey);
+			}
+			if ($this->RowAction == "insert" && $this->isConfirm() && $this->emptyRow())
+				$this->MultiSelectKey .= "<input type=\"hidden\" name=\"" . $blankRowName . "\" id=\"" . $blankRowName . "\" value=\"1\">";
+		}
+
+		// "delete"
+		if ($this->AllowAddDeleteRow) {
+			if ($this->CurrentMode == "add" || $this->CurrentMode == "copy" || $this->CurrentMode == "edit") {
+				$options = &$this->ListOptions;
+				$options->UseButtonGroup = TRUE; // Use button group for grid delete button
+				$opt = &$options->Items["griddelete"];
+				if (!$Security->canDelete() && is_numeric($this->RowIndex) && ($this->RowAction == "" || $this->RowAction == "edit")) { // Do not allow delete existing record
+					$opt->Body = "&nbsp;";
+				} else {
+					$opt->Body = "<a class=\"ew-grid-link ew-grid-delete\" title=\"" . HtmlTitle($Language->phrase("DeleteLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("DeleteLink")) . "\" onclick=\"return ew.deleteGridRow(this, " . $this->RowIndex . ");\">" . $Language->phrase("DeleteLink") . "</a>";
+				}
+			}
+		}
+		if ($this->CurrentMode == "view") { // View mode
+
+		// "view"
+		$opt = &$this->ListOptions->Items["view"];
+		$viewcaption = HtmlTitle($Language->phrase("ViewLink"));
+		if ($Security->canView()) {
+			$opt->Body = "<a class=\"ew-row-link ew-view\" title=\"" . $viewcaption . "\" data-caption=\"" . $viewcaption . "\" href=\"" . HtmlEncode($this->ViewUrl) . "\">" . $Language->phrase("ViewLink") . "</a>";
+		} else {
+			$opt->Body = "";
+		}
+
+		// "edit"
+		$opt = &$this->ListOptions->Items["edit"];
+		$editcaption = HtmlTitle($Language->phrase("EditLink"));
+		if ($Security->canEdit()) {
+			$opt->Body = "<a class=\"ew-row-link ew-edit\" title=\"" . HtmlTitle($Language->phrase("EditLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("EditLink")) . "\" href=\"" . HtmlEncode($this->EditUrl) . "\">" . $Language->phrase("EditLink") . "</a>";
+		} else {
+			$opt->Body = "";
+		}
+
+		// "copy"
+		$opt = &$this->ListOptions->Items["copy"];
+		$copycaption = HtmlTitle($Language->phrase("CopyLink"));
+		if ($Security->canAdd()) {
+			$opt->Body = "<a class=\"ew-row-link ew-copy\" title=\"" . $copycaption . "\" data-caption=\"" . $copycaption . "\" href=\"" . HtmlEncode($this->CopyUrl) . "\">" . $Language->phrase("CopyLink") . "</a>";
+		} else {
+			$opt->Body = "";
+		}
+
+		// "delete"
+		$opt = &$this->ListOptions->Items["delete"];
+		if ($Security->canDelete())
+			$opt->Body = "<a class=\"ew-row-link ew-delete\"" . "" . " title=\"" . HtmlTitle($Language->phrase("DeleteLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("DeleteLink")) . "\" href=\"" . HtmlEncode($this->DeleteUrl) . "\">" . $Language->phrase("DeleteLink") . "</a>";
+		else
+			$opt->Body = "";
+		} // End View mode
+		if ($this->CurrentMode == "edit" && is_numeric($this->RowIndex)) {
+			$this->MultiSelectKey .= "<input type=\"hidden\" name=\"" . $keyName . "\" id=\"" . $keyName . "\" value=\"" . $this->id->CurrentValue . "\">";
+		}
+		$this->renderListOptionsExt();
+
+		// Call ListOptions_Rendered event
+		$this->ListOptions_Rendered();
+	}
+
+	// Set record key
+	public function setRecordKey(&$key, $rs)
+	{
+		$key = "";
+		if ($key <> "")
+			$key .= $GLOBALS["COMPOSITE_KEY_SEPARATOR"];
+		$key .= $rs->fields('id');
+	}
+
+	// Set up other options
+	protected function setupOtherOptions()
+	{
+		global $Language, $Security;
+		$option = &$this->OtherOptions["addedit"];
+		$option->UseDropDownButton = FALSE;
+		$option->DropDownButtonPhrase = $Language->phrase("ButtonAddEdit");
+		$option->UseButtonGroup = TRUE;
+
+		//$option->ButtonClass = ""; // Class for button group
+		$item = &$option->add($option->GroupOptionName);
+		$item->Body = "";
+		$item->Visible = FALSE;
+
+		// Add
+		if ($this->CurrentMode == "view") { // Check view mode
+			$item = &$option->add("add");
+			$addcaption = HtmlTitle($Language->phrase("AddLink"));
+			$this->AddUrl = $this->getAddUrl();
+			$item->Body = "<a class=\"ew-add-edit ew-add\" title=\"" . $addcaption . "\" data-caption=\"" . $addcaption . "\" href=\"" . HtmlEncode($this->AddUrl) . "\">" . $Language->phrase("AddLink") . "</a>";
+			$item->Visible = ($this->AddUrl <> "" && $Security->canAdd());
+		}
+	}
+
+	// Render other options
+	public function renderOtherOptions()
+	{
+		global $Language, $Security;
+		$options = &$this->OtherOptions;
+		if (($this->CurrentMode == "add" || $this->CurrentMode == "copy" || $this->CurrentMode == "edit") && !$this->isConfirm()) { // Check add/copy/edit mode
+			if ($this->AllowAddDeleteRow) {
+				$option = &$options["addedit"];
+				$option->UseDropDownButton = FALSE;
+				$item = &$option->add("addblankrow");
+				$item->Body = "<a class=\"ew-add-edit ew-add-blank-row\" title=\"" . HtmlTitle($Language->phrase("AddBlankRow")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("AddBlankRow")) . "\" href=\"javascript:void(0);\" onclick=\"ew.addGridRow(this);\">" . $Language->phrase("AddBlankRow") . "</a>";
+				$item->Visible = $Security->canAdd();
+				$this->ShowOtherOptions = $item->Visible;
+			}
+		}
+		if ($this->CurrentMode == "view") { // Check view mode
+			$option = &$options["addedit"];
+			$item = &$option->getItem("add");
+			$this->ShowOtherOptions = $item && $item->Visible;
+		}
+	}
+	protected function renderListOptionsExt()
+	{
+		global $Security, $Language;
+	}
+
+	// Set up starting record parameters
+	public function setupStartRec()
+	{
+		if ($this->DisplayRecs == 0)
+			return;
+		if ($this->isPageRequest()) { // Validate request
+			if (Get(TABLE_START_REC) !== NULL) { // Check for "start" parameter
+				$this->StartRec = Get(TABLE_START_REC);
+				$this->setStartRecordNumber($this->StartRec);
+			} elseif (Get(TABLE_PAGE_NO) !== NULL) {
+				$pageNo = Get(TABLE_PAGE_NO);
+				if (is_numeric($pageNo)) {
+					$this->StartRec = ($pageNo - 1) * $this->DisplayRecs + 1;
+					if ($this->StartRec <= 0) {
+						$this->StartRec = 1;
+					} elseif ($this->StartRec >= (int)(($this->TotalRecs - 1)/$this->DisplayRecs) * $this->DisplayRecs + 1) {
+						$this->StartRec = (int)(($this->TotalRecs - 1)/$this->DisplayRecs) * $this->DisplayRecs + 1;
+					}
+					$this->setStartRecordNumber($this->StartRec);
+				}
+			}
+		}
+		$this->StartRec = $this->getStartRecordNumber();
+
+		// Check if correct start record counter
+		if (!is_numeric($this->StartRec) || $this->StartRec == "") { // Avoid invalid start record counter
+			$this->StartRec = 1; // Reset start record counter
+			$this->setStartRecordNumber($this->StartRec);
+		} elseif ($this->StartRec > $this->TotalRecs) { // Avoid starting record > total records
+			$this->StartRec = (int)(($this->TotalRecs - 1)/$this->DisplayRecs) * $this->DisplayRecs + 1; // Point to last page first record
+			$this->setStartRecordNumber($this->StartRec);
+		} elseif (($this->StartRec - 1) % $this->DisplayRecs <> 0) {
+			$this->StartRec = (int)(($this->StartRec - 1)/$this->DisplayRecs) * $this->DisplayRecs + 1; // Point to page boundary
+			$this->setStartRecordNumber($this->StartRec);
+		}
+	}
+
+	// Get upload files
+	protected function getUploadFiles()
+	{
+		global $CurrentForm, $Language;
+	}
+
+	// Load default values
+	protected function loadDefaultValues()
+	{
+		$this->id->CurrentValue = NULL;
+		$this->id->OldValue = $this->id->CurrentValue;
+		$this->Reception->CurrentValue = NULL;
+		$this->Reception->OldValue = $this->Reception->CurrentValue;
+		$this->PatientId->CurrentValue = NULL;
+		$this->PatientId->OldValue = $this->PatientId->CurrentValue;
+		$this->PatientName->CurrentValue = NULL;
+		$this->PatientName->OldValue = $this->PatientName->CurrentValue;
+		$this->Investigation->CurrentValue = NULL;
+		$this->Investigation->OldValue = $this->Investigation->CurrentValue;
+		$this->Value->CurrentValue = NULL;
+		$this->Value->OldValue = $this->Value->CurrentValue;
+		$this->NormalRange->CurrentValue = NULL;
+		$this->NormalRange->OldValue = $this->NormalRange->CurrentValue;
+		$this->mrnno->CurrentValue = NULL;
+		$this->mrnno->OldValue = $this->mrnno->CurrentValue;
+		$this->Age->CurrentValue = NULL;
+		$this->Age->OldValue = $this->Age->CurrentValue;
+		$this->Gender->CurrentValue = NULL;
+		$this->Gender->OldValue = $this->Gender->CurrentValue;
+		$this->profilePic->CurrentValue = NULL;
+		$this->profilePic->OldValue = $this->profilePic->CurrentValue;
+		$this->SampleCollected->CurrentValue = NULL;
+		$this->SampleCollected->OldValue = $this->SampleCollected->CurrentValue;
+		$this->SampleCollectedBy->CurrentValue = NULL;
+		$this->SampleCollectedBy->OldValue = $this->SampleCollectedBy->CurrentValue;
+		$this->ResultedDate->CurrentValue = NULL;
+		$this->ResultedDate->OldValue = $this->ResultedDate->CurrentValue;
+		$this->ResultedBy->CurrentValue = NULL;
+		$this->ResultedBy->OldValue = $this->ResultedBy->CurrentValue;
+		$this->Modified->CurrentValue = NULL;
+		$this->Modified->OldValue = $this->Modified->CurrentValue;
+		$this->ModifiedBy->CurrentValue = NULL;
+		$this->ModifiedBy->OldValue = $this->ModifiedBy->CurrentValue;
+		$this->Created->CurrentValue = NULL;
+		$this->Created->OldValue = $this->Created->CurrentValue;
+		$this->CreatedBy->CurrentValue = NULL;
+		$this->CreatedBy->OldValue = $this->CreatedBy->CurrentValue;
+		$this->GroupHead->CurrentValue = NULL;
+		$this->GroupHead->OldValue = $this->GroupHead->CurrentValue;
+		$this->Cost->CurrentValue = NULL;
+		$this->Cost->OldValue = $this->Cost->CurrentValue;
+		$this->PaymentStatus->CurrentValue = NULL;
+		$this->PaymentStatus->OldValue = $this->PaymentStatus->CurrentValue;
+		$this->PayMode->CurrentValue = NULL;
+		$this->PayMode->OldValue = $this->PayMode->CurrentValue;
+		$this->VoucherNo->CurrentValue = NULL;
+		$this->VoucherNo->OldValue = $this->VoucherNo->CurrentValue;
+		$this->InvestigationMultiselect->CurrentValue = NULL;
+		$this->InvestigationMultiselect->OldValue = $this->InvestigationMultiselect->CurrentValue;
+	}
+
+	// Load form values
+	protected function loadFormValues()
+	{
+
+		// Load from form
+		global $CurrentForm;
+		$CurrentForm->FormName = $this->FormName;
+
+		// Check field name 'id' first before field var 'x_id'
+		$val = $CurrentForm->hasValue("id") ? $CurrentForm->getValue("id") : $CurrentForm->getValue("x_id");
+		if (!$this->id->IsDetailKey && !$this->isGridAdd() && !$this->isAdd())
+			$this->id->setFormValue($val);
+
+		// Check field name 'Investigation' first before field var 'x_Investigation'
+		$val = $CurrentForm->hasValue("Investigation") ? $CurrentForm->getValue("Investigation") : $CurrentForm->getValue("x_Investigation");
+		if (!$this->Investigation->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Investigation->Visible = FALSE; // Disable update for API request
+			else
+				$this->Investigation->setFormValue($val);
+		}
+		$this->Investigation->setOldValue($CurrentForm->getValue("o_Investigation"));
+
+		// Check field name 'Value' first before field var 'x_Value'
+		$val = $CurrentForm->hasValue("Value") ? $CurrentForm->getValue("Value") : $CurrentForm->getValue("x_Value");
+		if (!$this->Value->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Value->Visible = FALSE; // Disable update for API request
+			else
+				$this->Value->setFormValue($val);
+		}
+		$this->Value->setOldValue($CurrentForm->getValue("o_Value"));
+
+		// Check field name 'NormalRange' first before field var 'x_NormalRange'
+		$val = $CurrentForm->hasValue("NormalRange") ? $CurrentForm->getValue("NormalRange") : $CurrentForm->getValue("x_NormalRange");
+		if (!$this->NormalRange->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->NormalRange->Visible = FALSE; // Disable update for API request
+			else
+				$this->NormalRange->setFormValue($val);
+		}
+		$this->NormalRange->setOldValue($CurrentForm->getValue("o_NormalRange"));
+
+		// Check field name 'mrnno' first before field var 'x_mrnno'
+		$val = $CurrentForm->hasValue("mrnno") ? $CurrentForm->getValue("mrnno") : $CurrentForm->getValue("x_mrnno");
+		if (!$this->mrnno->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->mrnno->Visible = FALSE; // Disable update for API request
+			else
+				$this->mrnno->setFormValue($val);
+		}
+		$this->mrnno->setOldValue($CurrentForm->getValue("o_mrnno"));
+
+		// Check field name 'Age' first before field var 'x_Age'
+		$val = $CurrentForm->hasValue("Age") ? $CurrentForm->getValue("Age") : $CurrentForm->getValue("x_Age");
+		if (!$this->Age->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Age->Visible = FALSE; // Disable update for API request
+			else
+				$this->Age->setFormValue($val);
+		}
+		$this->Age->setOldValue($CurrentForm->getValue("o_Age"));
+
+		// Check field name 'Gender' first before field var 'x_Gender'
+		$val = $CurrentForm->hasValue("Gender") ? $CurrentForm->getValue("Gender") : $CurrentForm->getValue("x_Gender");
+		if (!$this->Gender->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Gender->Visible = FALSE; // Disable update for API request
+			else
+				$this->Gender->setFormValue($val);
+		}
+		$this->Gender->setOldValue($CurrentForm->getValue("o_Gender"));
+
+		// Check field name 'SampleCollected' first before field var 'x_SampleCollected'
+		$val = $CurrentForm->hasValue("SampleCollected") ? $CurrentForm->getValue("SampleCollected") : $CurrentForm->getValue("x_SampleCollected");
+		if (!$this->SampleCollected->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->SampleCollected->Visible = FALSE; // Disable update for API request
+			else
+				$this->SampleCollected->setFormValue($val);
+			$this->SampleCollected->CurrentValue = UnFormatDateTime($this->SampleCollected->CurrentValue, 0);
+		}
+		$this->SampleCollected->setOldValue($CurrentForm->getValue("o_SampleCollected"));
+
+		// Check field name 'SampleCollectedBy' first before field var 'x_SampleCollectedBy'
+		$val = $CurrentForm->hasValue("SampleCollectedBy") ? $CurrentForm->getValue("SampleCollectedBy") : $CurrentForm->getValue("x_SampleCollectedBy");
+		if (!$this->SampleCollectedBy->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->SampleCollectedBy->Visible = FALSE; // Disable update for API request
+			else
+				$this->SampleCollectedBy->setFormValue($val);
+		}
+		$this->SampleCollectedBy->setOldValue($CurrentForm->getValue("o_SampleCollectedBy"));
+
+		// Check field name 'ResultedDate' first before field var 'x_ResultedDate'
+		$val = $CurrentForm->hasValue("ResultedDate") ? $CurrentForm->getValue("ResultedDate") : $CurrentForm->getValue("x_ResultedDate");
+		if (!$this->ResultedDate->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->ResultedDate->Visible = FALSE; // Disable update for API request
+			else
+				$this->ResultedDate->setFormValue($val);
+			$this->ResultedDate->CurrentValue = UnFormatDateTime($this->ResultedDate->CurrentValue, 0);
+		}
+		$this->ResultedDate->setOldValue($CurrentForm->getValue("o_ResultedDate"));
+
+		// Check field name 'ResultedBy' first before field var 'x_ResultedBy'
+		$val = $CurrentForm->hasValue("ResultedBy") ? $CurrentForm->getValue("ResultedBy") : $CurrentForm->getValue("x_ResultedBy");
+		if (!$this->ResultedBy->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->ResultedBy->Visible = FALSE; // Disable update for API request
+			else
+				$this->ResultedBy->setFormValue($val);
+		}
+		$this->ResultedBy->setOldValue($CurrentForm->getValue("o_ResultedBy"));
+
+		// Check field name 'Modified' first before field var 'x_Modified'
+		$val = $CurrentForm->hasValue("Modified") ? $CurrentForm->getValue("Modified") : $CurrentForm->getValue("x_Modified");
+		if (!$this->Modified->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Modified->Visible = FALSE; // Disable update for API request
+			else
+				$this->Modified->setFormValue($val);
+			$this->Modified->CurrentValue = UnFormatDateTime($this->Modified->CurrentValue, 0);
+		}
+		$this->Modified->setOldValue($CurrentForm->getValue("o_Modified"));
+
+		// Check field name 'ModifiedBy' first before field var 'x_ModifiedBy'
+		$val = $CurrentForm->hasValue("ModifiedBy") ? $CurrentForm->getValue("ModifiedBy") : $CurrentForm->getValue("x_ModifiedBy");
+		if (!$this->ModifiedBy->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->ModifiedBy->Visible = FALSE; // Disable update for API request
+			else
+				$this->ModifiedBy->setFormValue($val);
+		}
+		$this->ModifiedBy->setOldValue($CurrentForm->getValue("o_ModifiedBy"));
+
+		// Check field name 'Created' first before field var 'x_Created'
+		$val = $CurrentForm->hasValue("Created") ? $CurrentForm->getValue("Created") : $CurrentForm->getValue("x_Created");
+		if (!$this->Created->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Created->Visible = FALSE; // Disable update for API request
+			else
+				$this->Created->setFormValue($val);
+			$this->Created->CurrentValue = UnFormatDateTime($this->Created->CurrentValue, 0);
+		}
+		$this->Created->setOldValue($CurrentForm->getValue("o_Created"));
+
+		// Check field name 'CreatedBy' first before field var 'x_CreatedBy'
+		$val = $CurrentForm->hasValue("CreatedBy") ? $CurrentForm->getValue("CreatedBy") : $CurrentForm->getValue("x_CreatedBy");
+		if (!$this->CreatedBy->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->CreatedBy->Visible = FALSE; // Disable update for API request
+			else
+				$this->CreatedBy->setFormValue($val);
+		}
+		$this->CreatedBy->setOldValue($CurrentForm->getValue("o_CreatedBy"));
+
+		// Check field name 'GroupHead' first before field var 'x_GroupHead'
+		$val = $CurrentForm->hasValue("GroupHead") ? $CurrentForm->getValue("GroupHead") : $CurrentForm->getValue("x_GroupHead");
+		if (!$this->GroupHead->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->GroupHead->Visible = FALSE; // Disable update for API request
+			else
+				$this->GroupHead->setFormValue($val);
+		}
+		$this->GroupHead->setOldValue($CurrentForm->getValue("o_GroupHead"));
+
+		// Check field name 'Cost' first before field var 'x_Cost'
+		$val = $CurrentForm->hasValue("Cost") ? $CurrentForm->getValue("Cost") : $CurrentForm->getValue("x_Cost");
+		if (!$this->Cost->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Cost->Visible = FALSE; // Disable update for API request
+			else
+				$this->Cost->setFormValue($val);
+		}
+		$this->Cost->setOldValue($CurrentForm->getValue("o_Cost"));
+
+		// Check field name 'PaymentStatus' first before field var 'x_PaymentStatus'
+		$val = $CurrentForm->hasValue("PaymentStatus") ? $CurrentForm->getValue("PaymentStatus") : $CurrentForm->getValue("x_PaymentStatus");
+		if (!$this->PaymentStatus->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->PaymentStatus->Visible = FALSE; // Disable update for API request
+			else
+				$this->PaymentStatus->setFormValue($val);
+		}
+		$this->PaymentStatus->setOldValue($CurrentForm->getValue("o_PaymentStatus"));
+
+		// Check field name 'PayMode' first before field var 'x_PayMode'
+		$val = $CurrentForm->hasValue("PayMode") ? $CurrentForm->getValue("PayMode") : $CurrentForm->getValue("x_PayMode");
+		if (!$this->PayMode->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->PayMode->Visible = FALSE; // Disable update for API request
+			else
+				$this->PayMode->setFormValue($val);
+		}
+		$this->PayMode->setOldValue($CurrentForm->getValue("o_PayMode"));
+
+		// Check field name 'VoucherNo' first before field var 'x_VoucherNo'
+		$val = $CurrentForm->hasValue("VoucherNo") ? $CurrentForm->getValue("VoucherNo") : $CurrentForm->getValue("x_VoucherNo");
+		if (!$this->VoucherNo->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->VoucherNo->Visible = FALSE; // Disable update for API request
+			else
+				$this->VoucherNo->setFormValue($val);
+		}
+		$this->VoucherNo->setOldValue($CurrentForm->getValue("o_VoucherNo"));
+	}
+
+	// Restore form values
+	public function restoreFormValues()
+	{
+		global $CurrentForm;
+		if (!$this->isGridAdd() && !$this->isAdd())
+			$this->id->CurrentValue = $this->id->FormValue;
+		$this->Investigation->CurrentValue = $this->Investigation->FormValue;
+		$this->Value->CurrentValue = $this->Value->FormValue;
+		$this->NormalRange->CurrentValue = $this->NormalRange->FormValue;
+		$this->mrnno->CurrentValue = $this->mrnno->FormValue;
+		$this->Age->CurrentValue = $this->Age->FormValue;
+		$this->Gender->CurrentValue = $this->Gender->FormValue;
+		$this->SampleCollected->CurrentValue = $this->SampleCollected->FormValue;
+		$this->SampleCollected->CurrentValue = UnFormatDateTime($this->SampleCollected->CurrentValue, 0);
+		$this->SampleCollectedBy->CurrentValue = $this->SampleCollectedBy->FormValue;
+		$this->ResultedDate->CurrentValue = $this->ResultedDate->FormValue;
+		$this->ResultedDate->CurrentValue = UnFormatDateTime($this->ResultedDate->CurrentValue, 0);
+		$this->ResultedBy->CurrentValue = $this->ResultedBy->FormValue;
+		$this->Modified->CurrentValue = $this->Modified->FormValue;
+		$this->Modified->CurrentValue = UnFormatDateTime($this->Modified->CurrentValue, 0);
+		$this->ModifiedBy->CurrentValue = $this->ModifiedBy->FormValue;
+		$this->Created->CurrentValue = $this->Created->FormValue;
+		$this->Created->CurrentValue = UnFormatDateTime($this->Created->CurrentValue, 0);
+		$this->CreatedBy->CurrentValue = $this->CreatedBy->FormValue;
+		$this->GroupHead->CurrentValue = $this->GroupHead->FormValue;
+		$this->Cost->CurrentValue = $this->Cost->FormValue;
+		$this->PaymentStatus->CurrentValue = $this->PaymentStatus->FormValue;
+		$this->PayMode->CurrentValue = $this->PayMode->FormValue;
+		$this->VoucherNo->CurrentValue = $this->VoucherNo->FormValue;
+	}
+
+	// Load recordset
+	public function loadRecordset($offset = -1, $rowcnt = -1)
+	{
+
+		// Load List page SQL
+		$sql = $this->getListSql();
+		$conn = &$this->getConnection();
+
+		// Load recordset
+		$dbtype = GetConnectionType($this->Dbid);
+		if ($this->UseSelectLimit) {
+			$conn->raiseErrorFn = $GLOBALS["ERROR_FUNC"];
+			if ($dbtype == "MSSQL") {
+				$rs = $conn->selectLimit($sql, $rowcnt, $offset, ["_hasOrderBy" => trim($this->getOrderBy()) || trim($this->getSessionOrderBy())]);
+			} else {
+				$rs = $conn->selectLimit($sql, $rowcnt, $offset);
+			}
+			$conn->raiseErrorFn = '';
+		} else {
+			$rs = LoadRecordset($sql, $conn);
+		}
+
+		// Call Recordset Selected event
+		$this->Recordset_Selected($rs);
+		return $rs;
+	}
+
+	// Load row based on key values
+	public function loadRow()
+	{
+		global $Security, $Language;
+		$filter = $this->getRecordFilter();
+
+		// Call Row Selecting event
+		$this->Row_Selecting($filter);
+
+		// Load SQL based on filter
+		$this->CurrentFilter = $filter;
+		$sql = $this->getCurrentSql();
+		$conn = &$this->getConnection();
+		$res = FALSE;
+		$rs = LoadRecordset($sql, $conn);
+		if ($rs && !$rs->EOF) {
+			$res = TRUE;
+			$this->loadRowValues($rs); // Load row values
+			$rs->close();
+		}
+		return $res;
+	}
+
+	// Load row values from recordset
+	public function loadRowValues($rs = NULL)
+	{
+		if ($rs && !$rs->EOF)
+			$row = $rs->fields;
+		else
+			$row = $this->newRow();
+
+		// Call Row Selected event
+		$this->Row_Selected($row);
+		if (!$rs || $rs->EOF)
+			return;
+		$this->id->setDbValue($row['id']);
+		$this->Reception->setDbValue($row['Reception']);
+		$this->PatientId->setDbValue($row['PatientId']);
+		$this->PatientName->setDbValue($row['PatientName']);
+		$this->Investigation->setDbValue($row['Investigation']);
+		$this->Value->setDbValue($row['Value']);
+		$this->NormalRange->setDbValue($row['NormalRange']);
+		$this->mrnno->setDbValue($row['mrnno']);
+		$this->Age->setDbValue($row['Age']);
+		$this->Gender->setDbValue($row['Gender']);
+		$this->profilePic->setDbValue($row['profilePic']);
+		$this->SampleCollected->setDbValue($row['SampleCollected']);
+		$this->SampleCollectedBy->setDbValue($row['SampleCollectedBy']);
+		$this->ResultedDate->setDbValue($row['ResultedDate']);
+		$this->ResultedBy->setDbValue($row['ResultedBy']);
+		$this->Modified->setDbValue($row['Modified']);
+		$this->ModifiedBy->setDbValue($row['ModifiedBy']);
+		$this->Created->setDbValue($row['Created']);
+		$this->CreatedBy->setDbValue($row['CreatedBy']);
+		$this->GroupHead->setDbValue($row['GroupHead']);
+		$this->Cost->setDbValue($row['Cost']);
+		$this->PaymentStatus->setDbValue($row['PaymentStatus']);
+		$this->PayMode->setDbValue($row['PayMode']);
+		$this->VoucherNo->setDbValue($row['VoucherNo']);
+		$this->InvestigationMultiselect->setDbValue($row['InvestigationMultiselect']);
+	}
+
+	// Return a row with default values
+	protected function newRow()
+	{
+		$this->loadDefaultValues();
+		$row = [];
+		$row['id'] = $this->id->CurrentValue;
+		$row['Reception'] = $this->Reception->CurrentValue;
+		$row['PatientId'] = $this->PatientId->CurrentValue;
+		$row['PatientName'] = $this->PatientName->CurrentValue;
+		$row['Investigation'] = $this->Investigation->CurrentValue;
+		$row['Value'] = $this->Value->CurrentValue;
+		$row['NormalRange'] = $this->NormalRange->CurrentValue;
+		$row['mrnno'] = $this->mrnno->CurrentValue;
+		$row['Age'] = $this->Age->CurrentValue;
+		$row['Gender'] = $this->Gender->CurrentValue;
+		$row['profilePic'] = $this->profilePic->CurrentValue;
+		$row['SampleCollected'] = $this->SampleCollected->CurrentValue;
+		$row['SampleCollectedBy'] = $this->SampleCollectedBy->CurrentValue;
+		$row['ResultedDate'] = $this->ResultedDate->CurrentValue;
+		$row['ResultedBy'] = $this->ResultedBy->CurrentValue;
+		$row['Modified'] = $this->Modified->CurrentValue;
+		$row['ModifiedBy'] = $this->ModifiedBy->CurrentValue;
+		$row['Created'] = $this->Created->CurrentValue;
+		$row['CreatedBy'] = $this->CreatedBy->CurrentValue;
+		$row['GroupHead'] = $this->GroupHead->CurrentValue;
+		$row['Cost'] = $this->Cost->CurrentValue;
+		$row['PaymentStatus'] = $this->PaymentStatus->CurrentValue;
+		$row['PayMode'] = $this->PayMode->CurrentValue;
+		$row['VoucherNo'] = $this->VoucherNo->CurrentValue;
+		$row['InvestigationMultiselect'] = $this->InvestigationMultiselect->CurrentValue;
+		return $row;
+	}
+
+	// Load old record
+	protected function loadOldRecord()
+	{
+
+		// Load key values from Session
+		$validKey = TRUE;
+		$arKeys[] = $this->RowOldKey;
+		$cnt = count($arKeys);
+		if ($cnt >= 1) {
+			if (strval($arKeys[0]) <> "")
+				$this->id->CurrentValue = strval($arKeys[0]); // id
+			else
+				$validKey = FALSE;
+		} else {
+			$validKey = FALSE;
+		}
+
+		// Load old record
+		$this->OldRecordset = NULL;
+		if ($validKey) {
+			$this->CurrentFilter = $this->getRecordFilter();
+			$sql = $this->getCurrentSql();
+			$conn = &$this->getConnection();
+			$this->OldRecordset = LoadRecordset($sql, $conn);
+		}
+		$this->loadRowValues($this->OldRecordset); // Load row values
+		return $validKey;
+	}
+
+	// Render row values based on field settings
+	public function renderRow()
+	{
+		global $Security, $Language, $CurrentLanguage;
+
+		// Initialize URLs
+		$this->ViewUrl = $this->getViewUrl();
+		$this->EditUrl = $this->getEditUrl();
+		$this->CopyUrl = $this->getCopyUrl();
+		$this->DeleteUrl = $this->getDeleteUrl();
+
+		// Convert decimal values if posted back
+		if ($this->Cost->FormValue == $this->Cost->CurrentValue && is_numeric(ConvertToFloatString($this->Cost->CurrentValue)))
+			$this->Cost->CurrentValue = ConvertToFloatString($this->Cost->CurrentValue);
+
+		// Call Row_Rendering event
+		$this->Row_Rendering();
+
+		// Common render codes for all row types
+		// id
+		// Reception
+		// PatientId
+		// PatientName
+		// Investigation
+		// Value
+		// NormalRange
+		// mrnno
+		// Age
+		// Gender
+		// profilePic
+		// SampleCollected
+		// SampleCollectedBy
+		// ResultedDate
+		// ResultedBy
+		// Modified
+		// ModifiedBy
+		// Created
+		// CreatedBy
+		// GroupHead
+		// Cost
+		// PaymentStatus
+		// PayMode
+		// VoucherNo
+		// InvestigationMultiselect
+
+		if ($this->RowType == ROWTYPE_VIEW) { // View row
+
+			// id
+			$this->id->ViewValue = $this->id->CurrentValue;
+			$this->id->ViewCustomAttributes = "";
+
+			// Investigation
+			$this->Investigation->ViewValue = $this->Investigation->CurrentValue;
+			$this->Investigation->ViewCustomAttributes = "";
+
+			// Value
+			$this->Value->ViewValue = $this->Value->CurrentValue;
+			$this->Value->ViewCustomAttributes = "";
+
+			// NormalRange
+			$this->NormalRange->ViewValue = $this->NormalRange->CurrentValue;
+			$this->NormalRange->ViewCustomAttributes = "";
+
+			// mrnno
+			$this->mrnno->ViewValue = $this->mrnno->CurrentValue;
+			$this->mrnno->ViewCustomAttributes = "";
+
+			// Age
+			$this->Age->ViewValue = $this->Age->CurrentValue;
+			$this->Age->ViewCustomAttributes = "";
+
+			// Gender
+			$this->Gender->ViewValue = $this->Gender->CurrentValue;
+			$this->Gender->ViewCustomAttributes = "";
+
+			// SampleCollected
+			$this->SampleCollected->ViewValue = $this->SampleCollected->CurrentValue;
+			$this->SampleCollected->ViewValue = FormatDateTime($this->SampleCollected->ViewValue, 0);
+			$this->SampleCollected->ViewCustomAttributes = "";
+
+			// SampleCollectedBy
+			$this->SampleCollectedBy->ViewValue = $this->SampleCollectedBy->CurrentValue;
+			$this->SampleCollectedBy->ViewCustomAttributes = "";
+
+			// ResultedDate
+			$this->ResultedDate->ViewValue = $this->ResultedDate->CurrentValue;
+			$this->ResultedDate->ViewValue = FormatDateTime($this->ResultedDate->ViewValue, 0);
+			$this->ResultedDate->ViewCustomAttributes = "";
+
+			// ResultedBy
+			$this->ResultedBy->ViewValue = $this->ResultedBy->CurrentValue;
+			$this->ResultedBy->ViewCustomAttributes = "";
+
+			// Modified
+			$this->Modified->ViewValue = $this->Modified->CurrentValue;
+			$this->Modified->ViewValue = FormatDateTime($this->Modified->ViewValue, 0);
+			$this->Modified->ViewCustomAttributes = "";
+
+			// ModifiedBy
+			$this->ModifiedBy->ViewValue = $this->ModifiedBy->CurrentValue;
+			$this->ModifiedBy->ViewCustomAttributes = "";
+
+			// Created
+			$this->Created->ViewValue = $this->Created->CurrentValue;
+			$this->Created->ViewValue = FormatDateTime($this->Created->ViewValue, 0);
+			$this->Created->ViewCustomAttributes = "";
+
+			// CreatedBy
+			$this->CreatedBy->ViewValue = $this->CreatedBy->CurrentValue;
+			$this->CreatedBy->ViewCustomAttributes = "";
+
+			// GroupHead
+			$this->GroupHead->ViewValue = $this->GroupHead->CurrentValue;
+			$this->GroupHead->ViewCustomAttributes = "";
+
+			// Cost
+			$this->Cost->ViewValue = $this->Cost->CurrentValue;
+			$this->Cost->ViewValue = FormatNumber($this->Cost->ViewValue, 2, -2, -2, -2);
+			$this->Cost->ViewCustomAttributes = "";
+
+			// PaymentStatus
+			$this->PaymentStatus->ViewValue = $this->PaymentStatus->CurrentValue;
+			$this->PaymentStatus->ViewCustomAttributes = "";
+
+			// PayMode
+			$this->PayMode->ViewValue = $this->PayMode->CurrentValue;
+			$this->PayMode->ViewCustomAttributes = "";
+
+			// VoucherNo
+			$this->VoucherNo->ViewValue = $this->VoucherNo->CurrentValue;
+			$this->VoucherNo->ViewCustomAttributes = "";
+
+			// id
+			$this->id->LinkCustomAttributes = "";
+			$this->id->HrefValue = "";
+			$this->id->TooltipValue = "";
+
+			// Investigation
+			$this->Investigation->LinkCustomAttributes = "";
+			$this->Investigation->HrefValue = "";
+			$this->Investigation->TooltipValue = "";
+
+			// Value
+			$this->Value->LinkCustomAttributes = "";
+			$this->Value->HrefValue = "";
+			$this->Value->TooltipValue = "";
+
+			// NormalRange
+			$this->NormalRange->LinkCustomAttributes = "";
+			$this->NormalRange->HrefValue = "";
+			$this->NormalRange->TooltipValue = "";
+
+			// mrnno
+			$this->mrnno->LinkCustomAttributes = "";
+			$this->mrnno->HrefValue = "";
+			$this->mrnno->TooltipValue = "";
+
+			// Age
+			$this->Age->LinkCustomAttributes = "";
+			$this->Age->HrefValue = "";
+			$this->Age->TooltipValue = "";
+
+			// Gender
+			$this->Gender->LinkCustomAttributes = "";
+			$this->Gender->HrefValue = "";
+			$this->Gender->TooltipValue = "";
+
+			// SampleCollected
+			$this->SampleCollected->LinkCustomAttributes = "";
+			$this->SampleCollected->HrefValue = "";
+			$this->SampleCollected->TooltipValue = "";
+
+			// SampleCollectedBy
+			$this->SampleCollectedBy->LinkCustomAttributes = "";
+			$this->SampleCollectedBy->HrefValue = "";
+			$this->SampleCollectedBy->TooltipValue = "";
+
+			// ResultedDate
+			$this->ResultedDate->LinkCustomAttributes = "";
+			$this->ResultedDate->HrefValue = "";
+			$this->ResultedDate->TooltipValue = "";
+
+			// ResultedBy
+			$this->ResultedBy->LinkCustomAttributes = "";
+			$this->ResultedBy->HrefValue = "";
+			$this->ResultedBy->TooltipValue = "";
+
+			// Modified
+			$this->Modified->LinkCustomAttributes = "";
+			$this->Modified->HrefValue = "";
+			$this->Modified->TooltipValue = "";
+
+			// ModifiedBy
+			$this->ModifiedBy->LinkCustomAttributes = "";
+			$this->ModifiedBy->HrefValue = "";
+			$this->ModifiedBy->TooltipValue = "";
+
+			// Created
+			$this->Created->LinkCustomAttributes = "";
+			$this->Created->HrefValue = "";
+			$this->Created->TooltipValue = "";
+
+			// CreatedBy
+			$this->CreatedBy->LinkCustomAttributes = "";
+			$this->CreatedBy->HrefValue = "";
+			$this->CreatedBy->TooltipValue = "";
+
+			// GroupHead
+			$this->GroupHead->LinkCustomAttributes = "";
+			$this->GroupHead->HrefValue = "";
+			$this->GroupHead->TooltipValue = "";
+
+			// Cost
+			$this->Cost->LinkCustomAttributes = "";
+			$this->Cost->HrefValue = "";
+			$this->Cost->TooltipValue = "";
+
+			// PaymentStatus
+			$this->PaymentStatus->LinkCustomAttributes = "";
+			$this->PaymentStatus->HrefValue = "";
+			$this->PaymentStatus->TooltipValue = "";
+
+			// PayMode
+			$this->PayMode->LinkCustomAttributes = "";
+			$this->PayMode->HrefValue = "";
+			$this->PayMode->TooltipValue = "";
+
+			// VoucherNo
+			$this->VoucherNo->LinkCustomAttributes = "";
+			$this->VoucherNo->HrefValue = "";
+			$this->VoucherNo->TooltipValue = "";
+		} elseif ($this->RowType == ROWTYPE_ADD) { // Add row
+
+			// id
+			// Investigation
+
+			$this->Investigation->EditAttrs["class"] = "form-control";
+			$this->Investigation->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Investigation->CurrentValue = HtmlDecode($this->Investigation->CurrentValue);
+			$this->Investigation->EditValue = HtmlEncode($this->Investigation->CurrentValue);
+			$this->Investigation->PlaceHolder = RemoveHtml($this->Investigation->caption());
+
+			// Value
+			$this->Value->EditAttrs["class"] = "form-control";
+			$this->Value->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Value->CurrentValue = HtmlDecode($this->Value->CurrentValue);
+			$this->Value->EditValue = HtmlEncode($this->Value->CurrentValue);
+			$this->Value->PlaceHolder = RemoveHtml($this->Value->caption());
+
+			// NormalRange
+			$this->NormalRange->EditAttrs["class"] = "form-control";
+			$this->NormalRange->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->NormalRange->CurrentValue = HtmlDecode($this->NormalRange->CurrentValue);
+			$this->NormalRange->EditValue = HtmlEncode($this->NormalRange->CurrentValue);
+			$this->NormalRange->PlaceHolder = RemoveHtml($this->NormalRange->caption());
+
+			// mrnno
+			$this->mrnno->EditAttrs["class"] = "form-control";
+			$this->mrnno->EditCustomAttributes = "";
+			if ($this->mrnno->getSessionValue() <> "") {
+				$this->mrnno->CurrentValue = $this->mrnno->getSessionValue();
+				$this->mrnno->OldValue = $this->mrnno->CurrentValue;
+			$this->mrnno->ViewValue = $this->mrnno->CurrentValue;
+			$this->mrnno->ViewCustomAttributes = "";
+			} else {
+			if (REMOVE_XSS)
+				$this->mrnno->CurrentValue = HtmlDecode($this->mrnno->CurrentValue);
+			$this->mrnno->EditValue = HtmlEncode($this->mrnno->CurrentValue);
+			$this->mrnno->PlaceHolder = RemoveHtml($this->mrnno->caption());
+			}
+
+			// Age
+			$this->Age->EditAttrs["class"] = "form-control";
+			$this->Age->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Age->CurrentValue = HtmlDecode($this->Age->CurrentValue);
+			$this->Age->EditValue = HtmlEncode($this->Age->CurrentValue);
+			$this->Age->PlaceHolder = RemoveHtml($this->Age->caption());
+
+			// Gender
+			$this->Gender->EditAttrs["class"] = "form-control";
+			$this->Gender->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Gender->CurrentValue = HtmlDecode($this->Gender->CurrentValue);
+			$this->Gender->EditValue = HtmlEncode($this->Gender->CurrentValue);
+			$this->Gender->PlaceHolder = RemoveHtml($this->Gender->caption());
+
+			// SampleCollected
+			$this->SampleCollected->EditAttrs["class"] = "form-control";
+			$this->SampleCollected->EditCustomAttributes = "";
+			$this->SampleCollected->EditValue = HtmlEncode(FormatDateTime($this->SampleCollected->CurrentValue, 8));
+			$this->SampleCollected->PlaceHolder = RemoveHtml($this->SampleCollected->caption());
+
+			// SampleCollectedBy
+			$this->SampleCollectedBy->EditAttrs["class"] = "form-control";
+			$this->SampleCollectedBy->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->SampleCollectedBy->CurrentValue = HtmlDecode($this->SampleCollectedBy->CurrentValue);
+			$this->SampleCollectedBy->EditValue = HtmlEncode($this->SampleCollectedBy->CurrentValue);
+			$this->SampleCollectedBy->PlaceHolder = RemoveHtml($this->SampleCollectedBy->caption());
+
+			// ResultedDate
+			$this->ResultedDate->EditAttrs["class"] = "form-control";
+			$this->ResultedDate->EditCustomAttributes = "";
+			$this->ResultedDate->EditValue = HtmlEncode(FormatDateTime($this->ResultedDate->CurrentValue, 8));
+			$this->ResultedDate->PlaceHolder = RemoveHtml($this->ResultedDate->caption());
+
+			// ResultedBy
+			$this->ResultedBy->EditAttrs["class"] = "form-control";
+			$this->ResultedBy->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->ResultedBy->CurrentValue = HtmlDecode($this->ResultedBy->CurrentValue);
+			$this->ResultedBy->EditValue = HtmlEncode($this->ResultedBy->CurrentValue);
+			$this->ResultedBy->PlaceHolder = RemoveHtml($this->ResultedBy->caption());
+
+			// Modified
+			$this->Modified->EditAttrs["class"] = "form-control";
+			$this->Modified->EditCustomAttributes = "";
+			$this->Modified->EditValue = HtmlEncode(FormatDateTime($this->Modified->CurrentValue, 8));
+			$this->Modified->PlaceHolder = RemoveHtml($this->Modified->caption());
+
+			// ModifiedBy
+			$this->ModifiedBy->EditAttrs["class"] = "form-control";
+			$this->ModifiedBy->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->ModifiedBy->CurrentValue = HtmlDecode($this->ModifiedBy->CurrentValue);
+			$this->ModifiedBy->EditValue = HtmlEncode($this->ModifiedBy->CurrentValue);
+			$this->ModifiedBy->PlaceHolder = RemoveHtml($this->ModifiedBy->caption());
+
+			// Created
+			$this->Created->EditAttrs["class"] = "form-control";
+			$this->Created->EditCustomAttributes = "";
+			$this->Created->EditValue = HtmlEncode(FormatDateTime($this->Created->CurrentValue, 8));
+			$this->Created->PlaceHolder = RemoveHtml($this->Created->caption());
+
+			// CreatedBy
+			$this->CreatedBy->EditAttrs["class"] = "form-control";
+			$this->CreatedBy->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->CreatedBy->CurrentValue = HtmlDecode($this->CreatedBy->CurrentValue);
+			$this->CreatedBy->EditValue = HtmlEncode($this->CreatedBy->CurrentValue);
+			$this->CreatedBy->PlaceHolder = RemoveHtml($this->CreatedBy->caption());
+
+			// GroupHead
+			$this->GroupHead->EditAttrs["class"] = "form-control";
+			$this->GroupHead->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->GroupHead->CurrentValue = HtmlDecode($this->GroupHead->CurrentValue);
+			$this->GroupHead->EditValue = HtmlEncode($this->GroupHead->CurrentValue);
+			$this->GroupHead->PlaceHolder = RemoveHtml($this->GroupHead->caption());
+
+			// Cost
+			$this->Cost->EditAttrs["class"] = "form-control";
+			$this->Cost->EditCustomAttributes = "";
+			$this->Cost->EditValue = HtmlEncode($this->Cost->CurrentValue);
+			$this->Cost->PlaceHolder = RemoveHtml($this->Cost->caption());
+			if (strval($this->Cost->EditValue) <> "" && is_numeric($this->Cost->EditValue)) {
+				$this->Cost->EditValue = FormatNumber($this->Cost->EditValue, -2, -2, -2, -2);
+				$this->Cost->OldValue = $this->Cost->EditValue;
+			}
+
+			// PaymentStatus
+			$this->PaymentStatus->EditAttrs["class"] = "form-control";
+			$this->PaymentStatus->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->PaymentStatus->CurrentValue = HtmlDecode($this->PaymentStatus->CurrentValue);
+			$this->PaymentStatus->EditValue = HtmlEncode($this->PaymentStatus->CurrentValue);
+			$this->PaymentStatus->PlaceHolder = RemoveHtml($this->PaymentStatus->caption());
+
+			// PayMode
+			$this->PayMode->EditAttrs["class"] = "form-control";
+			$this->PayMode->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->PayMode->CurrentValue = HtmlDecode($this->PayMode->CurrentValue);
+			$this->PayMode->EditValue = HtmlEncode($this->PayMode->CurrentValue);
+			$this->PayMode->PlaceHolder = RemoveHtml($this->PayMode->caption());
+
+			// VoucherNo
+			$this->VoucherNo->EditAttrs["class"] = "form-control";
+			$this->VoucherNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->VoucherNo->CurrentValue = HtmlDecode($this->VoucherNo->CurrentValue);
+			$this->VoucherNo->EditValue = HtmlEncode($this->VoucherNo->CurrentValue);
+			$this->VoucherNo->PlaceHolder = RemoveHtml($this->VoucherNo->caption());
+
+			// Add refer script
+			// id
+
+			$this->id->LinkCustomAttributes = "";
+			$this->id->HrefValue = "";
+
+			// Investigation
+			$this->Investigation->LinkCustomAttributes = "";
+			$this->Investigation->HrefValue = "";
+
+			// Value
+			$this->Value->LinkCustomAttributes = "";
+			$this->Value->HrefValue = "";
+
+			// NormalRange
+			$this->NormalRange->LinkCustomAttributes = "";
+			$this->NormalRange->HrefValue = "";
+
+			// mrnno
+			$this->mrnno->LinkCustomAttributes = "";
+			$this->mrnno->HrefValue = "";
+
+			// Age
+			$this->Age->LinkCustomAttributes = "";
+			$this->Age->HrefValue = "";
+
+			// Gender
+			$this->Gender->LinkCustomAttributes = "";
+			$this->Gender->HrefValue = "";
+
+			// SampleCollected
+			$this->SampleCollected->LinkCustomAttributes = "";
+			$this->SampleCollected->HrefValue = "";
+
+			// SampleCollectedBy
+			$this->SampleCollectedBy->LinkCustomAttributes = "";
+			$this->SampleCollectedBy->HrefValue = "";
+
+			// ResultedDate
+			$this->ResultedDate->LinkCustomAttributes = "";
+			$this->ResultedDate->HrefValue = "";
+
+			// ResultedBy
+			$this->ResultedBy->LinkCustomAttributes = "";
+			$this->ResultedBy->HrefValue = "";
+
+			// Modified
+			$this->Modified->LinkCustomAttributes = "";
+			$this->Modified->HrefValue = "";
+
+			// ModifiedBy
+			$this->ModifiedBy->LinkCustomAttributes = "";
+			$this->ModifiedBy->HrefValue = "";
+
+			// Created
+			$this->Created->LinkCustomAttributes = "";
+			$this->Created->HrefValue = "";
+
+			// CreatedBy
+			$this->CreatedBy->LinkCustomAttributes = "";
+			$this->CreatedBy->HrefValue = "";
+
+			// GroupHead
+			$this->GroupHead->LinkCustomAttributes = "";
+			$this->GroupHead->HrefValue = "";
+
+			// Cost
+			$this->Cost->LinkCustomAttributes = "";
+			$this->Cost->HrefValue = "";
+
+			// PaymentStatus
+			$this->PaymentStatus->LinkCustomAttributes = "";
+			$this->PaymentStatus->HrefValue = "";
+
+			// PayMode
+			$this->PayMode->LinkCustomAttributes = "";
+			$this->PayMode->HrefValue = "";
+
+			// VoucherNo
+			$this->VoucherNo->LinkCustomAttributes = "";
+			$this->VoucherNo->HrefValue = "";
+		} elseif ($this->RowType == ROWTYPE_EDIT) { // Edit row
+
+			// id
+			$this->id->EditAttrs["class"] = "form-control";
+			$this->id->EditCustomAttributes = "";
+			$this->id->EditValue = $this->id->CurrentValue;
+			$this->id->ViewCustomAttributes = "";
+
+			// Investigation
+			$this->Investigation->EditAttrs["class"] = "form-control";
+			$this->Investigation->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Investigation->CurrentValue = HtmlDecode($this->Investigation->CurrentValue);
+			$this->Investigation->EditValue = HtmlEncode($this->Investigation->CurrentValue);
+			$this->Investigation->PlaceHolder = RemoveHtml($this->Investigation->caption());
+
+			// Value
+			$this->Value->EditAttrs["class"] = "form-control";
+			$this->Value->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Value->CurrentValue = HtmlDecode($this->Value->CurrentValue);
+			$this->Value->EditValue = HtmlEncode($this->Value->CurrentValue);
+			$this->Value->PlaceHolder = RemoveHtml($this->Value->caption());
+
+			// NormalRange
+			$this->NormalRange->EditAttrs["class"] = "form-control";
+			$this->NormalRange->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->NormalRange->CurrentValue = HtmlDecode($this->NormalRange->CurrentValue);
+			$this->NormalRange->EditValue = HtmlEncode($this->NormalRange->CurrentValue);
+			$this->NormalRange->PlaceHolder = RemoveHtml($this->NormalRange->caption());
+
+			// mrnno
+			$this->mrnno->EditAttrs["class"] = "form-control";
+			$this->mrnno->EditCustomAttributes = "";
+			$this->mrnno->EditValue = $this->mrnno->CurrentValue;
+			$this->mrnno->ViewCustomAttributes = "";
+
+			// Age
+			$this->Age->EditAttrs["class"] = "form-control";
+			$this->Age->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Age->CurrentValue = HtmlDecode($this->Age->CurrentValue);
+			$this->Age->EditValue = HtmlEncode($this->Age->CurrentValue);
+			$this->Age->PlaceHolder = RemoveHtml($this->Age->caption());
+
+			// Gender
+			$this->Gender->EditAttrs["class"] = "form-control";
+			$this->Gender->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Gender->CurrentValue = HtmlDecode($this->Gender->CurrentValue);
+			$this->Gender->EditValue = HtmlEncode($this->Gender->CurrentValue);
+			$this->Gender->PlaceHolder = RemoveHtml($this->Gender->caption());
+
+			// SampleCollected
+			$this->SampleCollected->EditAttrs["class"] = "form-control";
+			$this->SampleCollected->EditCustomAttributes = "";
+			$this->SampleCollected->EditValue = HtmlEncode(FormatDateTime($this->SampleCollected->CurrentValue, 8));
+			$this->SampleCollected->PlaceHolder = RemoveHtml($this->SampleCollected->caption());
+
+			// SampleCollectedBy
+			$this->SampleCollectedBy->EditAttrs["class"] = "form-control";
+			$this->SampleCollectedBy->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->SampleCollectedBy->CurrentValue = HtmlDecode($this->SampleCollectedBy->CurrentValue);
+			$this->SampleCollectedBy->EditValue = HtmlEncode($this->SampleCollectedBy->CurrentValue);
+			$this->SampleCollectedBy->PlaceHolder = RemoveHtml($this->SampleCollectedBy->caption());
+
+			// ResultedDate
+			$this->ResultedDate->EditAttrs["class"] = "form-control";
+			$this->ResultedDate->EditCustomAttributes = "";
+			$this->ResultedDate->EditValue = HtmlEncode(FormatDateTime($this->ResultedDate->CurrentValue, 8));
+			$this->ResultedDate->PlaceHolder = RemoveHtml($this->ResultedDate->caption());
+
+			// ResultedBy
+			$this->ResultedBy->EditAttrs["class"] = "form-control";
+			$this->ResultedBy->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->ResultedBy->CurrentValue = HtmlDecode($this->ResultedBy->CurrentValue);
+			$this->ResultedBy->EditValue = HtmlEncode($this->ResultedBy->CurrentValue);
+			$this->ResultedBy->PlaceHolder = RemoveHtml($this->ResultedBy->caption());
+
+			// Modified
+			$this->Modified->EditAttrs["class"] = "form-control";
+			$this->Modified->EditCustomAttributes = "";
+			$this->Modified->EditValue = HtmlEncode(FormatDateTime($this->Modified->CurrentValue, 8));
+			$this->Modified->PlaceHolder = RemoveHtml($this->Modified->caption());
+
+			// ModifiedBy
+			$this->ModifiedBy->EditAttrs["class"] = "form-control";
+			$this->ModifiedBy->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->ModifiedBy->CurrentValue = HtmlDecode($this->ModifiedBy->CurrentValue);
+			$this->ModifiedBy->EditValue = HtmlEncode($this->ModifiedBy->CurrentValue);
+			$this->ModifiedBy->PlaceHolder = RemoveHtml($this->ModifiedBy->caption());
+
+			// Created
+			$this->Created->EditAttrs["class"] = "form-control";
+			$this->Created->EditCustomAttributes = "";
+			$this->Created->EditValue = HtmlEncode(FormatDateTime($this->Created->CurrentValue, 8));
+			$this->Created->PlaceHolder = RemoveHtml($this->Created->caption());
+
+			// CreatedBy
+			$this->CreatedBy->EditAttrs["class"] = "form-control";
+			$this->CreatedBy->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->CreatedBy->CurrentValue = HtmlDecode($this->CreatedBy->CurrentValue);
+			$this->CreatedBy->EditValue = HtmlEncode($this->CreatedBy->CurrentValue);
+			$this->CreatedBy->PlaceHolder = RemoveHtml($this->CreatedBy->caption());
+
+			// GroupHead
+			$this->GroupHead->EditAttrs["class"] = "form-control";
+			$this->GroupHead->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->GroupHead->CurrentValue = HtmlDecode($this->GroupHead->CurrentValue);
+			$this->GroupHead->EditValue = HtmlEncode($this->GroupHead->CurrentValue);
+			$this->GroupHead->PlaceHolder = RemoveHtml($this->GroupHead->caption());
+
+			// Cost
+			$this->Cost->EditAttrs["class"] = "form-control";
+			$this->Cost->EditCustomAttributes = "";
+			$this->Cost->EditValue = HtmlEncode($this->Cost->CurrentValue);
+			$this->Cost->PlaceHolder = RemoveHtml($this->Cost->caption());
+			if (strval($this->Cost->EditValue) <> "" && is_numeric($this->Cost->EditValue)) {
+				$this->Cost->EditValue = FormatNumber($this->Cost->EditValue, -2, -2, -2, -2);
+				$this->Cost->OldValue = $this->Cost->EditValue;
+			}
+
+			// PaymentStatus
+			$this->PaymentStatus->EditAttrs["class"] = "form-control";
+			$this->PaymentStatus->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->PaymentStatus->CurrentValue = HtmlDecode($this->PaymentStatus->CurrentValue);
+			$this->PaymentStatus->EditValue = HtmlEncode($this->PaymentStatus->CurrentValue);
+			$this->PaymentStatus->PlaceHolder = RemoveHtml($this->PaymentStatus->caption());
+
+			// PayMode
+			$this->PayMode->EditAttrs["class"] = "form-control";
+			$this->PayMode->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->PayMode->CurrentValue = HtmlDecode($this->PayMode->CurrentValue);
+			$this->PayMode->EditValue = HtmlEncode($this->PayMode->CurrentValue);
+			$this->PayMode->PlaceHolder = RemoveHtml($this->PayMode->caption());
+
+			// VoucherNo
+			$this->VoucherNo->EditAttrs["class"] = "form-control";
+			$this->VoucherNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->VoucherNo->CurrentValue = HtmlDecode($this->VoucherNo->CurrentValue);
+			$this->VoucherNo->EditValue = HtmlEncode($this->VoucherNo->CurrentValue);
+			$this->VoucherNo->PlaceHolder = RemoveHtml($this->VoucherNo->caption());
+
+			// Edit refer script
+			// id
+
+			$this->id->LinkCustomAttributes = "";
+			$this->id->HrefValue = "";
+
+			// Investigation
+			$this->Investigation->LinkCustomAttributes = "";
+			$this->Investigation->HrefValue = "";
+
+			// Value
+			$this->Value->LinkCustomAttributes = "";
+			$this->Value->HrefValue = "";
+
+			// NormalRange
+			$this->NormalRange->LinkCustomAttributes = "";
+			$this->NormalRange->HrefValue = "";
+
+			// mrnno
+			$this->mrnno->LinkCustomAttributes = "";
+			$this->mrnno->HrefValue = "";
+			$this->mrnno->TooltipValue = "";
+
+			// Age
+			$this->Age->LinkCustomAttributes = "";
+			$this->Age->HrefValue = "";
+
+			// Gender
+			$this->Gender->LinkCustomAttributes = "";
+			$this->Gender->HrefValue = "";
+
+			// SampleCollected
+			$this->SampleCollected->LinkCustomAttributes = "";
+			$this->SampleCollected->HrefValue = "";
+
+			// SampleCollectedBy
+			$this->SampleCollectedBy->LinkCustomAttributes = "";
+			$this->SampleCollectedBy->HrefValue = "";
+
+			// ResultedDate
+			$this->ResultedDate->LinkCustomAttributes = "";
+			$this->ResultedDate->HrefValue = "";
+
+			// ResultedBy
+			$this->ResultedBy->LinkCustomAttributes = "";
+			$this->ResultedBy->HrefValue = "";
+
+			// Modified
+			$this->Modified->LinkCustomAttributes = "";
+			$this->Modified->HrefValue = "";
+
+			// ModifiedBy
+			$this->ModifiedBy->LinkCustomAttributes = "";
+			$this->ModifiedBy->HrefValue = "";
+
+			// Created
+			$this->Created->LinkCustomAttributes = "";
+			$this->Created->HrefValue = "";
+
+			// CreatedBy
+			$this->CreatedBy->LinkCustomAttributes = "";
+			$this->CreatedBy->HrefValue = "";
+
+			// GroupHead
+			$this->GroupHead->LinkCustomAttributes = "";
+			$this->GroupHead->HrefValue = "";
+
+			// Cost
+			$this->Cost->LinkCustomAttributes = "";
+			$this->Cost->HrefValue = "";
+
+			// PaymentStatus
+			$this->PaymentStatus->LinkCustomAttributes = "";
+			$this->PaymentStatus->HrefValue = "";
+
+			// PayMode
+			$this->PayMode->LinkCustomAttributes = "";
+			$this->PayMode->HrefValue = "";
+
+			// VoucherNo
+			$this->VoucherNo->LinkCustomAttributes = "";
+			$this->VoucherNo->HrefValue = "";
+		}
+		if ($this->RowType == ROWTYPE_ADD || $this->RowType == ROWTYPE_EDIT || $this->RowType == ROWTYPE_SEARCH) // Add/Edit/Search row
+			$this->setupFieldTitles();
+
+		// Call Row Rendered event
+		if ($this->RowType <> ROWTYPE_AGGREGATEINIT)
+			$this->Row_Rendered();
+	}
+
+	// Validate form
+	protected function validateForm()
+	{
+		global $Language, $FormError;
+
+		// Check if validation required
+		if (!SERVER_VALIDATE)
+			return ($FormError == "");
+		if ($this->id->Required) {
+			if (!$this->id->IsDetailKey && $this->id->FormValue != NULL && $this->id->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->id->caption(), $this->id->RequiredErrorMessage));
+			}
+		}
+		if ($this->Reception->Required) {
+			if (!$this->Reception->IsDetailKey && $this->Reception->FormValue != NULL && $this->Reception->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Reception->caption(), $this->Reception->RequiredErrorMessage));
+			}
+		}
+		if ($this->PatientId->Required) {
+			if (!$this->PatientId->IsDetailKey && $this->PatientId->FormValue != NULL && $this->PatientId->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->PatientId->caption(), $this->PatientId->RequiredErrorMessage));
+			}
+		}
+		if ($this->PatientName->Required) {
+			if (!$this->PatientName->IsDetailKey && $this->PatientName->FormValue != NULL && $this->PatientName->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->PatientName->caption(), $this->PatientName->RequiredErrorMessage));
+			}
+		}
+		if ($this->Investigation->Required) {
+			if (!$this->Investigation->IsDetailKey && $this->Investigation->FormValue != NULL && $this->Investigation->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Investigation->caption(), $this->Investigation->RequiredErrorMessage));
+			}
+		}
+		if ($this->Value->Required) {
+			if (!$this->Value->IsDetailKey && $this->Value->FormValue != NULL && $this->Value->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Value->caption(), $this->Value->RequiredErrorMessage));
+			}
+		}
+		if ($this->NormalRange->Required) {
+			if (!$this->NormalRange->IsDetailKey && $this->NormalRange->FormValue != NULL && $this->NormalRange->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->NormalRange->caption(), $this->NormalRange->RequiredErrorMessage));
+			}
+		}
+		if ($this->mrnno->Required) {
+			if (!$this->mrnno->IsDetailKey && $this->mrnno->FormValue != NULL && $this->mrnno->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->mrnno->caption(), $this->mrnno->RequiredErrorMessage));
+			}
+		}
+		if ($this->Age->Required) {
+			if (!$this->Age->IsDetailKey && $this->Age->FormValue != NULL && $this->Age->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Age->caption(), $this->Age->RequiredErrorMessage));
+			}
+		}
+		if ($this->Gender->Required) {
+			if (!$this->Gender->IsDetailKey && $this->Gender->FormValue != NULL && $this->Gender->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Gender->caption(), $this->Gender->RequiredErrorMessage));
+			}
+		}
+		if ($this->profilePic->Required) {
+			if (!$this->profilePic->IsDetailKey && $this->profilePic->FormValue != NULL && $this->profilePic->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->profilePic->caption(), $this->profilePic->RequiredErrorMessage));
+			}
+		}
+		if ($this->SampleCollected->Required) {
+			if (!$this->SampleCollected->IsDetailKey && $this->SampleCollected->FormValue != NULL && $this->SampleCollected->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->SampleCollected->caption(), $this->SampleCollected->RequiredErrorMessage));
+			}
+		}
+		if (!CheckDate($this->SampleCollected->FormValue)) {
+			AddMessage($FormError, $this->SampleCollected->errorMessage());
+		}
+		if ($this->SampleCollectedBy->Required) {
+			if (!$this->SampleCollectedBy->IsDetailKey && $this->SampleCollectedBy->FormValue != NULL && $this->SampleCollectedBy->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->SampleCollectedBy->caption(), $this->SampleCollectedBy->RequiredErrorMessage));
+			}
+		}
+		if ($this->ResultedDate->Required) {
+			if (!$this->ResultedDate->IsDetailKey && $this->ResultedDate->FormValue != NULL && $this->ResultedDate->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->ResultedDate->caption(), $this->ResultedDate->RequiredErrorMessage));
+			}
+		}
+		if (!CheckDate($this->ResultedDate->FormValue)) {
+			AddMessage($FormError, $this->ResultedDate->errorMessage());
+		}
+		if ($this->ResultedBy->Required) {
+			if (!$this->ResultedBy->IsDetailKey && $this->ResultedBy->FormValue != NULL && $this->ResultedBy->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->ResultedBy->caption(), $this->ResultedBy->RequiredErrorMessage));
+			}
+		}
+		if ($this->Modified->Required) {
+			if (!$this->Modified->IsDetailKey && $this->Modified->FormValue != NULL && $this->Modified->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Modified->caption(), $this->Modified->RequiredErrorMessage));
+			}
+		}
+		if (!CheckDate($this->Modified->FormValue)) {
+			AddMessage($FormError, $this->Modified->errorMessage());
+		}
+		if ($this->ModifiedBy->Required) {
+			if (!$this->ModifiedBy->IsDetailKey && $this->ModifiedBy->FormValue != NULL && $this->ModifiedBy->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->ModifiedBy->caption(), $this->ModifiedBy->RequiredErrorMessage));
+			}
+		}
+		if ($this->Created->Required) {
+			if (!$this->Created->IsDetailKey && $this->Created->FormValue != NULL && $this->Created->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Created->caption(), $this->Created->RequiredErrorMessage));
+			}
+		}
+		if (!CheckDate($this->Created->FormValue)) {
+			AddMessage($FormError, $this->Created->errorMessage());
+		}
+		if ($this->CreatedBy->Required) {
+			if (!$this->CreatedBy->IsDetailKey && $this->CreatedBy->FormValue != NULL && $this->CreatedBy->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->CreatedBy->caption(), $this->CreatedBy->RequiredErrorMessage));
+			}
+		}
+		if ($this->GroupHead->Required) {
+			if (!$this->GroupHead->IsDetailKey && $this->GroupHead->FormValue != NULL && $this->GroupHead->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->GroupHead->caption(), $this->GroupHead->RequiredErrorMessage));
+			}
+		}
+		if ($this->Cost->Required) {
+			if (!$this->Cost->IsDetailKey && $this->Cost->FormValue != NULL && $this->Cost->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Cost->caption(), $this->Cost->RequiredErrorMessage));
+			}
+		}
+		if (!CheckNumber($this->Cost->FormValue)) {
+			AddMessage($FormError, $this->Cost->errorMessage());
+		}
+		if ($this->PaymentStatus->Required) {
+			if (!$this->PaymentStatus->IsDetailKey && $this->PaymentStatus->FormValue != NULL && $this->PaymentStatus->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->PaymentStatus->caption(), $this->PaymentStatus->RequiredErrorMessage));
+			}
+		}
+		if ($this->PayMode->Required) {
+			if (!$this->PayMode->IsDetailKey && $this->PayMode->FormValue != NULL && $this->PayMode->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->PayMode->caption(), $this->PayMode->RequiredErrorMessage));
+			}
+		}
+		if ($this->VoucherNo->Required) {
+			if (!$this->VoucherNo->IsDetailKey && $this->VoucherNo->FormValue != NULL && $this->VoucherNo->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->VoucherNo->caption(), $this->VoucherNo->RequiredErrorMessage));
+			}
+		}
+		if ($this->InvestigationMultiselect->Required) {
+			if (!$this->InvestigationMultiselect->IsDetailKey && $this->InvestigationMultiselect->FormValue != NULL && $this->InvestigationMultiselect->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->InvestigationMultiselect->caption(), $this->InvestigationMultiselect->RequiredErrorMessage));
+			}
+		}
+
+		// Return validate result
+		$validateForm = ($FormError == "");
+
+		// Call Form_CustomValidate event
+		$formCustomError = "";
+		$validateForm = $validateForm && $this->Form_CustomValidate($formCustomError);
+		if ($formCustomError <> "") {
+			AddMessage($FormError, $formCustomError);
+		}
+		return $validateForm;
+	}
+
+	// Delete records based on current filter
+	protected function deleteRows()
+	{
+		global $Language, $Security;
+		if (!$Security->canDelete()) {
+			$this->setFailureMessage($Language->phrase("NoDeletePermission")); // No delete permission
+			return FALSE;
+		}
+		$deleteRows = TRUE;
+		$sql = $this->getCurrentSql();
+		$conn = &$this->getConnection();
+		$conn->raiseErrorFn = $GLOBALS["ERROR_FUNC"];
+		$rs = $conn->execute($sql);
+		$conn->raiseErrorFn = '';
+		if ($rs === FALSE) {
+			return FALSE;
+		} elseif ($rs->EOF) {
+			$this->setFailureMessage($Language->phrase("NoRecord")); // No record found
+			$rs->close();
+			return FALSE;
+		}
+		$rows = ($rs) ? $rs->getRows() : [];
+
+		// Clone old rows
+		$rsold = $rows;
+		if ($rs)
+			$rs->close();
+
+		// Call row deleting event
+		if ($deleteRows) {
+			foreach ($rsold as $row) {
+				$deleteRows = $this->Row_Deleting($row);
+				if (!$deleteRows)
+					break;
+			}
+		}
+		if ($deleteRows) {
+			$key = "";
+			foreach ($rsold as $row) {
+				$thisKey = "";
+				if ($thisKey <> "")
+					$thisKey .= $GLOBALS["COMPOSITE_KEY_SEPARATOR"];
+				$thisKey .= $row['id'];
+				if (DELETE_UPLOADED_FILES) // Delete old files
+					$this->deleteUploadedFiles($row);
+				$conn->raiseErrorFn = $GLOBALS["ERROR_FUNC"];
+				$deleteRows = $this->delete($row); // Delete
+				$conn->raiseErrorFn = '';
+				if ($deleteRows === FALSE)
+					break;
+				if ($key <> "")
+					$key .= ", ";
+				$key .= $thisKey;
+			}
+		}
+		if (!$deleteRows) {
+
+			// Set up error message
+			if ($this->getSuccessMessage() <> "" || $this->getFailureMessage() <> "") {
+
+				// Use the message, do nothing
+			} elseif ($this->CancelMessage <> "") {
+				$this->setFailureMessage($this->CancelMessage);
+				$this->CancelMessage = "";
+			} else {
+				$this->setFailureMessage($Language->phrase("DeleteCancelled"));
+			}
+		}
+
+		// Call Row Deleted event
+		if ($deleteRows) {
+			foreach ($rsold as $row) {
+				$this->Row_Deleted($row);
+			}
+		}
+
+		// Write JSON for API request (Support single row only)
+		if (IsApi() && $deleteRows) {
+			$row = $this->getRecordsFromRecordset($rsold, TRUE);
+			WriteJson(["success" => TRUE, $this->TableVar => $row]);
+		}
+		return $deleteRows;
+	}
+
+	// Update record based on key values
+	protected function editRow()
+	{
+		global $Security, $Language;
+		$filter = $this->getRecordFilter();
+		$filter = $this->applyUserIDFilters($filter);
+		$conn = &$this->getConnection();
+		$this->CurrentFilter = $filter;
+		$sql = $this->getCurrentSql();
+		$conn->raiseErrorFn = $GLOBALS["ERROR_FUNC"];
+		$rs = $conn->execute($sql);
+		$conn->raiseErrorFn = '';
+		if ($rs === FALSE)
+			return FALSE;
+		if ($rs->EOF) {
+			$this->setFailureMessage($Language->phrase("NoRecord")); // Set no record message
+			$editRow = FALSE; // Update Failed
+		} else {
+
+			// Save old values
+			$rsold = &$rs->fields;
+			$this->loadDbValues($rsold);
+			$rsnew = [];
+
+			// Investigation
+			$this->Investigation->setDbValueDef($rsnew, $this->Investigation->CurrentValue, NULL, $this->Investigation->ReadOnly);
+
+			// Value
+			$this->Value->setDbValueDef($rsnew, $this->Value->CurrentValue, NULL, $this->Value->ReadOnly);
+
+			// NormalRange
+			$this->NormalRange->setDbValueDef($rsnew, $this->NormalRange->CurrentValue, NULL, $this->NormalRange->ReadOnly);
+
+			// Age
+			$this->Age->setDbValueDef($rsnew, $this->Age->CurrentValue, NULL, $this->Age->ReadOnly);
+
+			// Gender
+			$this->Gender->setDbValueDef($rsnew, $this->Gender->CurrentValue, NULL, $this->Gender->ReadOnly);
+
+			// SampleCollected
+			$this->SampleCollected->setDbValueDef($rsnew, UnFormatDateTime($this->SampleCollected->CurrentValue, 0), NULL, $this->SampleCollected->ReadOnly);
+
+			// SampleCollectedBy
+			$this->SampleCollectedBy->setDbValueDef($rsnew, $this->SampleCollectedBy->CurrentValue, NULL, $this->SampleCollectedBy->ReadOnly);
+
+			// ResultedDate
+			$this->ResultedDate->setDbValueDef($rsnew, UnFormatDateTime($this->ResultedDate->CurrentValue, 0), NULL, $this->ResultedDate->ReadOnly);
+
+			// ResultedBy
+			$this->ResultedBy->setDbValueDef($rsnew, $this->ResultedBy->CurrentValue, NULL, $this->ResultedBy->ReadOnly);
+
+			// Modified
+			$this->Modified->setDbValueDef($rsnew, UnFormatDateTime($this->Modified->CurrentValue, 0), NULL, $this->Modified->ReadOnly);
+
+			// ModifiedBy
+			$this->ModifiedBy->setDbValueDef($rsnew, $this->ModifiedBy->CurrentValue, NULL, $this->ModifiedBy->ReadOnly);
+
+			// Created
+			$this->Created->setDbValueDef($rsnew, UnFormatDateTime($this->Created->CurrentValue, 0), NULL, $this->Created->ReadOnly);
+
+			// CreatedBy
+			$this->CreatedBy->setDbValueDef($rsnew, $this->CreatedBy->CurrentValue, NULL, $this->CreatedBy->ReadOnly);
+
+			// GroupHead
+			$this->GroupHead->setDbValueDef($rsnew, $this->GroupHead->CurrentValue, NULL, $this->GroupHead->ReadOnly);
+
+			// Cost
+			$this->Cost->setDbValueDef($rsnew, $this->Cost->CurrentValue, NULL, $this->Cost->ReadOnly);
+
+			// PaymentStatus
+			$this->PaymentStatus->setDbValueDef($rsnew, $this->PaymentStatus->CurrentValue, NULL, $this->PaymentStatus->ReadOnly);
+
+			// PayMode
+			$this->PayMode->setDbValueDef($rsnew, $this->PayMode->CurrentValue, NULL, $this->PayMode->ReadOnly);
+
+			// VoucherNo
+			$this->VoucherNo->setDbValueDef($rsnew, $this->VoucherNo->CurrentValue, NULL, $this->VoucherNo->ReadOnly);
+
+			// Call Row Updating event
+			$updateRow = $this->Row_Updating($rsold, $rsnew);
+			if ($updateRow) {
+				$conn->raiseErrorFn = $GLOBALS["ERROR_FUNC"];
+				if (count($rsnew) > 0)
+					$editRow = $this->update($rsnew, "", $rsold);
+				else
+					$editRow = TRUE; // No field to update
+				$conn->raiseErrorFn = '';
+				if ($editRow) {
+				}
+			} else {
+				if ($this->getSuccessMessage() <> "" || $this->getFailureMessage() <> "") {
+
+					// Use the message, do nothing
+				} elseif ($this->CancelMessage <> "") {
+					$this->setFailureMessage($this->CancelMessage);
+					$this->CancelMessage = "";
+				} else {
+					$this->setFailureMessage($Language->phrase("UpdateCancelled"));
+				}
+				$editRow = FALSE;
+			}
+		}
+
+		// Call Row_Updated event
+		if ($editRow)
+			$this->Row_Updated($rsold, $rsnew);
+		$rs->close();
+
+		// Write JSON for API request
+		if (IsApi() && $editRow) {
+			$row = $this->getRecordsFromRecordset([$rsnew], TRUE);
+			WriteJson(["success" => TRUE, $this->TableVar => $row]);
+		}
+		return $editRow;
+	}
+
+	// Add record
+	protected function addRow($rsold = NULL)
+	{
+		global $Language, $Security;
+
+		// Set up foreign key field value from Session
+			if ($this->getCurrentMasterTable() == "ip_admission") {
+				$this->Reception->CurrentValue = $this->Reception->getSessionValue();
+				$this->PatientId->CurrentValue = $this->PatientId->getSessionValue();
+				$this->mrnno->CurrentValue = $this->mrnno->getSessionValue();
+			}
+		$conn = &$this->getConnection();
+
+		// Load db values from rsold
+		$this->loadDbValues($rsold);
+		if ($rsold) {
+		}
+		$rsnew = [];
+
+		// Investigation
+		$this->Investigation->setDbValueDef($rsnew, $this->Investigation->CurrentValue, NULL, FALSE);
+
+		// Value
+		$this->Value->setDbValueDef($rsnew, $this->Value->CurrentValue, NULL, FALSE);
+
+		// NormalRange
+		$this->NormalRange->setDbValueDef($rsnew, $this->NormalRange->CurrentValue, NULL, FALSE);
+
+		// mrnno
+		$this->mrnno->setDbValueDef($rsnew, $this->mrnno->CurrentValue, NULL, FALSE);
+
+		// Age
+		$this->Age->setDbValueDef($rsnew, $this->Age->CurrentValue, NULL, FALSE);
+
+		// Gender
+		$this->Gender->setDbValueDef($rsnew, $this->Gender->CurrentValue, NULL, FALSE);
+
+		// SampleCollected
+		$this->SampleCollected->setDbValueDef($rsnew, UnFormatDateTime($this->SampleCollected->CurrentValue, 0), NULL, FALSE);
+
+		// SampleCollectedBy
+		$this->SampleCollectedBy->setDbValueDef($rsnew, $this->SampleCollectedBy->CurrentValue, NULL, FALSE);
+
+		// ResultedDate
+		$this->ResultedDate->setDbValueDef($rsnew, UnFormatDateTime($this->ResultedDate->CurrentValue, 0), NULL, FALSE);
+
+		// ResultedBy
+		$this->ResultedBy->setDbValueDef($rsnew, $this->ResultedBy->CurrentValue, NULL, FALSE);
+
+		// Modified
+		$this->Modified->setDbValueDef($rsnew, UnFormatDateTime($this->Modified->CurrentValue, 0), NULL, FALSE);
+
+		// ModifiedBy
+		$this->ModifiedBy->setDbValueDef($rsnew, $this->ModifiedBy->CurrentValue, NULL, FALSE);
+
+		// Created
+		$this->Created->setDbValueDef($rsnew, UnFormatDateTime($this->Created->CurrentValue, 0), NULL, FALSE);
+
+		// CreatedBy
+		$this->CreatedBy->setDbValueDef($rsnew, $this->CreatedBy->CurrentValue, NULL, FALSE);
+
+		// GroupHead
+		$this->GroupHead->setDbValueDef($rsnew, $this->GroupHead->CurrentValue, NULL, FALSE);
+
+		// Cost
+		$this->Cost->setDbValueDef($rsnew, $this->Cost->CurrentValue, NULL, FALSE);
+
+		// PaymentStatus
+		$this->PaymentStatus->setDbValueDef($rsnew, $this->PaymentStatus->CurrentValue, NULL, FALSE);
+
+		// PayMode
+		$this->PayMode->setDbValueDef($rsnew, $this->PayMode->CurrentValue, NULL, FALSE);
+
+		// VoucherNo
+		$this->VoucherNo->setDbValueDef($rsnew, $this->VoucherNo->CurrentValue, NULL, FALSE);
+
+		// Reception
+		if ($this->Reception->getSessionValue() <> "") {
+			$rsnew['Reception'] = $this->Reception->getSessionValue();
+		}
+
+		// PatientId
+		if ($this->PatientId->getSessionValue() <> "") {
+			$rsnew['PatientId'] = $this->PatientId->getSessionValue();
+		}
+
+		// Call Row Inserting event
+		$rs = ($rsold) ? $rsold->fields : NULL;
+		$insertRow = $this->Row_Inserting($rs, $rsnew);
+		if ($insertRow) {
+			$conn->raiseErrorFn = $GLOBALS["ERROR_FUNC"];
+			$addRow = $this->insert($rsnew);
+			$conn->raiseErrorFn = '';
+			if ($addRow) {
+			}
+		} else {
+			if ($this->getSuccessMessage() <> "" || $this->getFailureMessage() <> "") {
+
+				// Use the message, do nothing
+			} elseif ($this->CancelMessage <> "") {
+				$this->setFailureMessage($this->CancelMessage);
+				$this->CancelMessage = "";
+			} else {
+				$this->setFailureMessage($Language->phrase("InsertCancelled"));
+			}
+			$addRow = FALSE;
+		}
+		if ($addRow) {
+
+			// Call Row Inserted event
+			$rs = ($rsold) ? $rsold->fields : NULL;
+			$this->Row_Inserted($rs, $rsnew);
+		}
+
+		// Write JSON for API request
+		if (IsApi() && $addRow) {
+			$row = $this->getRecordsFromRecordset([$rsnew], TRUE);
+			WriteJson(["success" => TRUE, $this->TableVar => $row]);
+		}
+		return $addRow;
+	}
+
+	// Set up master/detail based on QueryString
+	protected function setupMasterParms()
+	{
+
+		// Hide foreign keys
+		$masterTblVar = $this->getCurrentMasterTable();
+		if ($masterTblVar == "ip_admission") {
+			$this->Reception->Visible = FALSE;
+			if ($GLOBALS["ip_admission"]->EventCancelled)
+				$this->EventCancelled = TRUE;
+			$this->PatientId->Visible = FALSE;
+			if ($GLOBALS["ip_admission"]->EventCancelled)
+				$this->EventCancelled = TRUE;
+			$this->mrnno->Visible = FALSE;
+			if ($GLOBALS["ip_admission"]->EventCancelled)
+				$this->EventCancelled = TRUE;
+		}
+		$this->DbMasterFilter = $this->getMasterFilter(); // Get master filter
+		$this->DbDetailFilter = $this->getDetailFilter(); // Get detail filter
+	}
+
+	// Setup lookup options
+	public function setupLookupOptions($fld)
+	{
+		if ($fld->Lookup !== NULL && $fld->Lookup->Options === NULL) {
+
+			// No need to check any more
+			$fld->Lookup->Options = [];
+
+			// Set up lookup SQL
+			switch ($fld->FieldVar) {
+				default:
+					$lookupFilter = "";
+					break;
+			}
+
+			// Always call to Lookup->getSql so that user can setup Lookup->Options in Lookup_Selecting server event
+			$sql = $fld->Lookup->getSql(FALSE, "", $lookupFilter, $this);
+
+			// Set up lookup cache
+			if ($fld->UseLookupCache && $sql <> "" && count($fld->Lookup->ParentFields) == 0 && count($fld->Lookup->Options) == 0) {
+				$conn = &$this->getConnection();
+				$totalCnt = $this->getRecordCount($sql);
+				if ($totalCnt > $fld->LookupCacheCount) // Total count > cache count, do not cache
+					return;
+				$rs = $conn->execute($sql);
+				$ar = [];
+				while ($rs && !$rs->EOF) {
+					$row = &$rs->fields;
+
+					// Format the field values
+					switch ($fld->FieldVar) {
+					}
+					$ar[strval($row[0])] = $row;
+					$rs->moveNext();
+				}
+				if ($rs)
+					$rs->close();
+				$fld->Lookup->Options = $ar;
+			}
+		}
+	}
+
+	// Page Load event
+	function Page_Load() {
+
+		//echo "Page Load";
+	}
+
+	// Page Unload event
+	function Page_Unload() {
+
+		//echo "Page Unload";
+	}
+
+	// Page Redirecting event
+	function Page_Redirecting(&$url) {
+
+		// Example:
+		//$url = "your URL";
+
+	}
+
+	// Message Showing event
+	// $type = ''|'success'|'failure'|'warning'
+	function Message_Showing(&$msg, $type) {
+		if ($type == 'success') {
+
+			//$msg = "your success message";
+		} elseif ($type == 'failure') {
+
+			//$msg = "your failure message";
+		} elseif ($type == 'warning') {
+
+			//$msg = "your warning message";
+		} else {
+
+			//$msg = "your message";
+		}
+	}
+
+	// Page Render event
+	function Page_Render() {
+
+		//echo "Page Render";
+	}
+
+	// Page Data Rendering event
+	function Page_DataRendering(&$header) {
+
+		// Example:
+		//$header = "your header";
+
+	}
+
+	// Page Data Rendered event
+	function Page_DataRendered(&$footer) {
+
+		// Example:
+		//$footer = "your footer";
+
+	}
+
+	// Form Custom Validate event
+	function Form_CustomValidate(&$customError) {
+
+		// Return error message in CustomError
+		return TRUE;
+	}
+
+	// ListOptions Load event
+	function ListOptions_Load() {
+
+		// Example:
+		//$opt = &$this->ListOptions->Add("new");
+		//$opt->Header = "xxx";
+		//$opt->OnLeft = TRUE; // Link on left
+		//$opt->MoveTo(0); // Move to first column
+
+	}
+
+	// ListOptions Rendering event
+	function ListOptions_Rendering() {
+
+		//$GLOBALS["xxx_grid"]->DetailAdd = (...condition...); // Set to TRUE or FALSE conditionally
+		//$GLOBALS["xxx_grid"]->DetailEdit = (...condition...); // Set to TRUE or FALSE conditionally
+		//$GLOBALS["xxx_grid"]->DetailView = (...condition...); // Set to TRUE or FALSE conditionally
+
+	}
+
+	// ListOptions Rendered event
+	function ListOptions_Rendered() {
+
+		// Example:
+		//$this->ListOptions->Items["new"]->Body = "xxx";
+
+	}
+}
+?>

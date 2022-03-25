@@ -1,0 +1,115 @@
+<?php
+namespace PHPMaker2020\HIMS;
+
+// Autoload
+include_once "autoload.php";
+
+// Session
+if (session_status() !== PHP_SESSION_ACTIVE)
+	\Delight\Cookie\Session::start(Config("COOKIE_SAMESITE")); // Init session data
+
+// Output buffering
+ob_start();
+?>
+<?php
+
+// Write header
+WriteHeader(FALSE);
+
+// Create page object
+$billing_type_view = new billing_type_view();
+
+// Run the page
+$billing_type_view->run();
+
+// Setup login status
+SetupLoginStatus();
+SetClientVar("login", LoginStatus());
+
+// Global Page Rendering event (in userfn*.php)
+Page_Rendering();
+
+// Page Rendering event
+$billing_type_view->Page_Render();
+?>
+<?php include_once "header.php"; ?>
+<?php if (!$billing_type_view->isExport()) { ?>
+<script>
+var fbilling_typeview, currentPageID;
+loadjs.ready("head", function() {
+
+	// Form object
+	currentPageID = ew.PAGE_ID = "view";
+	fbilling_typeview = currentForm = new ew.Form("fbilling_typeview", "view");
+	loadjs.done("fbilling_typeview");
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+
+	// Client script
+	// Write your client script here, no need to add script tags.
+
+});
+</script>
+<?php } ?>
+<?php if (!$billing_type_view->isExport()) { ?>
+<div class="btn-toolbar ew-toolbar">
+<?php $billing_type_view->ExportOptions->render("body") ?>
+<?php $billing_type_view->OtherOptions->render("body") ?>
+<div class="clearfix"></div>
+</div>
+<?php } ?>
+<?php $billing_type_view->showPageHeader(); ?>
+<?php
+$billing_type_view->showMessage();
+?>
+<form name="fbilling_typeview" id="fbilling_typeview" class="form-inline ew-form ew-view-form" action="<?php echo CurrentPageName() ?>" method="post">
+<?php if ($Page->CheckToken) { ?>
+<input type="hidden" name="<?php echo Config("TOKEN_NAME") ?>" value="<?php echo $Page->Token ?>">
+<?php } ?>
+<input type="hidden" name="t" value="billing_type">
+<input type="hidden" name="modal" value="<?php echo (int)$billing_type_view->IsModal ?>">
+<table class="table table-striped table-sm ew-view-table">
+<?php if ($billing_type_view->id->Visible) { // id ?>
+	<tr id="r_id">
+		<td class="<?php echo $billing_type_view->TableLeftColumnClass ?>"><span id="elh_billing_type_id"><?php echo $billing_type_view->id->caption() ?></span></td>
+		<td data-name="id" <?php echo $billing_type_view->id->cellAttributes() ?>>
+<span id="el_billing_type_id">
+<span<?php echo $billing_type_view->id->viewAttributes() ?>><?php echo $billing_type_view->id->getViewValue() ?></span>
+</span>
+</td>
+	</tr>
+<?php } ?>
+<?php if ($billing_type_view->Type->Visible) { // Type ?>
+	<tr id="r_Type">
+		<td class="<?php echo $billing_type_view->TableLeftColumnClass ?>"><span id="elh_billing_type_Type"><?php echo $billing_type_view->Type->caption() ?></span></td>
+		<td data-name="Type" <?php echo $billing_type_view->Type->cellAttributes() ?>>
+<span id="el_billing_type_Type">
+<span<?php echo $billing_type_view->Type->viewAttributes() ?>><?php echo $billing_type_view->Type->getViewValue() ?></span>
+</span>
+</td>
+	</tr>
+<?php } ?>
+</table>
+</form>
+<?php
+$billing_type_view->showPageFooter();
+if (Config("DEBUG"))
+	echo GetDebugMessage();
+?>
+<?php if (!$billing_type_view->isExport()) { ?>
+<script>
+loadjs.ready("load", function() {
+
+	// Startup script
+	// Write your table-specific startup script here
+	// console.log("page loaded");
+
+});
+</script>
+<?php } ?>
+<?php include_once "footer.php"; ?>
+<?php
+$billing_type_view->terminate();
+?>

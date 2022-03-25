@@ -1,0 +1,93 @@
+<?php
+
+namespace PHPMaker2021\HIMS;
+
+// Page object
+$MasterProcedureTreatmentView = &$Page;
+?>
+<?php if (!$Page->isExport()) { ?>
+<script>
+var currentForm, currentPageID;
+var fmaster_procedure_treatmentview;
+loadjs.ready("head", function () {
+    var $ = jQuery;
+    // Form object
+    currentPageID = ew.PAGE_ID = "view";
+    fmaster_procedure_treatmentview = currentForm = new ew.Form("fmaster_procedure_treatmentview", "view");
+    loadjs.done("fmaster_procedure_treatmentview");
+});
+</script>
+<script>
+loadjs.ready("head", function () {
+    // Write your table-specific client script here, no need to add script tags.
+});
+</script>
+<?php } ?>
+<script>
+if (!ew.vars.tables.master_procedure_treatment) ew.vars.tables.master_procedure_treatment = <?= JsonEncode(GetClientVar("tables", "master_procedure_treatment")) ?>;
+</script>
+<?php if (!$Page->isExport()) { ?>
+<div class="btn-toolbar ew-toolbar">
+<?php $Page->ExportOptions->render("body") ?>
+<?php $Page->OtherOptions->render("body") ?>
+<div class="clearfix"></div>
+</div>
+<?php } ?>
+<?php $Page->showPageHeader(); ?>
+<?php
+$Page->showMessage();
+?>
+<form name="fmaster_procedure_treatmentview" id="fmaster_procedure_treatmentview" class="form-inline ew-form ew-view-form" action="<?= CurrentPageUrl(false) ?>" method="post">
+<?php if (Config("CHECK_TOKEN")) { ?>
+<input type="hidden" name="<?= $TokenNameKey ?>" value="<?= $TokenName ?>"><!-- CSRF token name -->
+<input type="hidden" name="<?= $TokenValueKey ?>" value="<?= $TokenValue ?>"><!-- CSRF token value -->
+<?php } ?>
+<input type="hidden" name="t" value="master_procedure_treatment">
+<input type="hidden" name="modal" value="<?= (int)$Page->IsModal ?>">
+<table class="table table-striped table-sm ew-view-table">
+<?php if ($Page->id->Visible) { // id ?>
+    <tr id="r_id">
+        <td class="<?= $Page->TableLeftColumnClass ?>"><span id="elh_master_procedure_treatment_id"><?= $Page->id->caption() ?></span></td>
+        <td data-name="id" <?= $Page->id->cellAttributes() ?>>
+<span id="el_master_procedure_treatment_id">
+<span<?= $Page->id->viewAttributes() ?>>
+<?= $Page->id->getViewValue() ?></span>
+</span>
+</td>
+    </tr>
+<?php } ?>
+<?php if ($Page->Treatment->Visible) { // Treatment ?>
+    <tr id="r_Treatment">
+        <td class="<?= $Page->TableLeftColumnClass ?>"><span id="elh_master_procedure_treatment_Treatment"><?= $Page->Treatment->caption() ?></span></td>
+        <td data-name="Treatment" <?= $Page->Treatment->cellAttributes() ?>>
+<span id="el_master_procedure_treatment_Treatment">
+<span<?= $Page->Treatment->viewAttributes() ?>>
+<?= $Page->Treatment->getViewValue() ?></span>
+</span>
+</td>
+    </tr>
+<?php } ?>
+<?php if ($Page->Procedure->Visible) { // Procedure ?>
+    <tr id="r_Procedure">
+        <td class="<?= $Page->TableLeftColumnClass ?>"><span id="elh_master_procedure_treatment_Procedure"><?= $Page->Procedure->caption() ?></span></td>
+        <td data-name="Procedure" <?= $Page->Procedure->cellAttributes() ?>>
+<span id="el_master_procedure_treatment_Procedure">
+<span<?= $Page->Procedure->viewAttributes() ?>>
+<?= $Page->Procedure->getViewValue() ?></span>
+</span>
+</td>
+    </tr>
+<?php } ?>
+</table>
+</form>
+<?php
+$Page->showPageFooter();
+echo GetDebugMessage();
+?>
+<?php if (!$Page->isExport()) { ?>
+<script>
+loadjs.ready("load", function () {
+    // Write your table-specific startup script here, no need to add script tags.
+});
+</script>
+<?php } ?>

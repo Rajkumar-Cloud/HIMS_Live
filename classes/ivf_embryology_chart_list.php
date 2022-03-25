@@ -1,0 +1,11736 @@
+<?php
+namespace PHPMaker2019\HIMS;
+
+/**
+ * Page class
+ */
+class ivf_embryology_chart_list extends ivf_embryology_chart
+{
+
+	// Page ID
+	public $PageID = "list";
+
+	// Project ID
+	public $ProjectID = "{EA4F6D13-AF8F-428D-9EA7-BA88D1107EC3}";
+
+	// Table name
+	public $TableName = 'ivf_embryology_chart';
+
+	// Page object name
+	public $PageObjName = "ivf_embryology_chart_list";
+
+	// Grid form hidden field names
+	public $FormName = "fivf_embryology_chartlist";
+	public $FormActionName = "k_action";
+	public $FormKeyName = "k_key";
+	public $FormOldKeyName = "k_oldkey";
+	public $FormBlankRowName = "k_blankrow";
+	public $FormKeyCountName = "key_count";
+
+	// Page URLs
+	public $AddUrl;
+	public $EditUrl;
+	public $CopyUrl;
+	public $DeleteUrl;
+	public $ViewUrl;
+	public $ListUrl;
+	public $CancelUrl;
+
+	// Export URLs
+	public $ExportPrintUrl;
+	public $ExportHtmlUrl;
+	public $ExportExcelUrl;
+	public $ExportWordUrl;
+	public $ExportXmlUrl;
+	public $ExportCsvUrl;
+	public $ExportPdfUrl;
+
+	// Custom export
+	public $ExportExcelCustom = FALSE;
+	public $ExportWordCustom = FALSE;
+	public $ExportPdfCustom = FALSE;
+	public $ExportEmailCustom = FALSE;
+
+	// Update URLs
+	public $InlineAddUrl;
+	public $InlineCopyUrl;
+	public $InlineEditUrl;
+	public $GridAddUrl;
+	public $GridEditUrl;
+	public $MultiDeleteUrl;
+	public $MultiUpdateUrl;
+
+	// Page headings
+	public $Heading = "";
+	public $Subheading = "";
+	public $PageHeader;
+	public $PageFooter;
+
+	// Token
+	public $Token = "";
+	public $TokenTimeout = 0;
+	public $CheckToken = CHECK_TOKEN;
+
+	// Messages
+	private $_message = "";
+	private $_failureMessage = "";
+	private $_successMessage = "";
+	private $_warningMessage = "";
+
+	// Page URL
+	private $_pageUrl = "";
+
+	// Page heading
+	public function pageHeading()
+	{
+		global $Language;
+		if ($this->Heading <> "")
+			return $this->Heading;
+		if (method_exists($this, "tableCaption"))
+			return $this->tableCaption();
+		return "";
+	}
+
+	// Page subheading
+	public function pageSubheading()
+	{
+		global $Language;
+		if ($this->Subheading <> "")
+			return $this->Subheading;
+		if ($this->TableName)
+			return $Language->phrase($this->PageID);
+		return "";
+	}
+
+	// Page name
+	public function pageName()
+	{
+		return CurrentPageName();
+	}
+
+	// Page URL
+	public function pageUrl()
+	{
+		if ($this->_pageUrl == "") {
+			$this->_pageUrl = CurrentPageName() . "?";
+			if ($this->UseTokenInUrl)
+				$this->_pageUrl .= "t=" . $this->TableVar . "&"; // Add page token
+		}
+		return $this->_pageUrl;
+	}
+
+	// Get message
+	public function getMessage()
+	{
+		return isset($_SESSION[SESSION_MESSAGE]) ? $_SESSION[SESSION_MESSAGE] : $this->_message;
+	}
+
+	// Set message
+	public function setMessage($v)
+	{
+		AddMessage($this->_message, $v);
+		$_SESSION[SESSION_MESSAGE] = $this->_message;
+	}
+
+	// Get failure message
+	public function getFailureMessage()
+	{
+		return isset($_SESSION[SESSION_FAILURE_MESSAGE]) ? $_SESSION[SESSION_FAILURE_MESSAGE] : $this->_failureMessage;
+	}
+
+	// Set failure message
+	public function setFailureMessage($v)
+	{
+		AddMessage($this->_failureMessage, $v);
+		$_SESSION[SESSION_FAILURE_MESSAGE] = $this->_failureMessage;
+	}
+
+	// Get success message
+	public function getSuccessMessage()
+	{
+		return isset($_SESSION[SESSION_SUCCESS_MESSAGE]) ? $_SESSION[SESSION_SUCCESS_MESSAGE] : $this->_successMessage;
+	}
+
+	// Set success message
+	public function setSuccessMessage($v)
+	{
+		AddMessage($this->_successMessage, $v);
+		$_SESSION[SESSION_SUCCESS_MESSAGE] = $this->_successMessage;
+	}
+
+	// Get warning message
+	public function getWarningMessage()
+	{
+		return isset($_SESSION[SESSION_WARNING_MESSAGE]) ? $_SESSION[SESSION_WARNING_MESSAGE] : $this->_warningMessage;
+	}
+
+	// Set warning message
+	public function setWarningMessage($v)
+	{
+		AddMessage($this->_warningMessage, $v);
+		$_SESSION[SESSION_WARNING_MESSAGE] = $this->_warningMessage;
+	}
+
+	// Clear message
+	public function clearMessage()
+	{
+		$this->_message = "";
+		$_SESSION[SESSION_MESSAGE] = "";
+	}
+
+	// Clear failure message
+	public function clearFailureMessage()
+	{
+		$this->_failureMessage = "";
+		$_SESSION[SESSION_FAILURE_MESSAGE] = "";
+	}
+
+	// Clear success message
+	public function clearSuccessMessage()
+	{
+		$this->_successMessage = "";
+		$_SESSION[SESSION_SUCCESS_MESSAGE] = "";
+	}
+
+	// Clear warning message
+	public function clearWarningMessage()
+	{
+		$this->_warningMessage = "";
+		$_SESSION[SESSION_WARNING_MESSAGE] = "";
+	}
+
+	// Clear messages
+	public function clearMessages()
+	{
+		$this->clearMessage();
+		$this->clearFailureMessage();
+		$this->clearSuccessMessage();
+		$this->clearWarningMessage();
+	}
+
+	// Show message
+	public function showMessage()
+	{
+		$hidden = FALSE;
+		$html = "";
+
+		// Message
+		$message = $this->getMessage();
+		if (method_exists($this, "Message_Showing"))
+			$this->Message_Showing($message, "");
+		if ($message <> "") { // Message in Session, display
+			if (!$hidden)
+				$message = '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $message;
+			$html .= '<div class="alert alert-info alert-dismissible ew-info"><i class="icon fa fa-info"></i>' . $message . '</div>';
+			$_SESSION[SESSION_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Warning message
+		$warningMessage = $this->getWarningMessage();
+		if (method_exists($this, "Message_Showing"))
+			$this->Message_Showing($warningMessage, "warning");
+		if ($warningMessage <> "") { // Message in Session, display
+			if (!$hidden)
+				$warningMessage = '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $warningMessage;
+			$html .= '<div class="alert alert-warning alert-dismissible ew-warning"><i class="icon fa fa-warning"></i>' . $warningMessage . '</div>';
+			$_SESSION[SESSION_WARNING_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Success message
+		$successMessage = $this->getSuccessMessage();
+		if (method_exists($this, "Message_Showing"))
+			$this->Message_Showing($successMessage, "success");
+		if ($successMessage <> "") { // Message in Session, display
+			if (!$hidden)
+				$successMessage = '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $successMessage;
+			$html .= '<div class="alert alert-success alert-dismissible ew-success"><i class="icon fa fa-check"></i>' . $successMessage . '</div>';
+			$_SESSION[SESSION_SUCCESS_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Failure message
+		$errorMessage = $this->getFailureMessage();
+		if (method_exists($this, "Message_Showing"))
+			$this->Message_Showing($errorMessage, "failure");
+		if ($errorMessage <> "") { // Message in Session, display
+			if (!$hidden)
+				$errorMessage = '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $errorMessage;
+			$html .= '<div class="alert alert-danger alert-dismissible ew-error"><i class="icon fa fa-ban"></i>' . $errorMessage . '</div>';
+			$_SESSION[SESSION_FAILURE_MESSAGE] = ""; // Clear message in Session
+		}
+		echo '<div class="ew-message-dialog' . (($hidden) ? ' d-none' : "") . '">' . $html . '</div>';
+	}
+
+	// Get message as array
+	public function getMessages()
+	{
+		$ar = array();
+
+		// Message
+		$message = $this->getMessage();
+
+		//if (method_exists($this, "Message_Showing"))
+		//	$this->Message_Showing($message, "");
+
+		if ($message <> "") { // Message in Session, display
+			$ar["message"] = $message;
+			$_SESSION[SESSION_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Warning message
+		$warningMessage = $this->getWarningMessage();
+
+		//if (method_exists($this, "Message_Showing"))
+		//	$this->Message_Showing($warningMessage, "warning");
+
+		if ($warningMessage <> "") { // Message in Session, display
+			$ar["warningMessage"] = $warningMessage;
+			$_SESSION[SESSION_WARNING_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Success message
+		$successMessage = $this->getSuccessMessage();
+
+		//if (method_exists($this, "Message_Showing"))
+		//	$this->Message_Showing($successMessage, "success");
+
+		if ($successMessage <> "") { // Message in Session, display
+			$ar["successMessage"] = $successMessage;
+			$_SESSION[SESSION_SUCCESS_MESSAGE] = ""; // Clear message in Session
+		}
+
+		// Failure message
+		$failureMessage = $this->getFailureMessage();
+
+		//if (method_exists($this, "Message_Showing"))
+		//	$this->Message_Showing($failureMessage, "failure");
+
+		if ($failureMessage <> "") { // Message in Session, display
+			$ar["failureMessage"] = $failureMessage;
+			$_SESSION[SESSION_FAILURE_MESSAGE] = ""; // Clear message in Session
+		}
+		return $ar;
+	}
+
+	// Show Page Header
+	public function showPageHeader()
+	{
+		$header = $this->PageHeader;
+		$this->Page_DataRendering($header);
+		if ($header <> "") { // Header exists, display
+			echo '<p id="ew-page-header">' . $header . '</p>';
+		}
+	}
+
+	// Show Page Footer
+	public function showPageFooter()
+	{
+		$footer = $this->PageFooter;
+		$this->Page_DataRendered($footer);
+		if ($footer <> "") { // Footer exists, display
+			echo '<p id="ew-page-footer">' . $footer . '</p>';
+		}
+	}
+
+	// Validate page request
+	protected function isPageRequest()
+	{
+		global $CurrentForm;
+		if ($this->UseTokenInUrl) {
+			if ($CurrentForm)
+				return ($this->TableVar == $CurrentForm->getValue("t"));
+			if (Get("t") !== NULL)
+				return ($this->TableVar == Get("t"));
+		}
+		return TRUE;
+	}
+
+	// Valid Post
+	protected function validPost()
+	{
+		if (!$this->CheckToken || !IsPost() || IsApi())
+			return TRUE;
+		if (Post(TOKEN_NAME) === NULL)
+			return FALSE;
+		$fn = PROJECT_NAMESPACE . CHECK_TOKEN_FUNC;
+		if (is_callable($fn))
+			return $fn(Post(TOKEN_NAME), $this->TokenTimeout);
+		return FALSE;
+	}
+
+	// Create Token
+	public function createToken()
+	{
+		global $CurrentToken;
+		$fn = PROJECT_NAMESPACE . CREATE_TOKEN_FUNC; // Always create token, required by API file/lookup request
+		if ($this->Token == "" && is_callable($fn)) // Create token
+			$this->Token = $fn();
+		$CurrentToken = $this->Token; // Save to global variable
+	}
+
+	// Constructor
+	public function __construct()
+	{
+		global $Language, $COMPOSITE_KEY_SEPARATOR;
+		global $UserTable, $UserTableConn;
+
+		// Initialize
+		$GLOBALS["Page"] = &$this;
+		$this->TokenTimeout = SessionTimeoutTime();
+
+		// Language object
+		if (!isset($Language))
+			$Language = new Language();
+
+		// Parent constuctor
+		parent::__construct();
+
+		// Table object (ivf_embryology_chart)
+		if (!isset($GLOBALS["ivf_embryology_chart"]) || get_class($GLOBALS["ivf_embryology_chart"]) == PROJECT_NAMESPACE . "ivf_embryology_chart") {
+			$GLOBALS["ivf_embryology_chart"] = &$this;
+			$GLOBALS["Table"] = &$GLOBALS["ivf_embryology_chart"];
+		}
+
+		// Initialize URLs
+		$this->ExportPrintUrl = $this->pageUrl() . "export=print";
+		$this->ExportExcelUrl = $this->pageUrl() . "export=excel";
+		$this->ExportWordUrl = $this->pageUrl() . "export=word";
+		$this->ExportHtmlUrl = $this->pageUrl() . "export=html";
+		$this->ExportXmlUrl = $this->pageUrl() . "export=xml";
+		$this->ExportCsvUrl = $this->pageUrl() . "export=csv";
+		$this->ExportPdfUrl = $this->pageUrl() . "export=pdf";
+		$this->AddUrl = "ivf_embryology_chartadd.php";
+		$this->InlineAddUrl = $this->pageUrl() . "action=add";
+		$this->GridAddUrl = $this->pageUrl() . "action=gridadd";
+		$this->GridEditUrl = $this->pageUrl() . "action=gridedit";
+		$this->MultiDeleteUrl = "ivf_embryology_chartdelete.php";
+		$this->MultiUpdateUrl = "ivf_embryology_chartupdate.php";
+		$this->CancelUrl = $this->pageUrl() . "action=cancel";
+
+		// Table object (user_login)
+		if (!isset($GLOBALS['user_login']))
+			$GLOBALS['user_login'] = new user_login();
+
+		// Table object (ivf_treatment_plan)
+		if (!isset($GLOBALS['ivf_treatment_plan']))
+			$GLOBALS['ivf_treatment_plan'] = new ivf_treatment_plan();
+
+		// Table object (ivf_oocytedenudation)
+		if (!isset($GLOBALS['ivf_oocytedenudation']))
+			$GLOBALS['ivf_oocytedenudation'] = new ivf_oocytedenudation();
+
+		// Page ID
+		if (!defined(PROJECT_NAMESPACE . "PAGE_ID"))
+			define(PROJECT_NAMESPACE . "PAGE_ID", 'list');
+
+		// Table name (for backward compatibility)
+		if (!defined(PROJECT_NAMESPACE . "TABLE_NAME"))
+			define(PROJECT_NAMESPACE . "TABLE_NAME", 'ivf_embryology_chart');
+
+		// Start timer
+		if (!isset($GLOBALS["DebugTimer"]))
+			$GLOBALS["DebugTimer"] = new Timer();
+
+		// Debug message
+		LoadDebugMessage();
+
+		// Open connection
+		if (!isset($GLOBALS["Conn"]))
+			$GLOBALS["Conn"] = &$this->getConnection();
+
+		// User table object (user_login)
+		if (!isset($UserTable)) {
+			$UserTable = new user_login();
+			$UserTableConn = Conn($UserTable->Dbid);
+		}
+
+		// List options
+		$this->ListOptions = new ListOptions();
+		$this->ListOptions->TableVar = $this->TableVar;
+
+		// Export options
+		$this->ExportOptions = new ListOptions();
+		$this->ExportOptions->Tag = "div";
+		$this->ExportOptions->TagClassName = "ew-export-option";
+
+		// Import options
+		$this->ImportOptions = new ListOptions();
+		$this->ImportOptions->Tag = "div";
+		$this->ImportOptions->TagClassName = "ew-import-option";
+
+		// Other options
+		if (!$this->OtherOptions)
+			$this->OtherOptions = new ListOptionsArray();
+		$this->OtherOptions["addedit"] = new ListOptions();
+		$this->OtherOptions["addedit"]->Tag = "div";
+		$this->OtherOptions["addedit"]->TagClassName = "ew-add-edit-option";
+		$this->OtherOptions["detail"] = new ListOptions();
+		$this->OtherOptions["detail"]->Tag = "div";
+		$this->OtherOptions["detail"]->TagClassName = "ew-detail-option";
+		$this->OtherOptions["action"] = new ListOptions();
+		$this->OtherOptions["action"]->Tag = "div";
+		$this->OtherOptions["action"]->TagClassName = "ew-action-option";
+
+		// Filter options
+		$this->FilterOptions = new ListOptions();
+		$this->FilterOptions->Tag = "div";
+		$this->FilterOptions->TagClassName = "ew-filter-option fivf_embryology_chartlistsrch";
+
+		// List actions
+		$this->ListActions = new ListActions();
+	}
+
+	// Terminate page
+	public function terminate($url = "")
+	{
+		global $ExportFileName, $TempImages;
+
+		// Page Unload event
+		$this->Page_Unload();
+
+		// Global Page Unloaded event (in userfn*.php)
+		Page_Unloaded();
+
+		// Export
+		global $EXPORT, $ivf_embryology_chart;
+		if ($this->CustomExport && $this->CustomExport == $this->Export && array_key_exists($this->CustomExport, $EXPORT)) {
+				$content = ob_get_contents();
+			if ($ExportFileName == "")
+				$ExportFileName = $this->TableVar;
+			$class = PROJECT_NAMESPACE . $EXPORT[$this->CustomExport];
+			if (class_exists($class)) {
+				$doc = new $class($ivf_embryology_chart);
+				$doc->Text = @$content;
+				if ($this->isExport("email"))
+					echo $this->exportEmail($doc->Text);
+				else
+					$doc->export();
+				DeleteTempImages(); // Delete temp images
+				exit();
+			}
+		}
+		if (!IsApi())
+			$this->Page_Redirecting($url);
+
+		// Close connection
+		CloseConnections();
+
+		// Return for API
+		if (IsApi()) {
+			$res = $url === TRUE;
+			if (!$res) // Show error
+				WriteJson(array_merge(["success" => FALSE], $this->getMessages()));
+			return;
+		}
+
+		// Go to URL if specified
+		if ($url <> "") {
+			if (!DEBUG_ENABLED && ob_get_length())
+				ob_end_clean();
+			SaveDebugMessage();
+			AddHeader("Location", $url);
+		}
+		exit();
+	}
+
+	// Get records from recordset
+	protected function getRecordsFromRecordset($rs, $current = FALSE)
+	{
+		$rows = array();
+		if (is_object($rs)) { // Recordset
+			while ($rs && !$rs->EOF) {
+				$this->loadRowValues($rs); // Set up DbValue/CurrentValue
+				$row = $this->getRecordFromArray($rs->fields);
+				if ($current)
+					return $row;
+				else
+					$rows[] = $row;
+				$rs->moveNext();
+			}
+		} elseif (is_array($rs)) {
+			foreach ($rs as $ar) {
+				$row = $this->getRecordFromArray($ar);
+				if ($current)
+					return $row;
+				else
+					$rows[] = $row;
+			}
+		}
+		return $rows;
+	}
+
+	// Get record from array
+	protected function getRecordFromArray($ar)
+	{
+		$row = array();
+		if (is_array($ar)) {
+			foreach ($ar as $fldname => $val) {
+				if (array_key_exists($fldname, $this->fields) && ($this->fields[$fldname]->Visible || $this->fields[$fldname]->IsPrimaryKey)) { // Primary key or Visible
+					$fld = &$this->fields[$fldname];
+					if ($fld->HtmlTag == "FILE") { // Upload field
+						if (EmptyValue($val)) {
+							$row[$fldname] = NULL;
+						} else {
+							if ($fld->DataType == DATATYPE_BLOB) {
+
+								//$url = FullUrl($fld->TableVar . "/" . API_FILE_ACTION . "/" . $fld->Param . "/" . rawurlencode($this->getRecordKeyValue($ar))); // URL rewrite format
+								$url = FullUrl(GetPageName(API_URL) . "?" . API_OBJECT_NAME . "=" . $fld->TableVar . "&" . API_ACTION_NAME . "=" . API_FILE_ACTION . "&" . API_FIELD_NAME . "=" . $fld->Param . "&" . API_KEY_NAME . "=" . rawurlencode($this->getRecordKeyValue($ar))); // Query string format
+								$row[$fldname] = ["mimeType" => ContentType($val), "url" => $url];
+							} elseif (!$fld->UploadMultiple || !ContainsString($val, MULTIPLE_UPLOAD_SEPARATOR)) { // Single file
+								$row[$fldname] = ["mimeType" => MimeContentType($val), "url" => FullUrl($fld->hrefPath() . $val)];
+							} else { // Multiple files
+								$files = explode(MULTIPLE_UPLOAD_SEPARATOR, $val);
+								$ar = [];
+								foreach ($files as $file) {
+									if (!EmptyValue($file))
+										$ar[] = ["type" => MimeContentType($file), "url" => FullUrl($fld->hrefPath() . $file)];
+								}
+								$row[$fldname] = $ar;
+							}
+						}
+					} else {
+						$row[$fldname] = $val;
+					}
+				}
+			}
+		}
+		return $row;
+	}
+
+	// Get record key value from array
+	protected function getRecordKeyValue($ar)
+	{
+		global $COMPOSITE_KEY_SEPARATOR;
+		$key = "";
+		if (is_array($ar)) {
+			$key .= @$ar['id'];
+		}
+		return $key;
+	}
+
+	/**
+	 * Hide fields for add/edit
+	 *
+	 * @return void
+	 */
+	protected function hideFieldsForAddEdit()
+	{
+		if ($this->isAdd() || $this->isCopy() || $this->isGridAdd())
+			$this->id->Visible = FALSE;
+	}
+
+	// Class variables
+	public $ListOptions; // List options
+	public $ExportOptions; // Export options
+	public $SearchOptions; // Search options
+	public $OtherOptions; // Other options
+	public $FilterOptions; // Filter options
+	public $ImportOptions; // Import options
+	public $ListActions; // List actions
+	public $SelectedCount = 0;
+	public $SelectedIndex = 0;
+	public $DisplayRecs = 2000;
+	public $StartRec;
+	public $StopRec;
+	public $TotalRecs = 0;
+	public $RecRange = 10;
+	public $Pager;
+	public $AutoHidePager = AUTO_HIDE_PAGER;
+	public $AutoHidePageSizeSelector = AUTO_HIDE_PAGE_SIZE_SELECTOR;
+	public $DefaultSearchWhere = ""; // Default search WHERE clause
+	public $SearchWhere = ""; // Search WHERE clause
+	public $RecCnt = 0; // Record count
+	public $EditRowCnt;
+	public $StartRowCnt = 1;
+	public $RowCnt = 0;
+	public $Attrs = array(); // Row attributes and cell attributes
+	public $RowIndex = 0; // Row index
+	public $KeyCount = 0; // Key count
+	public $RowAction = ""; // Row action
+	public $RowOldKey = ""; // Row old key (for copy)
+	public $MultiColumnClass = "col-sm";
+	public $MultiColumnEditClass = "w-100";
+	public $DbMasterFilter = ""; // Master filter
+	public $DbDetailFilter = ""; // Detail filter
+	public $MasterRecordExists;
+	public $MultiSelectKey;
+	public $Command;
+	public $RestoreSearch = FALSE;
+	public $DetailPages;
+	public $OldRecordset;
+
+	//
+	// Page run
+	//
+
+	public function run()
+	{
+		global $ExportType, $CustomExportType, $ExportFileName, $UserProfile, $Language, $Security, $RequestSecurity, $CurrentForm,
+			$FormError, $SearchError, $EXPORT;
+
+		// Init Session data for API request if token found
+		if (IsApi() && session_status() !== PHP_SESSION_ACTIVE) {
+			$func = PROJECT_NAMESPACE . CHECK_TOKEN_FUNC;
+			if (is_callable($func) && Param(TOKEN_NAME) !== NULL && $func(Param(TOKEN_NAME), SessionTimeoutTime()))
+				session_start();
+		}
+
+		// User profile
+		$UserProfile = new UserProfile();
+
+		// Security
+		$Security = new AdvancedSecurity();
+		$validRequest = FALSE;
+
+		// Check security for API request
+		If (IsApi()) {
+
+			// Check token first
+			$func = PROJECT_NAMESPACE . CHECK_TOKEN_FUNC;
+			if (is_callable($func) && Post(TOKEN_NAME) !== NULL)
+				$validRequest = $func(Post(TOKEN_NAME), SessionTimeoutTime());
+			elseif (is_array($RequestSecurity) && @$RequestSecurity["username"] <> "") // Login user for API request
+				$Security->loginUser(@$RequestSecurity["username"], @$RequestSecurity["userid"], @$RequestSecurity["parentuserid"], @$RequestSecurity["userlevelid"]);
+		}
+		if (!$validRequest) {
+			if (!$Security->isLoggedIn())
+				$Security->autoLogin();
+			if ($Security->isLoggedIn())
+				$Security->TablePermission_Loading();
+			$Security->loadCurrentUserLevel($this->ProjectID . $this->TableName);
+			if ($Security->isLoggedIn())
+				$Security->TablePermission_Loaded();
+			if (!$Security->canList()) {
+				$Security->saveLastUrl();
+				$this->setFailureMessage(DeniedMessage()); // Set no permission
+				$this->terminate(GetUrl("index.php"));
+				return;
+			}
+		}
+
+		// Create form object
+		$CurrentForm = new HttpForm();
+
+		// Get export parameters
+		$custom = "";
+		if (Param("export") !== NULL) {
+			$this->Export = Param("export");
+			$custom = Param("custom", "");
+		} elseif (IsPost()) {
+			if (Post("exporttype") !== NULL)
+				$this->Export = Post("exporttype");
+			$custom = Post("custom", "");
+		} elseif (Get("cmd") == "json") {
+			$this->Export = Get("cmd");
+		} else {
+			$this->setExportReturnUrl(CurrentUrl());
+		}
+		$ExportFileName = $this->TableVar; // Get export file, used in header
+
+		// Get custom export parameters
+		if ($this->isExport() && $custom <> "") {
+			$this->CustomExport = $this->Export;
+			$this->Export = "print";
+		}
+		$CustomExportType = $this->CustomExport;
+		$ExportType = $this->Export; // Get export parameter, used in header
+
+		// Update Export URLs
+		if (defined(PROJECT_NAMESPACE . "USE_PHPEXCEL"))
+			$this->ExportExcelCustom = FALSE;
+		if ($this->ExportExcelCustom)
+			$this->ExportExcelUrl .= "&amp;custom=1";
+		if (defined(PROJECT_NAMESPACE . "USE_PHPWORD"))
+			$this->ExportWordCustom = FALSE;
+		if ($this->ExportWordCustom)
+			$this->ExportWordUrl .= "&amp;custom=1";
+		if ($this->ExportPdfCustom)
+			$this->ExportPdfUrl .= "&amp;custom=1";
+		$this->CurrentAction = Param("action"); // Set up current action
+
+		// Get grid add count
+		$gridaddcnt = Get(TABLE_GRID_ADD_ROW_COUNT, "");
+		if (is_numeric($gridaddcnt) && $gridaddcnt > 0)
+			$this->GridAddRowCount = $gridaddcnt;
+
+		// Set up list options
+		$this->setupListOptions();
+
+		// Setup export options
+		$this->setupExportOptions();
+		$this->id->setVisibility();
+		$this->RIDNo->setVisibility();
+		$this->Name->setVisibility();
+		$this->ARTCycle->setVisibility();
+		$this->SpermOrigin->setVisibility();
+		$this->InseminatinTechnique->setVisibility();
+		$this->IndicationForART->setVisibility();
+		$this->Day0sino->setVisibility();
+		$this->Day0OocyteStage->setVisibility();
+		$this->Day0PolarBodyPosition->setVisibility();
+		$this->Day0Breakage->setVisibility();
+		$this->Day0Attempts->setVisibility();
+		$this->Day0SPZMorpho->setVisibility();
+		$this->Day0SPZLocation->setVisibility();
+		$this->Day0SpOrgin->setVisibility();
+		$this->Day5Cryoptop->setVisibility();
+		$this->Day1Sperm->setVisibility();
+		$this->Day1PN->setVisibility();
+		$this->Day1PB->setVisibility();
+		$this->Day1Pronucleus->setVisibility();
+		$this->Day1Nucleolus->setVisibility();
+		$this->Day1Halo->setVisibility();
+		$this->Day2SiNo->setVisibility();
+		$this->Day2CellNo->setVisibility();
+		$this->Day2Frag->setVisibility();
+		$this->Day2Symmetry->setVisibility();
+		$this->Day2Cryoptop->setVisibility();
+		$this->Day2Grade->setVisibility();
+		$this->Day2End->setVisibility();
+		$this->Day3Sino->setVisibility();
+		$this->Day3CellNo->setVisibility();
+		$this->Day3Frag->setVisibility();
+		$this->Day3Symmetry->setVisibility();
+		$this->Day3ZP->setVisibility();
+		$this->Day3Vacoules->setVisibility();
+		$this->Day3Grade->setVisibility();
+		$this->Day3Cryoptop->setVisibility();
+		$this->Day3End->setVisibility();
+		$this->Day4SiNo->setVisibility();
+		$this->Day4CellNo->setVisibility();
+		$this->Day4Frag->setVisibility();
+		$this->Day4Symmetry->setVisibility();
+		$this->Day4Grade->setVisibility();
+		$this->Day4Cryoptop->setVisibility();
+		$this->Day4End->setVisibility();
+		$this->Day5CellNo->setVisibility();
+		$this->Day5ICM->setVisibility();
+		$this->Day5TE->setVisibility();
+		$this->Day5Observation->setVisibility();
+		$this->Day5Collapsed->setVisibility();
+		$this->Day5Vacoulles->setVisibility();
+		$this->Day5Grade->setVisibility();
+		$this->Day6CellNo->setVisibility();
+		$this->Day6ICM->setVisibility();
+		$this->Day6TE->setVisibility();
+		$this->Day6Observation->setVisibility();
+		$this->Day6Collapsed->setVisibility();
+		$this->Day6Vacoulles->setVisibility();
+		$this->Day6Grade->setVisibility();
+		$this->Day6Cryoptop->setVisibility();
+		$this->EndSiNo->setVisibility();
+		$this->EndingDay->setVisibility();
+		$this->EndingCellStage->setVisibility();
+		$this->EndingGrade->setVisibility();
+		$this->EndingState->setVisibility();
+		$this->TidNo->setVisibility();
+		$this->DidNO->setVisibility();
+		$this->ICSiIVFDateTime->setVisibility();
+		$this->PrimaryEmbrologist->setVisibility();
+		$this->SecondaryEmbrologist->setVisibility();
+		$this->Incubator->setVisibility();
+		$this->location->setVisibility();
+		$this->OocyteNo->setVisibility();
+		$this->Stage->setVisibility();
+		$this->Remarks->setVisibility();
+		$this->vitrificationDate->setVisibility();
+		$this->vitriPrimaryEmbryologist->setVisibility();
+		$this->vitriSecondaryEmbryologist->setVisibility();
+		$this->vitriEmbryoNo->setVisibility();
+		$this->thawReFrozen->setVisibility();
+		$this->vitriFertilisationDate->setVisibility();
+		$this->vitriDay->setVisibility();
+		$this->vitriStage->setVisibility();
+		$this->vitriGrade->setVisibility();
+		$this->vitriIncubator->setVisibility();
+		$this->vitriTank->setVisibility();
+		$this->vitriCanister->setVisibility();
+		$this->vitriGobiet->setVisibility();
+		$this->vitriViscotube->setVisibility();
+		$this->vitriCryolockNo->setVisibility();
+		$this->vitriCryolockColour->setVisibility();
+		$this->thawDate->setVisibility();
+		$this->thawPrimaryEmbryologist->setVisibility();
+		$this->thawSecondaryEmbryologist->setVisibility();
+		$this->thawET->setVisibility();
+		$this->thawAbserve->setVisibility();
+		$this->thawDiscard->setVisibility();
+		$this->ETCatheter->setVisibility();
+		$this->ETDifficulty->setVisibility();
+		$this->ETEasy->setVisibility();
+		$this->ETComments->setVisibility();
+		$this->ETDoctor->setVisibility();
+		$this->ETEmbryologist->setVisibility();
+		$this->ETDate->setVisibility();
+		$this->Day1End->setVisibility();
+		$this->hideFieldsForAddEdit();
+
+		// Global Page Loading event (in userfn*.php)
+		Page_Loading();
+
+		// Page Load event
+		$this->Page_Load();
+
+		// Check token
+		if (!$this->validPost()) {
+			Write($Language->phrase("InvalidPostRequest"));
+			$this->terminate();
+		}
+
+		// Create Token
+		$this->createToken();
+
+		// Set up master detail parameters
+		$this->setupMasterParms();
+
+		// Setup other options
+		$this->setupOtherOptions();
+
+		// Set up custom action (compatible with old version)
+		foreach ($this->CustomActions as $name => $action)
+			$this->ListActions->add($name, $action);
+
+		// Show checkbox column if multiple action
+		foreach ($this->ListActions->Items as $listaction) {
+			if ($listaction->Select == ACTION_MULTIPLE && $listaction->Allow) {
+				$this->ListOptions->Items["checkbox"]->Visible = TRUE;
+				break;
+			}
+		}
+
+		// Set up lookup cache
+		// Search filters
+
+		$srchAdvanced = ""; // Advanced search filter
+		$srchBasic = ""; // Basic search filter
+		$filter = "";
+
+		// Get command
+		$this->Command = strtolower(Get("cmd"));
+		if ($this->isPageRequest()) { // Validate request
+
+			// Process list action first
+			if ($this->processListAction()) // Ajax request
+				$this->terminate();
+
+			// Set up records per page
+			$this->setupDisplayRecs();
+
+			// Handle reset command
+			$this->resetCmd();
+
+			// Set up Breadcrumb
+			if (!$this->isExport())
+				$this->setupBreadcrumb();
+
+			// Check QueryString parameters
+			if (Get("action") !== NULL) {
+				$this->CurrentAction = Get("action");
+
+				// Clear inline mode
+				if ($this->isCancel())
+					$this->clearInlineMode();
+
+				// Switch to grid edit mode
+				if ($this->isGridEdit())
+					$this->gridEditMode();
+
+				// Switch to inline edit mode
+				if ($this->isEdit())
+					$this->inlineEditMode();
+
+				// Switch to inline add mode
+				if ($this->isAdd() || $this->isCopy())
+					$this->inlineAddMode();
+
+				// Switch to grid add mode
+				if ($this->isGridAdd())
+					$this->gridAddMode();
+			} else {
+				if (Post("action") !== NULL) {
+					$this->CurrentAction = Post("action"); // Get action
+
+					// Grid Update
+					if (($this->isGridUpdate() || $this->isGridOverwrite()) && @$_SESSION[SESSION_INLINE_MODE] == "gridedit") {
+						if ($this->validateGridForm()) {
+							$gridUpdate = $this->gridUpdate();
+						} else {
+							$gridUpdate = FALSE;
+							$this->setFailureMessage($FormError);
+						}
+						if ($gridUpdate) {
+							$this->gridEditMode();
+						} else {
+							$this->EventCancelled = TRUE;
+							$this->gridEditMode(); // Stay in Grid edit mode
+						}
+					}
+
+					// Inline Update
+					if (($this->isUpdate() || $this->isOverwrite()) && @$_SESSION[SESSION_INLINE_MODE] == "edit")
+						$this->inlineUpdate();
+
+					// Insert Inline
+					if ($this->isInsert() && @$_SESSION[SESSION_INLINE_MODE] == "add")
+						$this->inlineInsert();
+
+					// Grid Insert
+					if ($this->isGridInsert() && @$_SESSION[SESSION_INLINE_MODE] == "gridadd") {
+						if ($this->validateGridForm()) {
+							$gridInsert = $this->gridInsert();
+						} else {
+							$gridInsert = FALSE;
+							$this->setFailureMessage($FormError);
+						}
+						if ($gridInsert) {
+						} else {
+							$this->EventCancelled = TRUE;
+							$this->gridAddMode(); // Stay in Grid add mode
+						}
+					}
+				} elseif (@$_SESSION[SESSION_INLINE_MODE] == "gridedit") { // Previously in grid edit mode
+					if (Get(TABLE_START_REC) !== NULL || Get(TABLE_PAGE_NO) !== NULL) // Stay in grid edit mode if paging
+						$this->gridEditMode();
+					else // Reset grid edit
+						$this->clearInlineMode();
+				}
+			}
+
+			// Hide list options
+			if ($this->isExport()) {
+				$this->ListOptions->hideAllOptions(array("sequence"));
+				$this->ListOptions->UseDropDownButton = FALSE; // Disable drop down button
+				$this->ListOptions->UseButtonGroup = FALSE; // Disable button group
+			} elseif ($this->isGridAdd() || $this->isGridEdit()) {
+				$this->ListOptions->hideAllOptions();
+				$this->ListOptions->UseDropDownButton = FALSE; // Disable drop down button
+				$this->ListOptions->UseButtonGroup = FALSE; // Disable button group
+			}
+
+			// Hide options
+			if ($this->isExport() || $this->CurrentAction) {
+				$this->ExportOptions->hideAllOptions();
+				$this->FilterOptions->hideAllOptions();
+				$this->ImportOptions->hideAllOptions();
+			}
+
+			// Hide other options
+			if ($this->isExport())
+				$this->OtherOptions->hideAllOptions();
+
+			// Show grid delete link for grid add / grid edit
+			if ($this->AllowAddDeleteRow) {
+				if ($this->isGridAdd() || $this->isGridEdit()) {
+					$item = &$this->ListOptions->getItem("griddelete");
+					if ($item)
+						$item->Visible = TRUE;
+				}
+			}
+
+			// Get default search criteria
+			AddFilter($this->DefaultSearchWhere, $this->basicSearchWhere(TRUE));
+
+			// Get basic search values
+			$this->loadBasicSearchValues();
+
+			// Process filter list
+			if ($this->processFilterList())
+				$this->terminate();
+
+			// Restore search parms from Session if not searching / reset / export
+			if (($this->isExport() || $this->Command <> "search" && $this->Command <> "reset" && $this->Command <> "resetall") && $this->Command <> "json" && $this->checkSearchParms())
+				$this->restoreSearchParms();
+
+			// Call Recordset SearchValidated event
+			$this->Recordset_SearchValidated();
+
+			// Set up sorting order
+			$this->setupSortOrder();
+
+			// Get basic search criteria
+			if ($SearchError == "")
+				$srchBasic = $this->basicSearchWhere();
+		}
+
+		// Restore display records
+		if ($this->Command <> "json" && $this->getRecordsPerPage() <> "") {
+			$this->DisplayRecs = $this->getRecordsPerPage(); // Restore from Session
+		} else {
+			$this->DisplayRecs = 2000; // Load default
+		}
+
+		// Load Sorting Order
+		if ($this->Command <> "json")
+			$this->loadSortOrder();
+
+		// Load search default if no existing search criteria
+		if (!$this->checkSearchParms()) {
+
+			// Load basic search from default
+			$this->BasicSearch->loadDefault();
+			if ($this->BasicSearch->Keyword != "")
+				$srchBasic = $this->basicSearchWhere();
+		}
+
+		// Build search criteria
+		AddFilter($this->SearchWhere, $srchAdvanced);
+		AddFilter($this->SearchWhere, $srchBasic);
+
+		// Call Recordset_Searching event
+		$this->Recordset_Searching($this->SearchWhere);
+
+		// Save search criteria
+		if ($this->Command == "search" && !$this->RestoreSearch) {
+			$this->setSearchWhere($this->SearchWhere); // Save to Session
+			$this->StartRec = 1; // Reset start record counter
+			$this->setStartRecordNumber($this->StartRec);
+		} elseif ($this->Command <> "json") {
+			$this->SearchWhere = $this->getSearchWhere();
+		}
+
+		// Build filter
+		$filter = "";
+		if (!$Security->canList())
+			$filter = "(0=1)"; // Filter all records
+
+		// Restore master/detail filter
+		$this->DbMasterFilter = $this->getMasterFilter(); // Restore master filter
+		$this->DbDetailFilter = $this->getDetailFilter(); // Restore detail filter
+		AddFilter($filter, $this->DbDetailFilter);
+		AddFilter($filter, $this->SearchWhere);
+
+		// Load master record
+		if ($this->CurrentMode <> "add" && $this->getMasterFilter() <> "" && $this->getCurrentMasterTable() == "ivf_treatment_plan") {
+			global $ivf_treatment_plan;
+			$rsmaster = $ivf_treatment_plan->loadRs($this->DbMasterFilter);
+			$this->MasterRecordExists = ($rsmaster && !$rsmaster->EOF);
+			if (!$this->MasterRecordExists) {
+				$this->setFailureMessage($Language->phrase("NoRecord")); // Set no record found
+				$this->terminate("ivf_treatment_planlist.php"); // Return to master page
+			} else {
+				$ivf_treatment_plan->loadListRowValues($rsmaster);
+				$ivf_treatment_plan->RowType = ROWTYPE_MASTER; // Master row
+				$ivf_treatment_plan->renderListRow();
+				$rsmaster->close();
+			}
+		}
+
+		// Load master record
+		if ($this->CurrentMode <> "add" && $this->getMasterFilter() <> "" && $this->getCurrentMasterTable() == "ivf_oocytedenudation") {
+			global $ivf_oocytedenudation;
+			$rsmaster = $ivf_oocytedenudation->loadRs($this->DbMasterFilter);
+			$this->MasterRecordExists = ($rsmaster && !$rsmaster->EOF);
+			if (!$this->MasterRecordExists) {
+				$this->setFailureMessage($Language->phrase("NoRecord")); // Set no record found
+				$this->terminate("ivf_oocytedenudationlist.php"); // Return to master page
+			} else {
+				$ivf_oocytedenudation->loadListRowValues($rsmaster);
+				$ivf_oocytedenudation->RowType = ROWTYPE_MASTER; // Master row
+				$ivf_oocytedenudation->renderListRow();
+				$rsmaster->close();
+			}
+		}
+
+		// Set up filter
+		if ($this->Command == "json") {
+			$this->UseSessionForListSql = FALSE; // Do not use session for ListSQL
+			$this->CurrentFilter = $filter;
+		} else {
+			$this->setSessionWhere($filter);
+			$this->CurrentFilter = "";
+		}
+
+		// Export data only
+		if (!$this->CustomExport && in_array($this->Export, array_keys($EXPORT))) {
+			$this->exportData();
+			$this->terminate();
+		}
+		if ($this->isGridAdd()) {
+			$this->CurrentFilter = "0=1";
+			$this->StartRec = 1;
+			$this->DisplayRecs = $this->GridAddRowCount;
+			$this->TotalRecs = $this->DisplayRecs;
+			$this->StopRec = $this->DisplayRecs;
+		} else {
+			$selectLimit = $this->UseSelectLimit;
+			if ($selectLimit) {
+				$this->TotalRecs = $this->listRecordCount();
+			} else {
+				if ($this->Recordset = $this->loadRecordset())
+					$this->TotalRecs = $this->Recordset->RecordCount();
+			}
+			$this->StartRec = 1;
+			if ($this->DisplayRecs <= 0 || ($this->isExport() && $this->ExportAll)) // Display all records
+				$this->DisplayRecs = $this->TotalRecs;
+			if (!($this->isExport() && $this->ExportAll)) // Set up start record position
+				$this->setupStartRec();
+			if ($selectLimit)
+				$this->Recordset = $this->loadRecordset($this->StartRec - 1, $this->DisplayRecs);
+
+			// Set no record found message
+			if (!$this->CurrentAction && $this->TotalRecs == 0) {
+				if (!$Security->canList())
+					$this->setWarningMessage(DeniedMessage());
+				if ($this->SearchWhere == "0=101")
+					$this->setWarningMessage($Language->phrase("EnterSearchCriteria"));
+				else
+					$this->setWarningMessage($Language->phrase("NoRecord"));
+			}
+		}
+
+		// Search options
+		$this->setupSearchOptions();
+
+		// Normal return
+		if (IsApi()) {
+			$rows = $this->getRecordsFromRecordset($this->Recordset);
+			$this->Recordset->close();
+			WriteJson(["success" => TRUE, $this->TableVar => $rows, "totalRecordCount" => $this->TotalRecs]);
+			$this->terminate(TRUE);
+		}
+	}
+
+	// Set up number of records displayed per page
+	protected function setupDisplayRecs()
+	{
+		$wrk = Get(TABLE_REC_PER_PAGE, "");
+		if ($wrk <> "") {
+			if (is_numeric($wrk)) {
+				$this->DisplayRecs = (int)$wrk;
+			} else {
+				if (SameText($wrk, "all")) { // Display all records
+					$this->DisplayRecs = -1;
+				} else {
+					$this->DisplayRecs = 2000; // Non-numeric, load default
+				}
+			}
+			$this->setRecordsPerPage($this->DisplayRecs); // Save to Session
+
+			// Reset start position
+			$this->StartRec = 1;
+			$this->setStartRecordNumber($this->StartRec);
+		}
+	}
+
+	// Exit inline mode
+	protected function clearInlineMode()
+	{
+		$this->setKey("id", ""); // Clear inline edit key
+		$this->LastAction = $this->CurrentAction; // Save last action
+		$this->CurrentAction = ""; // Clear action
+		$_SESSION[SESSION_INLINE_MODE] = ""; // Clear inline mode
+	}
+
+	// Switch to Grid Add mode
+	protected function gridAddMode()
+	{
+		$this->CurrentAction = "gridadd";
+		$_SESSION[SESSION_INLINE_MODE] = "gridadd";
+		$this->hideFieldsForAddEdit();
+	}
+
+	// Switch to Grid Edit mode
+	protected function gridEditMode()
+	{
+		$this->CurrentAction = "gridedit";
+		$_SESSION[SESSION_INLINE_MODE] = "gridedit";
+		$this->hideFieldsForAddEdit();
+	}
+
+	// Switch to Inline Edit mode
+	protected function inlineEditMode()
+	{
+		global $Security, $Language;
+		if (!$Security->canEdit())
+			return FALSE; // Edit not allowed
+		$inlineEdit = TRUE;
+		if (Get("id") !== NULL) {
+			$this->id->setQueryStringValue(Get("id"));
+		} else {
+			$inlineEdit = FALSE;
+		}
+		if ($inlineEdit) {
+			if ($this->loadRow()) {
+				$this->setKey("id", $this->id->CurrentValue); // Set up inline edit key
+				$_SESSION[SESSION_INLINE_MODE] = "edit"; // Enable inline edit
+			}
+		}
+		return TRUE;
+	}
+
+	// Perform update to Inline Edit record
+	protected function inlineUpdate()
+	{
+		global $Language, $CurrentForm, $FormError;
+		$CurrentForm->Index = 1;
+		$this->loadFormValues(); // Get form values
+
+		// Validate form
+		$inlineUpdate = TRUE;
+		if (!$this->validateForm()) {
+			$inlineUpdate = FALSE; // Form error, reset action
+			$this->setFailureMessage($FormError);
+		} else {
+			$inlineUpdate = FALSE;
+			$rowkey = strval($CurrentForm->getValue($this->FormKeyName));
+			if ($this->setupKeyValues($rowkey)) { // Set up key values
+				if ($this->checkInlineEditKey()) { // Check key
+					$this->SendEmail = TRUE; // Send email on update success
+					$inlineUpdate = $this->editRow(); // Update record
+				} else {
+					$inlineUpdate = FALSE;
+				}
+			}
+		}
+		if ($inlineUpdate) { // Update success
+			if ($this->getSuccessMessage() == "")
+				$this->setSuccessMessage($Language->phrase("UpdateSuccess")); // Set up success message
+			$this->clearInlineMode(); // Clear inline edit mode
+		} else {
+			if ($this->getFailureMessage() == "")
+				$this->setFailureMessage($Language->phrase("UpdateFailed")); // Set update failed message
+			$this->EventCancelled = TRUE; // Cancel event
+			$this->CurrentAction = "edit"; // Stay in edit mode
+		}
+	}
+
+	// Check Inline Edit key
+	public function checkInlineEditKey()
+	{
+		if (strval($this->getKey("id")) <> strval($this->id->CurrentValue))
+			return FALSE;
+		return TRUE;
+	}
+
+	// Switch to Inline Add mode
+	protected function inlineAddMode()
+	{
+		global $Security, $Language;
+		if (!$Security->canAdd())
+			return FALSE; // Add not allowed
+		if ($this->isCopy()) {
+			if (Get("id") !== NULL) {
+				$this->id->setQueryStringValue(Get("id"));
+				$this->setKey("id", $this->id->CurrentValue); // Set up key
+			} else {
+				$this->setKey("id", ""); // Clear key
+				$this->CurrentAction = "add";
+			}
+		}
+		$_SESSION[SESSION_INLINE_MODE] = "add"; // Enable inline add
+		return TRUE;
+	}
+
+	// Perform update to Inline Add/Copy record
+	protected function inlineInsert()
+	{
+		global $Language, $CurrentForm, $FormError;
+		$this->loadOldRecord(); // Load old record
+		$CurrentForm->Index = 0;
+		$this->loadFormValues(); // Get form values
+
+		// Validate form
+		if (!$this->validateForm()) {
+			$this->setFailureMessage($FormError); // Set validation error message
+			$this->EventCancelled = TRUE; // Set event cancelled
+			$this->CurrentAction = "add"; // Stay in add mode
+			return;
+		}
+		$this->SendEmail = TRUE; // Send email on add success
+		if ($this->addRow($this->OldRecordset)) { // Add record
+			if ($this->getSuccessMessage() == "")
+				$this->setSuccessMessage($Language->phrase("AddSuccess")); // Set up add success message
+			$this->clearInlineMode(); // Clear inline add mode
+		} else { // Add failed
+			$this->EventCancelled = TRUE; // Set event cancelled
+			$this->CurrentAction = "add"; // Stay in add mode
+		}
+	}
+
+	// Perform update to grid
+	public function gridUpdate()
+	{
+		global $Language, $CurrentForm, $FormError;
+		$gridUpdate = TRUE;
+
+		// Get old recordset
+		$this->CurrentFilter = $this->buildKeyFilter();
+		if ($this->CurrentFilter == "")
+			$this->CurrentFilter = "0=1";
+		$sql = $this->getCurrentSql();
+		$conn = &$this->getConnection();
+		if ($rs = $conn->execute($sql)) {
+			$rsold = $rs->getRows();
+			$rs->close();
+		}
+
+		// Call Grid Updating event
+		if (!$this->Grid_Updating($rsold)) {
+			if ($this->getFailureMessage() == "")
+				$this->setFailureMessage($Language->phrase("GridEditCancelled")); // Set grid edit cancelled message
+			return FALSE;
+		}
+
+		// Begin transaction
+		$conn->beginTrans();
+		$key = "";
+
+		// Update row index and get row key
+		$CurrentForm->Index = -1;
+		$rowcnt = strval($CurrentForm->getValue($this->FormKeyCountName));
+		if ($rowcnt == "" || !is_numeric($rowcnt))
+			$rowcnt = 0;
+
+		// Update all rows based on key
+		for ($rowindex = 1; $rowindex <= $rowcnt; $rowindex++) {
+			$CurrentForm->Index = $rowindex;
+			$rowkey = strval($CurrentForm->getValue($this->FormKeyName));
+			$rowaction = strval($CurrentForm->getValue($this->FormActionName));
+
+			// Load all values and keys
+			if ($rowaction <> "insertdelete") { // Skip insert then deleted rows
+				$this->loadFormValues(); // Get form values
+				if ($rowaction == "" || $rowaction == "edit" || $rowaction == "delete") {
+					$gridUpdate = $this->setupKeyValues($rowkey); // Set up key values
+				} else {
+					$gridUpdate = TRUE;
+				}
+
+				// Skip empty row
+				if ($rowaction == "insert" && $this->emptyRow()) {
+
+					// No action required
+				// Validate form and insert/update/delete record
+
+				} elseif ($gridUpdate) {
+					if ($rowaction == "delete") {
+						$this->CurrentFilter = $this->getRecordFilter();
+						$gridUpdate = $this->deleteRows(); // Delete this row
+					} else if (!$this->validateForm()) {
+						$gridUpdate = FALSE; // Form error, reset action
+						$this->setFailureMessage($FormError);
+					} else {
+						if ($rowaction == "insert") {
+							$gridUpdate = $this->addRow(); // Insert this row
+						} else {
+							if ($rowkey <> "") {
+								$this->SendEmail = FALSE; // Do not send email on update success
+								$gridUpdate = $this->editRow(); // Update this row
+							}
+						} // End update
+					}
+				}
+				if ($gridUpdate) {
+					if ($key <> "")
+						$key .= ", ";
+					$key .= $rowkey;
+				} else {
+					break;
+				}
+			}
+		}
+		if ($gridUpdate) {
+			$conn->commitTrans(); // Commit transaction
+
+			// Get new recordset
+			if ($rs = $conn->execute($sql)) {
+				$rsnew = $rs->getRows();
+				$rs->close();
+			}
+
+			// Call Grid_Updated event
+			$this->Grid_Updated($rsold, $rsnew);
+			if ($this->getSuccessMessage() == "")
+				$this->setSuccessMessage($Language->phrase("UpdateSuccess")); // Set up update success message
+			$this->clearInlineMode(); // Clear inline edit mode
+		} else {
+			$conn->rollbackTrans(); // Rollback transaction
+			if ($this->getFailureMessage() == "")
+				$this->setFailureMessage($Language->phrase("UpdateFailed")); // Set update failed message
+		}
+		return $gridUpdate;
+	}
+
+	// Build filter for all keys
+	protected function buildKeyFilter()
+	{
+		global $CurrentForm;
+		$wrkFilter = "";
+
+		// Update row index and get row key
+		$rowindex = 1;
+		$CurrentForm->Index = $rowindex;
+		$thisKey = strval($CurrentForm->getValue($this->FormKeyName));
+		while ($thisKey <> "") {
+			if ($this->setupKeyValues($thisKey)) {
+				$filter = $this->getRecordFilter();
+				if ($wrkFilter <> "")
+					$wrkFilter .= " OR ";
+				$wrkFilter .= $filter;
+			} else {
+				$wrkFilter = "0=1";
+				break;
+			}
+
+			// Update row index and get row key
+			$rowindex++; // Next row
+			$CurrentForm->Index = $rowindex;
+			$thisKey = strval($CurrentForm->getValue($this->FormKeyName));
+		}
+		return $wrkFilter;
+	}
+
+	// Set up key values
+	protected function setupKeyValues($key)
+	{
+		$arKeyFlds = explode($GLOBALS["COMPOSITE_KEY_SEPARATOR"], $key);
+		if (count($arKeyFlds) >= 1) {
+			$this->id->setFormValue($arKeyFlds[0]);
+			if (!is_numeric($this->id->FormValue))
+				return FALSE;
+		}
+		return TRUE;
+	}
+
+	// Perform Grid Add
+	public function gridInsert()
+	{
+		global $Language, $CurrentForm, $FormError;
+		$rowindex = 1;
+		$gridInsert = FALSE;
+		$conn = &$this->getConnection();
+
+		// Call Grid Inserting event
+		if (!$this->Grid_Inserting()) {
+			if ($this->getFailureMessage() == "")
+				$this->setFailureMessage($Language->phrase("GridAddCancelled")); // Set grid add cancelled message
+			return FALSE;
+		}
+
+		// Begin transaction
+		$conn->beginTrans();
+
+		// Init key filter
+		$wrkfilter = "";
+		$addcnt = 0;
+		$key = "";
+
+		// Get row count
+		$CurrentForm->Index = -1;
+		$rowcnt = strval($CurrentForm->getValue($this->FormKeyCountName));
+		if ($rowcnt == "" || !is_numeric($rowcnt))
+			$rowcnt = 0;
+
+		// Insert all rows
+		for ($rowindex = 1; $rowindex <= $rowcnt; $rowindex++) {
+
+			// Load current row values
+			$CurrentForm->Index = $rowindex;
+			$rowaction = strval($CurrentForm->getValue($this->FormActionName));
+			if ($rowaction <> "" && $rowaction <> "insert")
+				continue; // Skip
+			$this->loadFormValues(); // Get form values
+			if (!$this->emptyRow()) {
+				$addcnt++;
+				$this->SendEmail = FALSE; // Do not send email on insert success
+
+				// Validate form
+				if (!$this->validateForm()) {
+					$gridInsert = FALSE; // Form error, reset action
+					$this->setFailureMessage($FormError);
+				} else {
+					$gridInsert = $this->addRow($this->OldRecordset); // Insert this row
+				}
+				if ($gridInsert) {
+					if ($key <> "")
+						$key .= $GLOBALS["COMPOSITE_KEY_SEPARATOR"];
+					$key .= $this->id->CurrentValue;
+
+					// Add filter for this record
+					$filter = $this->getRecordFilter();
+					if ($wrkfilter <> "")
+						$wrkfilter .= " OR ";
+					$wrkfilter .= $filter;
+				} else {
+					break;
+				}
+			}
+		}
+		if ($addcnt == 0) { // No record inserted
+			$this->setFailureMessage($Language->phrase("NoAddRecord"));
+			$gridInsert = FALSE;
+		}
+		if ($gridInsert) {
+			$conn->commitTrans(); // Commit transaction
+
+			// Get new recordset
+			$this->CurrentFilter = $wrkfilter;
+			$sql = $this->getCurrentSql();
+			if ($rs = $conn->execute($sql)) {
+				$rsnew = $rs->getRows();
+				$rs->close();
+			}
+
+			// Call Grid_Inserted event
+			$this->Grid_Inserted($rsnew);
+			if ($this->getSuccessMessage() == "")
+				$this->setSuccessMessage($Language->phrase("InsertSuccess")); // Set up insert success message
+			$this->clearInlineMode(); // Clear grid add mode
+		} else {
+			$conn->rollbackTrans(); // Rollback transaction
+			if ($this->getFailureMessage() == "")
+				$this->setFailureMessage($Language->phrase("InsertFailed")); // Set insert failed message
+		}
+		return $gridInsert;
+	}
+
+	// Check if empty row
+	public function emptyRow()
+	{
+		global $CurrentForm;
+		if ($CurrentForm->hasValue("x_RIDNo") && $CurrentForm->hasValue("o_RIDNo") && $this->RIDNo->CurrentValue <> $this->RIDNo->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Name") && $CurrentForm->hasValue("o_Name") && $this->Name->CurrentValue <> $this->Name->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_ARTCycle") && $CurrentForm->hasValue("o_ARTCycle") && $this->ARTCycle->CurrentValue <> $this->ARTCycle->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_SpermOrigin") && $CurrentForm->hasValue("o_SpermOrigin") && $this->SpermOrigin->CurrentValue <> $this->SpermOrigin->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_InseminatinTechnique") && $CurrentForm->hasValue("o_InseminatinTechnique") && $this->InseminatinTechnique->CurrentValue <> $this->InseminatinTechnique->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_IndicationForART") && $CurrentForm->hasValue("o_IndicationForART") && $this->IndicationForART->CurrentValue <> $this->IndicationForART->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day0sino") && $CurrentForm->hasValue("o_Day0sino") && $this->Day0sino->CurrentValue <> $this->Day0sino->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day0OocyteStage") && $CurrentForm->hasValue("o_Day0OocyteStage") && $this->Day0OocyteStage->CurrentValue <> $this->Day0OocyteStage->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day0PolarBodyPosition") && $CurrentForm->hasValue("o_Day0PolarBodyPosition") && $this->Day0PolarBodyPosition->CurrentValue <> $this->Day0PolarBodyPosition->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day0Breakage") && $CurrentForm->hasValue("o_Day0Breakage") && $this->Day0Breakage->CurrentValue <> $this->Day0Breakage->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day0Attempts") && $CurrentForm->hasValue("o_Day0Attempts") && $this->Day0Attempts->CurrentValue <> $this->Day0Attempts->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day0SPZMorpho") && $CurrentForm->hasValue("o_Day0SPZMorpho") && $this->Day0SPZMorpho->CurrentValue <> $this->Day0SPZMorpho->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day0SPZLocation") && $CurrentForm->hasValue("o_Day0SPZLocation") && $this->Day0SPZLocation->CurrentValue <> $this->Day0SPZLocation->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day0SpOrgin") && $CurrentForm->hasValue("o_Day0SpOrgin") && $this->Day0SpOrgin->CurrentValue <> $this->Day0SpOrgin->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day5Cryoptop") && $CurrentForm->hasValue("o_Day5Cryoptop") && $this->Day5Cryoptop->CurrentValue <> $this->Day5Cryoptop->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day1Sperm") && $CurrentForm->hasValue("o_Day1Sperm") && $this->Day1Sperm->CurrentValue <> $this->Day1Sperm->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day1PN") && $CurrentForm->hasValue("o_Day1PN") && $this->Day1PN->CurrentValue <> $this->Day1PN->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day1PB") && $CurrentForm->hasValue("o_Day1PB") && $this->Day1PB->CurrentValue <> $this->Day1PB->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day1Pronucleus") && $CurrentForm->hasValue("o_Day1Pronucleus") && $this->Day1Pronucleus->CurrentValue <> $this->Day1Pronucleus->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day1Nucleolus") && $CurrentForm->hasValue("o_Day1Nucleolus") && $this->Day1Nucleolus->CurrentValue <> $this->Day1Nucleolus->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day1Halo") && $CurrentForm->hasValue("o_Day1Halo") && $this->Day1Halo->CurrentValue <> $this->Day1Halo->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day2SiNo") && $CurrentForm->hasValue("o_Day2SiNo") && $this->Day2SiNo->CurrentValue <> $this->Day2SiNo->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day2CellNo") && $CurrentForm->hasValue("o_Day2CellNo") && $this->Day2CellNo->CurrentValue <> $this->Day2CellNo->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day2Frag") && $CurrentForm->hasValue("o_Day2Frag") && $this->Day2Frag->CurrentValue <> $this->Day2Frag->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day2Symmetry") && $CurrentForm->hasValue("o_Day2Symmetry") && $this->Day2Symmetry->CurrentValue <> $this->Day2Symmetry->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day2Cryoptop") && $CurrentForm->hasValue("o_Day2Cryoptop") && $this->Day2Cryoptop->CurrentValue <> $this->Day2Cryoptop->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day2Grade") && $CurrentForm->hasValue("o_Day2Grade") && $this->Day2Grade->CurrentValue <> $this->Day2Grade->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day2End") && $CurrentForm->hasValue("o_Day2End") && $this->Day2End->CurrentValue <> $this->Day2End->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day3Sino") && $CurrentForm->hasValue("o_Day3Sino") && $this->Day3Sino->CurrentValue <> $this->Day3Sino->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day3CellNo") && $CurrentForm->hasValue("o_Day3CellNo") && $this->Day3CellNo->CurrentValue <> $this->Day3CellNo->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day3Frag") && $CurrentForm->hasValue("o_Day3Frag") && $this->Day3Frag->CurrentValue <> $this->Day3Frag->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day3Symmetry") && $CurrentForm->hasValue("o_Day3Symmetry") && $this->Day3Symmetry->CurrentValue <> $this->Day3Symmetry->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day3ZP") && $CurrentForm->hasValue("o_Day3ZP") && $this->Day3ZP->CurrentValue <> $this->Day3ZP->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day3Vacoules") && $CurrentForm->hasValue("o_Day3Vacoules") && $this->Day3Vacoules->CurrentValue <> $this->Day3Vacoules->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day3Grade") && $CurrentForm->hasValue("o_Day3Grade") && $this->Day3Grade->CurrentValue <> $this->Day3Grade->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day3Cryoptop") && $CurrentForm->hasValue("o_Day3Cryoptop") && $this->Day3Cryoptop->CurrentValue <> $this->Day3Cryoptop->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day3End") && $CurrentForm->hasValue("o_Day3End") && $this->Day3End->CurrentValue <> $this->Day3End->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day4SiNo") && $CurrentForm->hasValue("o_Day4SiNo") && $this->Day4SiNo->CurrentValue <> $this->Day4SiNo->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day4CellNo") && $CurrentForm->hasValue("o_Day4CellNo") && $this->Day4CellNo->CurrentValue <> $this->Day4CellNo->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day4Frag") && $CurrentForm->hasValue("o_Day4Frag") && $this->Day4Frag->CurrentValue <> $this->Day4Frag->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day4Symmetry") && $CurrentForm->hasValue("o_Day4Symmetry") && $this->Day4Symmetry->CurrentValue <> $this->Day4Symmetry->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day4Grade") && $CurrentForm->hasValue("o_Day4Grade") && $this->Day4Grade->CurrentValue <> $this->Day4Grade->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day4Cryoptop") && $CurrentForm->hasValue("o_Day4Cryoptop") && $this->Day4Cryoptop->CurrentValue <> $this->Day4Cryoptop->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day4End") && $CurrentForm->hasValue("o_Day4End") && $this->Day4End->CurrentValue <> $this->Day4End->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day5CellNo") && $CurrentForm->hasValue("o_Day5CellNo") && $this->Day5CellNo->CurrentValue <> $this->Day5CellNo->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day5ICM") && $CurrentForm->hasValue("o_Day5ICM") && $this->Day5ICM->CurrentValue <> $this->Day5ICM->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day5TE") && $CurrentForm->hasValue("o_Day5TE") && $this->Day5TE->CurrentValue <> $this->Day5TE->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day5Observation") && $CurrentForm->hasValue("o_Day5Observation") && $this->Day5Observation->CurrentValue <> $this->Day5Observation->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day5Collapsed") && $CurrentForm->hasValue("o_Day5Collapsed") && $this->Day5Collapsed->CurrentValue <> $this->Day5Collapsed->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day5Vacoulles") && $CurrentForm->hasValue("o_Day5Vacoulles") && $this->Day5Vacoulles->CurrentValue <> $this->Day5Vacoulles->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day5Grade") && $CurrentForm->hasValue("o_Day5Grade") && $this->Day5Grade->CurrentValue <> $this->Day5Grade->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day6CellNo") && $CurrentForm->hasValue("o_Day6CellNo") && $this->Day6CellNo->CurrentValue <> $this->Day6CellNo->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day6ICM") && $CurrentForm->hasValue("o_Day6ICM") && $this->Day6ICM->CurrentValue <> $this->Day6ICM->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day6TE") && $CurrentForm->hasValue("o_Day6TE") && $this->Day6TE->CurrentValue <> $this->Day6TE->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day6Observation") && $CurrentForm->hasValue("o_Day6Observation") && $this->Day6Observation->CurrentValue <> $this->Day6Observation->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day6Collapsed") && $CurrentForm->hasValue("o_Day6Collapsed") && $this->Day6Collapsed->CurrentValue <> $this->Day6Collapsed->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day6Vacoulles") && $CurrentForm->hasValue("o_Day6Vacoulles") && $this->Day6Vacoulles->CurrentValue <> $this->Day6Vacoulles->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day6Grade") && $CurrentForm->hasValue("o_Day6Grade") && $this->Day6Grade->CurrentValue <> $this->Day6Grade->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day6Cryoptop") && $CurrentForm->hasValue("o_Day6Cryoptop") && $this->Day6Cryoptop->CurrentValue <> $this->Day6Cryoptop->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_EndSiNo") && $CurrentForm->hasValue("o_EndSiNo") && $this->EndSiNo->CurrentValue <> $this->EndSiNo->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_EndingDay") && $CurrentForm->hasValue("o_EndingDay") && $this->EndingDay->CurrentValue <> $this->EndingDay->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_EndingCellStage") && $CurrentForm->hasValue("o_EndingCellStage") && $this->EndingCellStage->CurrentValue <> $this->EndingCellStage->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_EndingGrade") && $CurrentForm->hasValue("o_EndingGrade") && $this->EndingGrade->CurrentValue <> $this->EndingGrade->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_EndingState") && $CurrentForm->hasValue("o_EndingState") && $this->EndingState->CurrentValue <> $this->EndingState->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_TidNo") && $CurrentForm->hasValue("o_TidNo") && $this->TidNo->CurrentValue <> $this->TidNo->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_DidNO") && $CurrentForm->hasValue("o_DidNO") && $this->DidNO->CurrentValue <> $this->DidNO->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_ICSiIVFDateTime") && $CurrentForm->hasValue("o_ICSiIVFDateTime") && $this->ICSiIVFDateTime->CurrentValue <> $this->ICSiIVFDateTime->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_PrimaryEmbrologist") && $CurrentForm->hasValue("o_PrimaryEmbrologist") && $this->PrimaryEmbrologist->CurrentValue <> $this->PrimaryEmbrologist->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_SecondaryEmbrologist") && $CurrentForm->hasValue("o_SecondaryEmbrologist") && $this->SecondaryEmbrologist->CurrentValue <> $this->SecondaryEmbrologist->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Incubator") && $CurrentForm->hasValue("o_Incubator") && $this->Incubator->CurrentValue <> $this->Incubator->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_location") && $CurrentForm->hasValue("o_location") && $this->location->CurrentValue <> $this->location->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_OocyteNo") && $CurrentForm->hasValue("o_OocyteNo") && $this->OocyteNo->CurrentValue <> $this->OocyteNo->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Stage") && $CurrentForm->hasValue("o_Stage") && $this->Stage->CurrentValue <> $this->Stage->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Remarks") && $CurrentForm->hasValue("o_Remarks") && $this->Remarks->CurrentValue <> $this->Remarks->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_vitrificationDate") && $CurrentForm->hasValue("o_vitrificationDate") && $this->vitrificationDate->CurrentValue <> $this->vitrificationDate->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_vitriPrimaryEmbryologist") && $CurrentForm->hasValue("o_vitriPrimaryEmbryologist") && $this->vitriPrimaryEmbryologist->CurrentValue <> $this->vitriPrimaryEmbryologist->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_vitriSecondaryEmbryologist") && $CurrentForm->hasValue("o_vitriSecondaryEmbryologist") && $this->vitriSecondaryEmbryologist->CurrentValue <> $this->vitriSecondaryEmbryologist->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_vitriEmbryoNo") && $CurrentForm->hasValue("o_vitriEmbryoNo") && $this->vitriEmbryoNo->CurrentValue <> $this->vitriEmbryoNo->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_thawReFrozen") && $CurrentForm->hasValue("o_thawReFrozen") && $this->thawReFrozen->CurrentValue <> $this->thawReFrozen->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_vitriFertilisationDate") && $CurrentForm->hasValue("o_vitriFertilisationDate") && $this->vitriFertilisationDate->CurrentValue <> $this->vitriFertilisationDate->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_vitriDay") && $CurrentForm->hasValue("o_vitriDay") && $this->vitriDay->CurrentValue <> $this->vitriDay->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_vitriStage") && $CurrentForm->hasValue("o_vitriStage") && $this->vitriStage->CurrentValue <> $this->vitriStage->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_vitriGrade") && $CurrentForm->hasValue("o_vitriGrade") && $this->vitriGrade->CurrentValue <> $this->vitriGrade->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_vitriIncubator") && $CurrentForm->hasValue("o_vitriIncubator") && $this->vitriIncubator->CurrentValue <> $this->vitriIncubator->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_vitriTank") && $CurrentForm->hasValue("o_vitriTank") && $this->vitriTank->CurrentValue <> $this->vitriTank->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_vitriCanister") && $CurrentForm->hasValue("o_vitriCanister") && $this->vitriCanister->CurrentValue <> $this->vitriCanister->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_vitriGobiet") && $CurrentForm->hasValue("o_vitriGobiet") && $this->vitriGobiet->CurrentValue <> $this->vitriGobiet->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_vitriViscotube") && $CurrentForm->hasValue("o_vitriViscotube") && $this->vitriViscotube->CurrentValue <> $this->vitriViscotube->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_vitriCryolockNo") && $CurrentForm->hasValue("o_vitriCryolockNo") && $this->vitriCryolockNo->CurrentValue <> $this->vitriCryolockNo->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_vitriCryolockColour") && $CurrentForm->hasValue("o_vitriCryolockColour") && $this->vitriCryolockColour->CurrentValue <> $this->vitriCryolockColour->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_thawDate") && $CurrentForm->hasValue("o_thawDate") && $this->thawDate->CurrentValue <> $this->thawDate->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_thawPrimaryEmbryologist") && $CurrentForm->hasValue("o_thawPrimaryEmbryologist") && $this->thawPrimaryEmbryologist->CurrentValue <> $this->thawPrimaryEmbryologist->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_thawSecondaryEmbryologist") && $CurrentForm->hasValue("o_thawSecondaryEmbryologist") && $this->thawSecondaryEmbryologist->CurrentValue <> $this->thawSecondaryEmbryologist->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_thawET") && $CurrentForm->hasValue("o_thawET") && $this->thawET->CurrentValue <> $this->thawET->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_thawAbserve") && $CurrentForm->hasValue("o_thawAbserve") && $this->thawAbserve->CurrentValue <> $this->thawAbserve->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_thawDiscard") && $CurrentForm->hasValue("o_thawDiscard") && $this->thawDiscard->CurrentValue <> $this->thawDiscard->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_ETCatheter") && $CurrentForm->hasValue("o_ETCatheter") && $this->ETCatheter->CurrentValue <> $this->ETCatheter->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_ETDifficulty") && $CurrentForm->hasValue("o_ETDifficulty") && $this->ETDifficulty->CurrentValue <> $this->ETDifficulty->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_ETEasy") && $CurrentForm->hasValue("o_ETEasy") && $this->ETEasy->CurrentValue <> $this->ETEasy->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_ETComments") && $CurrentForm->hasValue("o_ETComments") && $this->ETComments->CurrentValue <> $this->ETComments->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_ETDoctor") && $CurrentForm->hasValue("o_ETDoctor") && $this->ETDoctor->CurrentValue <> $this->ETDoctor->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_ETEmbryologist") && $CurrentForm->hasValue("o_ETEmbryologist") && $this->ETEmbryologist->CurrentValue <> $this->ETEmbryologist->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_ETDate") && $CurrentForm->hasValue("o_ETDate") && $this->ETDate->CurrentValue <> $this->ETDate->OldValue)
+			return FALSE;
+		if ($CurrentForm->hasValue("x_Day1End") && $CurrentForm->hasValue("o_Day1End") && $this->Day1End->CurrentValue <> $this->Day1End->OldValue)
+			return FALSE;
+		return TRUE;
+	}
+
+	// Validate grid form
+	public function validateGridForm()
+	{
+		global $CurrentForm;
+
+		// Get row count
+		$CurrentForm->Index = -1;
+		$rowcnt = strval($CurrentForm->getValue($this->FormKeyCountName));
+		if ($rowcnt == "" || !is_numeric($rowcnt))
+			$rowcnt = 0;
+
+		// Validate all records
+		for ($rowindex = 1; $rowindex <= $rowcnt; $rowindex++) {
+
+			// Load current row values
+			$CurrentForm->Index = $rowindex;
+			$rowaction = strval($CurrentForm->getValue($this->FormActionName));
+			if ($rowaction <> "delete" && $rowaction <> "insertdelete") {
+				$this->loadFormValues(); // Get form values
+				if ($rowaction == "insert" && $this->emptyRow()) {
+
+					// Ignore
+				} else if (!$this->validateForm()) {
+					return FALSE;
+				}
+			}
+		}
+		return TRUE;
+	}
+
+	// Get all form values of the grid
+	public function getGridFormValues()
+	{
+		global $CurrentForm;
+
+		// Get row count
+		$CurrentForm->Index = -1;
+		$rowcnt = strval($CurrentForm->getValue($this->FormKeyCountName));
+		if ($rowcnt == "" || !is_numeric($rowcnt))
+			$rowcnt = 0;
+		$rows = array();
+
+		// Loop through all records
+		for ($rowindex = 1; $rowindex <= $rowcnt; $rowindex++) {
+
+			// Load current row values
+			$CurrentForm->Index = $rowindex;
+			$rowaction = strval($CurrentForm->getValue($this->FormActionName));
+			if ($rowaction <> "delete" && $rowaction <> "insertdelete") {
+				$this->loadFormValues(); // Get form values
+				if ($rowaction == "insert" && $this->emptyRow()) {
+
+					// Ignore
+				} else {
+					$rows[] = $this->getFieldValues("FormValue"); // Return row as array
+				}
+			}
+		}
+		return $rows; // Return as array of array
+	}
+
+	// Restore form values for current row
+	public function restoreCurrentRowFormValues($idx)
+	{
+		global $CurrentForm;
+
+		// Get row based on current index
+		$CurrentForm->Index = $idx;
+		$this->loadFormValues(); // Load form values
+	}
+
+	// Get list of filters
+	public function getFilterList()
+	{
+		global $UserProfile;
+
+		// Initialize
+		$filterList = "";
+		$savedFilterList = "";
+
+		// Load server side filters
+		if (SEARCH_FILTER_OPTION == "Server" && isset($UserProfile))
+			$savedFilterList = $UserProfile->getSearchFilters(CurrentUserName(), "fivf_embryology_chartlistsrch");
+		$filterList = Concat($filterList, $this->id->AdvancedSearch->toJson(), ","); // Field id
+		$filterList = Concat($filterList, $this->RIDNo->AdvancedSearch->toJson(), ","); // Field RIDNo
+		$filterList = Concat($filterList, $this->Name->AdvancedSearch->toJson(), ","); // Field Name
+		$filterList = Concat($filterList, $this->ARTCycle->AdvancedSearch->toJson(), ","); // Field ARTCycle
+		$filterList = Concat($filterList, $this->SpermOrigin->AdvancedSearch->toJson(), ","); // Field SpermOrigin
+		$filterList = Concat($filterList, $this->InseminatinTechnique->AdvancedSearch->toJson(), ","); // Field InseminatinTechnique
+		$filterList = Concat($filterList, $this->IndicationForART->AdvancedSearch->toJson(), ","); // Field IndicationForART
+		$filterList = Concat($filterList, $this->Day0sino->AdvancedSearch->toJson(), ","); // Field Day0sino
+		$filterList = Concat($filterList, $this->Day0OocyteStage->AdvancedSearch->toJson(), ","); // Field Day0OocyteStage
+		$filterList = Concat($filterList, $this->Day0PolarBodyPosition->AdvancedSearch->toJson(), ","); // Field Day0PolarBodyPosition
+		$filterList = Concat($filterList, $this->Day0Breakage->AdvancedSearch->toJson(), ","); // Field Day0Breakage
+		$filterList = Concat($filterList, $this->Day0Attempts->AdvancedSearch->toJson(), ","); // Field Day0Attempts
+		$filterList = Concat($filterList, $this->Day0SPZMorpho->AdvancedSearch->toJson(), ","); // Field Day0SPZMorpho
+		$filterList = Concat($filterList, $this->Day0SPZLocation->AdvancedSearch->toJson(), ","); // Field Day0SPZLocation
+		$filterList = Concat($filterList, $this->Day0SpOrgin->AdvancedSearch->toJson(), ","); // Field Day0SpOrgin
+		$filterList = Concat($filterList, $this->Day5Cryoptop->AdvancedSearch->toJson(), ","); // Field Day5Cryoptop
+		$filterList = Concat($filterList, $this->Day1Sperm->AdvancedSearch->toJson(), ","); // Field Day1Sperm
+		$filterList = Concat($filterList, $this->Day1PN->AdvancedSearch->toJson(), ","); // Field Day1PN
+		$filterList = Concat($filterList, $this->Day1PB->AdvancedSearch->toJson(), ","); // Field Day1PB
+		$filterList = Concat($filterList, $this->Day1Pronucleus->AdvancedSearch->toJson(), ","); // Field Day1Pronucleus
+		$filterList = Concat($filterList, $this->Day1Nucleolus->AdvancedSearch->toJson(), ","); // Field Day1Nucleolus
+		$filterList = Concat($filterList, $this->Day1Halo->AdvancedSearch->toJson(), ","); // Field Day1Halo
+		$filterList = Concat($filterList, $this->Day2SiNo->AdvancedSearch->toJson(), ","); // Field Day2SiNo
+		$filterList = Concat($filterList, $this->Day2CellNo->AdvancedSearch->toJson(), ","); // Field Day2CellNo
+		$filterList = Concat($filterList, $this->Day2Frag->AdvancedSearch->toJson(), ","); // Field Day2Frag
+		$filterList = Concat($filterList, $this->Day2Symmetry->AdvancedSearch->toJson(), ","); // Field Day2Symmetry
+		$filterList = Concat($filterList, $this->Day2Cryoptop->AdvancedSearch->toJson(), ","); // Field Day2Cryoptop
+		$filterList = Concat($filterList, $this->Day2Grade->AdvancedSearch->toJson(), ","); // Field Day2Grade
+		$filterList = Concat($filterList, $this->Day2End->AdvancedSearch->toJson(), ","); // Field Day2End
+		$filterList = Concat($filterList, $this->Day3Sino->AdvancedSearch->toJson(), ","); // Field Day3Sino
+		$filterList = Concat($filterList, $this->Day3CellNo->AdvancedSearch->toJson(), ","); // Field Day3CellNo
+		$filterList = Concat($filterList, $this->Day3Frag->AdvancedSearch->toJson(), ","); // Field Day3Frag
+		$filterList = Concat($filterList, $this->Day3Symmetry->AdvancedSearch->toJson(), ","); // Field Day3Symmetry
+		$filterList = Concat($filterList, $this->Day3ZP->AdvancedSearch->toJson(), ","); // Field Day3ZP
+		$filterList = Concat($filterList, $this->Day3Vacoules->AdvancedSearch->toJson(), ","); // Field Day3Vacoules
+		$filterList = Concat($filterList, $this->Day3Grade->AdvancedSearch->toJson(), ","); // Field Day3Grade
+		$filterList = Concat($filterList, $this->Day3Cryoptop->AdvancedSearch->toJson(), ","); // Field Day3Cryoptop
+		$filterList = Concat($filterList, $this->Day3End->AdvancedSearch->toJson(), ","); // Field Day3End
+		$filterList = Concat($filterList, $this->Day4SiNo->AdvancedSearch->toJson(), ","); // Field Day4SiNo
+		$filterList = Concat($filterList, $this->Day4CellNo->AdvancedSearch->toJson(), ","); // Field Day4CellNo
+		$filterList = Concat($filterList, $this->Day4Frag->AdvancedSearch->toJson(), ","); // Field Day4Frag
+		$filterList = Concat($filterList, $this->Day4Symmetry->AdvancedSearch->toJson(), ","); // Field Day4Symmetry
+		$filterList = Concat($filterList, $this->Day4Grade->AdvancedSearch->toJson(), ","); // Field Day4Grade
+		$filterList = Concat($filterList, $this->Day4Cryoptop->AdvancedSearch->toJson(), ","); // Field Day4Cryoptop
+		$filterList = Concat($filterList, $this->Day4End->AdvancedSearch->toJson(), ","); // Field Day4End
+		$filterList = Concat($filterList, $this->Day5CellNo->AdvancedSearch->toJson(), ","); // Field Day5CellNo
+		$filterList = Concat($filterList, $this->Day5ICM->AdvancedSearch->toJson(), ","); // Field Day5ICM
+		$filterList = Concat($filterList, $this->Day5TE->AdvancedSearch->toJson(), ","); // Field Day5TE
+		$filterList = Concat($filterList, $this->Day5Observation->AdvancedSearch->toJson(), ","); // Field Day5Observation
+		$filterList = Concat($filterList, $this->Day5Collapsed->AdvancedSearch->toJson(), ","); // Field Day5Collapsed
+		$filterList = Concat($filterList, $this->Day5Vacoulles->AdvancedSearch->toJson(), ","); // Field Day5Vacoulles
+		$filterList = Concat($filterList, $this->Day5Grade->AdvancedSearch->toJson(), ","); // Field Day5Grade
+		$filterList = Concat($filterList, $this->Day6CellNo->AdvancedSearch->toJson(), ","); // Field Day6CellNo
+		$filterList = Concat($filterList, $this->Day6ICM->AdvancedSearch->toJson(), ","); // Field Day6ICM
+		$filterList = Concat($filterList, $this->Day6TE->AdvancedSearch->toJson(), ","); // Field Day6TE
+		$filterList = Concat($filterList, $this->Day6Observation->AdvancedSearch->toJson(), ","); // Field Day6Observation
+		$filterList = Concat($filterList, $this->Day6Collapsed->AdvancedSearch->toJson(), ","); // Field Day6Collapsed
+		$filterList = Concat($filterList, $this->Day6Vacoulles->AdvancedSearch->toJson(), ","); // Field Day6Vacoulles
+		$filterList = Concat($filterList, $this->Day6Grade->AdvancedSearch->toJson(), ","); // Field Day6Grade
+		$filterList = Concat($filterList, $this->Day6Cryoptop->AdvancedSearch->toJson(), ","); // Field Day6Cryoptop
+		$filterList = Concat($filterList, $this->EndSiNo->AdvancedSearch->toJson(), ","); // Field EndSiNo
+		$filterList = Concat($filterList, $this->EndingDay->AdvancedSearch->toJson(), ","); // Field EndingDay
+		$filterList = Concat($filterList, $this->EndingCellStage->AdvancedSearch->toJson(), ","); // Field EndingCellStage
+		$filterList = Concat($filterList, $this->EndingGrade->AdvancedSearch->toJson(), ","); // Field EndingGrade
+		$filterList = Concat($filterList, $this->EndingState->AdvancedSearch->toJson(), ","); // Field EndingState
+		$filterList = Concat($filterList, $this->TidNo->AdvancedSearch->toJson(), ","); // Field TidNo
+		$filterList = Concat($filterList, $this->DidNO->AdvancedSearch->toJson(), ","); // Field DidNO
+		$filterList = Concat($filterList, $this->ICSiIVFDateTime->AdvancedSearch->toJson(), ","); // Field ICSiIVFDateTime
+		$filterList = Concat($filterList, $this->PrimaryEmbrologist->AdvancedSearch->toJson(), ","); // Field PrimaryEmbrologist
+		$filterList = Concat($filterList, $this->SecondaryEmbrologist->AdvancedSearch->toJson(), ","); // Field SecondaryEmbrologist
+		$filterList = Concat($filterList, $this->Incubator->AdvancedSearch->toJson(), ","); // Field Incubator
+		$filterList = Concat($filterList, $this->location->AdvancedSearch->toJson(), ","); // Field location
+		$filterList = Concat($filterList, $this->OocyteNo->AdvancedSearch->toJson(), ","); // Field OocyteNo
+		$filterList = Concat($filterList, $this->Stage->AdvancedSearch->toJson(), ","); // Field Stage
+		$filterList = Concat($filterList, $this->Remarks->AdvancedSearch->toJson(), ","); // Field Remarks
+		$filterList = Concat($filterList, $this->vitrificationDate->AdvancedSearch->toJson(), ","); // Field vitrificationDate
+		$filterList = Concat($filterList, $this->vitriPrimaryEmbryologist->AdvancedSearch->toJson(), ","); // Field vitriPrimaryEmbryologist
+		$filterList = Concat($filterList, $this->vitriSecondaryEmbryologist->AdvancedSearch->toJson(), ","); // Field vitriSecondaryEmbryologist
+		$filterList = Concat($filterList, $this->vitriEmbryoNo->AdvancedSearch->toJson(), ","); // Field vitriEmbryoNo
+		$filterList = Concat($filterList, $this->thawReFrozen->AdvancedSearch->toJson(), ","); // Field thawReFrozen
+		$filterList = Concat($filterList, $this->vitriFertilisationDate->AdvancedSearch->toJson(), ","); // Field vitriFertilisationDate
+		$filterList = Concat($filterList, $this->vitriDay->AdvancedSearch->toJson(), ","); // Field vitriDay
+		$filterList = Concat($filterList, $this->vitriStage->AdvancedSearch->toJson(), ","); // Field vitriStage
+		$filterList = Concat($filterList, $this->vitriGrade->AdvancedSearch->toJson(), ","); // Field vitriGrade
+		$filterList = Concat($filterList, $this->vitriIncubator->AdvancedSearch->toJson(), ","); // Field vitriIncubator
+		$filterList = Concat($filterList, $this->vitriTank->AdvancedSearch->toJson(), ","); // Field vitriTank
+		$filterList = Concat($filterList, $this->vitriCanister->AdvancedSearch->toJson(), ","); // Field vitriCanister
+		$filterList = Concat($filterList, $this->vitriGobiet->AdvancedSearch->toJson(), ","); // Field vitriGobiet
+		$filterList = Concat($filterList, $this->vitriViscotube->AdvancedSearch->toJson(), ","); // Field vitriViscotube
+		$filterList = Concat($filterList, $this->vitriCryolockNo->AdvancedSearch->toJson(), ","); // Field vitriCryolockNo
+		$filterList = Concat($filterList, $this->vitriCryolockColour->AdvancedSearch->toJson(), ","); // Field vitriCryolockColour
+		$filterList = Concat($filterList, $this->thawDate->AdvancedSearch->toJson(), ","); // Field thawDate
+		$filterList = Concat($filterList, $this->thawPrimaryEmbryologist->AdvancedSearch->toJson(), ","); // Field thawPrimaryEmbryologist
+		$filterList = Concat($filterList, $this->thawSecondaryEmbryologist->AdvancedSearch->toJson(), ","); // Field thawSecondaryEmbryologist
+		$filterList = Concat($filterList, $this->thawET->AdvancedSearch->toJson(), ","); // Field thawET
+		$filterList = Concat($filterList, $this->thawAbserve->AdvancedSearch->toJson(), ","); // Field thawAbserve
+		$filterList = Concat($filterList, $this->thawDiscard->AdvancedSearch->toJson(), ","); // Field thawDiscard
+		$filterList = Concat($filterList, $this->ETCatheter->AdvancedSearch->toJson(), ","); // Field ETCatheter
+		$filterList = Concat($filterList, $this->ETDifficulty->AdvancedSearch->toJson(), ","); // Field ETDifficulty
+		$filterList = Concat($filterList, $this->ETEasy->AdvancedSearch->toJson(), ","); // Field ETEasy
+		$filterList = Concat($filterList, $this->ETComments->AdvancedSearch->toJson(), ","); // Field ETComments
+		$filterList = Concat($filterList, $this->ETDoctor->AdvancedSearch->toJson(), ","); // Field ETDoctor
+		$filterList = Concat($filterList, $this->ETEmbryologist->AdvancedSearch->toJson(), ","); // Field ETEmbryologist
+		$filterList = Concat($filterList, $this->ETDate->AdvancedSearch->toJson(), ","); // Field ETDate
+		$filterList = Concat($filterList, $this->Day1End->AdvancedSearch->toJson(), ","); // Field Day1End
+		if ($this->BasicSearch->Keyword <> "") {
+			$wrk = "\"" . TABLE_BASIC_SEARCH . "\":\"" . JsEncode($this->BasicSearch->Keyword) . "\",\"" . TABLE_BASIC_SEARCH_TYPE . "\":\"" . JsEncode($this->BasicSearch->Type) . "\"";
+			$filterList = Concat($filterList, $wrk, ",");
+		}
+
+		// Return filter list in JSON
+		if ($filterList <> "")
+			$filterList = "\"data\":{" . $filterList . "}";
+		if ($savedFilterList <> "")
+			$filterList = Concat($filterList, "\"filters\":" . $savedFilterList, ",");
+		return ($filterList <> "") ? "{" . $filterList . "}" : "null";
+	}
+
+	// Process filter list
+	protected function processFilterList()
+	{
+		global $UserProfile;
+		if (Post("ajax") == "savefilters") { // Save filter request (Ajax)
+			$filters = Post("filters");
+			$UserProfile->setSearchFilters(CurrentUserName(), "fivf_embryology_chartlistsrch", $filters);
+			WriteJson([["success" => TRUE]]); // Success
+			return TRUE;
+		} elseif (Post("cmd") == "resetfilter") {
+			$this->restoreFilterList();
+		}
+		return FALSE;
+	}
+
+	// Restore list of filters
+	protected function restoreFilterList()
+	{
+
+		// Return if not reset filter
+		if (Post("cmd") !== "resetfilter")
+			return FALSE;
+		$filter = json_decode(Post("filter"), TRUE);
+		$this->Command = "search";
+
+		// Field id
+		$this->id->AdvancedSearch->SearchValue = @$filter["x_id"];
+		$this->id->AdvancedSearch->SearchOperator = @$filter["z_id"];
+		$this->id->AdvancedSearch->SearchCondition = @$filter["v_id"];
+		$this->id->AdvancedSearch->SearchValue2 = @$filter["y_id"];
+		$this->id->AdvancedSearch->SearchOperator2 = @$filter["w_id"];
+		$this->id->AdvancedSearch->save();
+
+		// Field RIDNo
+		$this->RIDNo->AdvancedSearch->SearchValue = @$filter["x_RIDNo"];
+		$this->RIDNo->AdvancedSearch->SearchOperator = @$filter["z_RIDNo"];
+		$this->RIDNo->AdvancedSearch->SearchCondition = @$filter["v_RIDNo"];
+		$this->RIDNo->AdvancedSearch->SearchValue2 = @$filter["y_RIDNo"];
+		$this->RIDNo->AdvancedSearch->SearchOperator2 = @$filter["w_RIDNo"];
+		$this->RIDNo->AdvancedSearch->save();
+
+		// Field Name
+		$this->Name->AdvancedSearch->SearchValue = @$filter["x_Name"];
+		$this->Name->AdvancedSearch->SearchOperator = @$filter["z_Name"];
+		$this->Name->AdvancedSearch->SearchCondition = @$filter["v_Name"];
+		$this->Name->AdvancedSearch->SearchValue2 = @$filter["y_Name"];
+		$this->Name->AdvancedSearch->SearchOperator2 = @$filter["w_Name"];
+		$this->Name->AdvancedSearch->save();
+
+		// Field ARTCycle
+		$this->ARTCycle->AdvancedSearch->SearchValue = @$filter["x_ARTCycle"];
+		$this->ARTCycle->AdvancedSearch->SearchOperator = @$filter["z_ARTCycle"];
+		$this->ARTCycle->AdvancedSearch->SearchCondition = @$filter["v_ARTCycle"];
+		$this->ARTCycle->AdvancedSearch->SearchValue2 = @$filter["y_ARTCycle"];
+		$this->ARTCycle->AdvancedSearch->SearchOperator2 = @$filter["w_ARTCycle"];
+		$this->ARTCycle->AdvancedSearch->save();
+
+		// Field SpermOrigin
+		$this->SpermOrigin->AdvancedSearch->SearchValue = @$filter["x_SpermOrigin"];
+		$this->SpermOrigin->AdvancedSearch->SearchOperator = @$filter["z_SpermOrigin"];
+		$this->SpermOrigin->AdvancedSearch->SearchCondition = @$filter["v_SpermOrigin"];
+		$this->SpermOrigin->AdvancedSearch->SearchValue2 = @$filter["y_SpermOrigin"];
+		$this->SpermOrigin->AdvancedSearch->SearchOperator2 = @$filter["w_SpermOrigin"];
+		$this->SpermOrigin->AdvancedSearch->save();
+
+		// Field InseminatinTechnique
+		$this->InseminatinTechnique->AdvancedSearch->SearchValue = @$filter["x_InseminatinTechnique"];
+		$this->InseminatinTechnique->AdvancedSearch->SearchOperator = @$filter["z_InseminatinTechnique"];
+		$this->InseminatinTechnique->AdvancedSearch->SearchCondition = @$filter["v_InseminatinTechnique"];
+		$this->InseminatinTechnique->AdvancedSearch->SearchValue2 = @$filter["y_InseminatinTechnique"];
+		$this->InseminatinTechnique->AdvancedSearch->SearchOperator2 = @$filter["w_InseminatinTechnique"];
+		$this->InseminatinTechnique->AdvancedSearch->save();
+
+		// Field IndicationForART
+		$this->IndicationForART->AdvancedSearch->SearchValue = @$filter["x_IndicationForART"];
+		$this->IndicationForART->AdvancedSearch->SearchOperator = @$filter["z_IndicationForART"];
+		$this->IndicationForART->AdvancedSearch->SearchCondition = @$filter["v_IndicationForART"];
+		$this->IndicationForART->AdvancedSearch->SearchValue2 = @$filter["y_IndicationForART"];
+		$this->IndicationForART->AdvancedSearch->SearchOperator2 = @$filter["w_IndicationForART"];
+		$this->IndicationForART->AdvancedSearch->save();
+
+		// Field Day0sino
+		$this->Day0sino->AdvancedSearch->SearchValue = @$filter["x_Day0sino"];
+		$this->Day0sino->AdvancedSearch->SearchOperator = @$filter["z_Day0sino"];
+		$this->Day0sino->AdvancedSearch->SearchCondition = @$filter["v_Day0sino"];
+		$this->Day0sino->AdvancedSearch->SearchValue2 = @$filter["y_Day0sino"];
+		$this->Day0sino->AdvancedSearch->SearchOperator2 = @$filter["w_Day0sino"];
+		$this->Day0sino->AdvancedSearch->save();
+
+		// Field Day0OocyteStage
+		$this->Day0OocyteStage->AdvancedSearch->SearchValue = @$filter["x_Day0OocyteStage"];
+		$this->Day0OocyteStage->AdvancedSearch->SearchOperator = @$filter["z_Day0OocyteStage"];
+		$this->Day0OocyteStage->AdvancedSearch->SearchCondition = @$filter["v_Day0OocyteStage"];
+		$this->Day0OocyteStage->AdvancedSearch->SearchValue2 = @$filter["y_Day0OocyteStage"];
+		$this->Day0OocyteStage->AdvancedSearch->SearchOperator2 = @$filter["w_Day0OocyteStage"];
+		$this->Day0OocyteStage->AdvancedSearch->save();
+
+		// Field Day0PolarBodyPosition
+		$this->Day0PolarBodyPosition->AdvancedSearch->SearchValue = @$filter["x_Day0PolarBodyPosition"];
+		$this->Day0PolarBodyPosition->AdvancedSearch->SearchOperator = @$filter["z_Day0PolarBodyPosition"];
+		$this->Day0PolarBodyPosition->AdvancedSearch->SearchCondition = @$filter["v_Day0PolarBodyPosition"];
+		$this->Day0PolarBodyPosition->AdvancedSearch->SearchValue2 = @$filter["y_Day0PolarBodyPosition"];
+		$this->Day0PolarBodyPosition->AdvancedSearch->SearchOperator2 = @$filter["w_Day0PolarBodyPosition"];
+		$this->Day0PolarBodyPosition->AdvancedSearch->save();
+
+		// Field Day0Breakage
+		$this->Day0Breakage->AdvancedSearch->SearchValue = @$filter["x_Day0Breakage"];
+		$this->Day0Breakage->AdvancedSearch->SearchOperator = @$filter["z_Day0Breakage"];
+		$this->Day0Breakage->AdvancedSearch->SearchCondition = @$filter["v_Day0Breakage"];
+		$this->Day0Breakage->AdvancedSearch->SearchValue2 = @$filter["y_Day0Breakage"];
+		$this->Day0Breakage->AdvancedSearch->SearchOperator2 = @$filter["w_Day0Breakage"];
+		$this->Day0Breakage->AdvancedSearch->save();
+
+		// Field Day0Attempts
+		$this->Day0Attempts->AdvancedSearch->SearchValue = @$filter["x_Day0Attempts"];
+		$this->Day0Attempts->AdvancedSearch->SearchOperator = @$filter["z_Day0Attempts"];
+		$this->Day0Attempts->AdvancedSearch->SearchCondition = @$filter["v_Day0Attempts"];
+		$this->Day0Attempts->AdvancedSearch->SearchValue2 = @$filter["y_Day0Attempts"];
+		$this->Day0Attempts->AdvancedSearch->SearchOperator2 = @$filter["w_Day0Attempts"];
+		$this->Day0Attempts->AdvancedSearch->save();
+
+		// Field Day0SPZMorpho
+		$this->Day0SPZMorpho->AdvancedSearch->SearchValue = @$filter["x_Day0SPZMorpho"];
+		$this->Day0SPZMorpho->AdvancedSearch->SearchOperator = @$filter["z_Day0SPZMorpho"];
+		$this->Day0SPZMorpho->AdvancedSearch->SearchCondition = @$filter["v_Day0SPZMorpho"];
+		$this->Day0SPZMorpho->AdvancedSearch->SearchValue2 = @$filter["y_Day0SPZMorpho"];
+		$this->Day0SPZMorpho->AdvancedSearch->SearchOperator2 = @$filter["w_Day0SPZMorpho"];
+		$this->Day0SPZMorpho->AdvancedSearch->save();
+
+		// Field Day0SPZLocation
+		$this->Day0SPZLocation->AdvancedSearch->SearchValue = @$filter["x_Day0SPZLocation"];
+		$this->Day0SPZLocation->AdvancedSearch->SearchOperator = @$filter["z_Day0SPZLocation"];
+		$this->Day0SPZLocation->AdvancedSearch->SearchCondition = @$filter["v_Day0SPZLocation"];
+		$this->Day0SPZLocation->AdvancedSearch->SearchValue2 = @$filter["y_Day0SPZLocation"];
+		$this->Day0SPZLocation->AdvancedSearch->SearchOperator2 = @$filter["w_Day0SPZLocation"];
+		$this->Day0SPZLocation->AdvancedSearch->save();
+
+		// Field Day0SpOrgin
+		$this->Day0SpOrgin->AdvancedSearch->SearchValue = @$filter["x_Day0SpOrgin"];
+		$this->Day0SpOrgin->AdvancedSearch->SearchOperator = @$filter["z_Day0SpOrgin"];
+		$this->Day0SpOrgin->AdvancedSearch->SearchCondition = @$filter["v_Day0SpOrgin"];
+		$this->Day0SpOrgin->AdvancedSearch->SearchValue2 = @$filter["y_Day0SpOrgin"];
+		$this->Day0SpOrgin->AdvancedSearch->SearchOperator2 = @$filter["w_Day0SpOrgin"];
+		$this->Day0SpOrgin->AdvancedSearch->save();
+
+		// Field Day5Cryoptop
+		$this->Day5Cryoptop->AdvancedSearch->SearchValue = @$filter["x_Day5Cryoptop"];
+		$this->Day5Cryoptop->AdvancedSearch->SearchOperator = @$filter["z_Day5Cryoptop"];
+		$this->Day5Cryoptop->AdvancedSearch->SearchCondition = @$filter["v_Day5Cryoptop"];
+		$this->Day5Cryoptop->AdvancedSearch->SearchValue2 = @$filter["y_Day5Cryoptop"];
+		$this->Day5Cryoptop->AdvancedSearch->SearchOperator2 = @$filter["w_Day5Cryoptop"];
+		$this->Day5Cryoptop->AdvancedSearch->save();
+
+		// Field Day1Sperm
+		$this->Day1Sperm->AdvancedSearch->SearchValue = @$filter["x_Day1Sperm"];
+		$this->Day1Sperm->AdvancedSearch->SearchOperator = @$filter["z_Day1Sperm"];
+		$this->Day1Sperm->AdvancedSearch->SearchCondition = @$filter["v_Day1Sperm"];
+		$this->Day1Sperm->AdvancedSearch->SearchValue2 = @$filter["y_Day1Sperm"];
+		$this->Day1Sperm->AdvancedSearch->SearchOperator2 = @$filter["w_Day1Sperm"];
+		$this->Day1Sperm->AdvancedSearch->save();
+
+		// Field Day1PN
+		$this->Day1PN->AdvancedSearch->SearchValue = @$filter["x_Day1PN"];
+		$this->Day1PN->AdvancedSearch->SearchOperator = @$filter["z_Day1PN"];
+		$this->Day1PN->AdvancedSearch->SearchCondition = @$filter["v_Day1PN"];
+		$this->Day1PN->AdvancedSearch->SearchValue2 = @$filter["y_Day1PN"];
+		$this->Day1PN->AdvancedSearch->SearchOperator2 = @$filter["w_Day1PN"];
+		$this->Day1PN->AdvancedSearch->save();
+
+		// Field Day1PB
+		$this->Day1PB->AdvancedSearch->SearchValue = @$filter["x_Day1PB"];
+		$this->Day1PB->AdvancedSearch->SearchOperator = @$filter["z_Day1PB"];
+		$this->Day1PB->AdvancedSearch->SearchCondition = @$filter["v_Day1PB"];
+		$this->Day1PB->AdvancedSearch->SearchValue2 = @$filter["y_Day1PB"];
+		$this->Day1PB->AdvancedSearch->SearchOperator2 = @$filter["w_Day1PB"];
+		$this->Day1PB->AdvancedSearch->save();
+
+		// Field Day1Pronucleus
+		$this->Day1Pronucleus->AdvancedSearch->SearchValue = @$filter["x_Day1Pronucleus"];
+		$this->Day1Pronucleus->AdvancedSearch->SearchOperator = @$filter["z_Day1Pronucleus"];
+		$this->Day1Pronucleus->AdvancedSearch->SearchCondition = @$filter["v_Day1Pronucleus"];
+		$this->Day1Pronucleus->AdvancedSearch->SearchValue2 = @$filter["y_Day1Pronucleus"];
+		$this->Day1Pronucleus->AdvancedSearch->SearchOperator2 = @$filter["w_Day1Pronucleus"];
+		$this->Day1Pronucleus->AdvancedSearch->save();
+
+		// Field Day1Nucleolus
+		$this->Day1Nucleolus->AdvancedSearch->SearchValue = @$filter["x_Day1Nucleolus"];
+		$this->Day1Nucleolus->AdvancedSearch->SearchOperator = @$filter["z_Day1Nucleolus"];
+		$this->Day1Nucleolus->AdvancedSearch->SearchCondition = @$filter["v_Day1Nucleolus"];
+		$this->Day1Nucleolus->AdvancedSearch->SearchValue2 = @$filter["y_Day1Nucleolus"];
+		$this->Day1Nucleolus->AdvancedSearch->SearchOperator2 = @$filter["w_Day1Nucleolus"];
+		$this->Day1Nucleolus->AdvancedSearch->save();
+
+		// Field Day1Halo
+		$this->Day1Halo->AdvancedSearch->SearchValue = @$filter["x_Day1Halo"];
+		$this->Day1Halo->AdvancedSearch->SearchOperator = @$filter["z_Day1Halo"];
+		$this->Day1Halo->AdvancedSearch->SearchCondition = @$filter["v_Day1Halo"];
+		$this->Day1Halo->AdvancedSearch->SearchValue2 = @$filter["y_Day1Halo"];
+		$this->Day1Halo->AdvancedSearch->SearchOperator2 = @$filter["w_Day1Halo"];
+		$this->Day1Halo->AdvancedSearch->save();
+
+		// Field Day2SiNo
+		$this->Day2SiNo->AdvancedSearch->SearchValue = @$filter["x_Day2SiNo"];
+		$this->Day2SiNo->AdvancedSearch->SearchOperator = @$filter["z_Day2SiNo"];
+		$this->Day2SiNo->AdvancedSearch->SearchCondition = @$filter["v_Day2SiNo"];
+		$this->Day2SiNo->AdvancedSearch->SearchValue2 = @$filter["y_Day2SiNo"];
+		$this->Day2SiNo->AdvancedSearch->SearchOperator2 = @$filter["w_Day2SiNo"];
+		$this->Day2SiNo->AdvancedSearch->save();
+
+		// Field Day2CellNo
+		$this->Day2CellNo->AdvancedSearch->SearchValue = @$filter["x_Day2CellNo"];
+		$this->Day2CellNo->AdvancedSearch->SearchOperator = @$filter["z_Day2CellNo"];
+		$this->Day2CellNo->AdvancedSearch->SearchCondition = @$filter["v_Day2CellNo"];
+		$this->Day2CellNo->AdvancedSearch->SearchValue2 = @$filter["y_Day2CellNo"];
+		$this->Day2CellNo->AdvancedSearch->SearchOperator2 = @$filter["w_Day2CellNo"];
+		$this->Day2CellNo->AdvancedSearch->save();
+
+		// Field Day2Frag
+		$this->Day2Frag->AdvancedSearch->SearchValue = @$filter["x_Day2Frag"];
+		$this->Day2Frag->AdvancedSearch->SearchOperator = @$filter["z_Day2Frag"];
+		$this->Day2Frag->AdvancedSearch->SearchCondition = @$filter["v_Day2Frag"];
+		$this->Day2Frag->AdvancedSearch->SearchValue2 = @$filter["y_Day2Frag"];
+		$this->Day2Frag->AdvancedSearch->SearchOperator2 = @$filter["w_Day2Frag"];
+		$this->Day2Frag->AdvancedSearch->save();
+
+		// Field Day2Symmetry
+		$this->Day2Symmetry->AdvancedSearch->SearchValue = @$filter["x_Day2Symmetry"];
+		$this->Day2Symmetry->AdvancedSearch->SearchOperator = @$filter["z_Day2Symmetry"];
+		$this->Day2Symmetry->AdvancedSearch->SearchCondition = @$filter["v_Day2Symmetry"];
+		$this->Day2Symmetry->AdvancedSearch->SearchValue2 = @$filter["y_Day2Symmetry"];
+		$this->Day2Symmetry->AdvancedSearch->SearchOperator2 = @$filter["w_Day2Symmetry"];
+		$this->Day2Symmetry->AdvancedSearch->save();
+
+		// Field Day2Cryoptop
+		$this->Day2Cryoptop->AdvancedSearch->SearchValue = @$filter["x_Day2Cryoptop"];
+		$this->Day2Cryoptop->AdvancedSearch->SearchOperator = @$filter["z_Day2Cryoptop"];
+		$this->Day2Cryoptop->AdvancedSearch->SearchCondition = @$filter["v_Day2Cryoptop"];
+		$this->Day2Cryoptop->AdvancedSearch->SearchValue2 = @$filter["y_Day2Cryoptop"];
+		$this->Day2Cryoptop->AdvancedSearch->SearchOperator2 = @$filter["w_Day2Cryoptop"];
+		$this->Day2Cryoptop->AdvancedSearch->save();
+
+		// Field Day2Grade
+		$this->Day2Grade->AdvancedSearch->SearchValue = @$filter["x_Day2Grade"];
+		$this->Day2Grade->AdvancedSearch->SearchOperator = @$filter["z_Day2Grade"];
+		$this->Day2Grade->AdvancedSearch->SearchCondition = @$filter["v_Day2Grade"];
+		$this->Day2Grade->AdvancedSearch->SearchValue2 = @$filter["y_Day2Grade"];
+		$this->Day2Grade->AdvancedSearch->SearchOperator2 = @$filter["w_Day2Grade"];
+		$this->Day2Grade->AdvancedSearch->save();
+
+		// Field Day2End
+		$this->Day2End->AdvancedSearch->SearchValue = @$filter["x_Day2End"];
+		$this->Day2End->AdvancedSearch->SearchOperator = @$filter["z_Day2End"];
+		$this->Day2End->AdvancedSearch->SearchCondition = @$filter["v_Day2End"];
+		$this->Day2End->AdvancedSearch->SearchValue2 = @$filter["y_Day2End"];
+		$this->Day2End->AdvancedSearch->SearchOperator2 = @$filter["w_Day2End"];
+		$this->Day2End->AdvancedSearch->save();
+
+		// Field Day3Sino
+		$this->Day3Sino->AdvancedSearch->SearchValue = @$filter["x_Day3Sino"];
+		$this->Day3Sino->AdvancedSearch->SearchOperator = @$filter["z_Day3Sino"];
+		$this->Day3Sino->AdvancedSearch->SearchCondition = @$filter["v_Day3Sino"];
+		$this->Day3Sino->AdvancedSearch->SearchValue2 = @$filter["y_Day3Sino"];
+		$this->Day3Sino->AdvancedSearch->SearchOperator2 = @$filter["w_Day3Sino"];
+		$this->Day3Sino->AdvancedSearch->save();
+
+		// Field Day3CellNo
+		$this->Day3CellNo->AdvancedSearch->SearchValue = @$filter["x_Day3CellNo"];
+		$this->Day3CellNo->AdvancedSearch->SearchOperator = @$filter["z_Day3CellNo"];
+		$this->Day3CellNo->AdvancedSearch->SearchCondition = @$filter["v_Day3CellNo"];
+		$this->Day3CellNo->AdvancedSearch->SearchValue2 = @$filter["y_Day3CellNo"];
+		$this->Day3CellNo->AdvancedSearch->SearchOperator2 = @$filter["w_Day3CellNo"];
+		$this->Day3CellNo->AdvancedSearch->save();
+
+		// Field Day3Frag
+		$this->Day3Frag->AdvancedSearch->SearchValue = @$filter["x_Day3Frag"];
+		$this->Day3Frag->AdvancedSearch->SearchOperator = @$filter["z_Day3Frag"];
+		$this->Day3Frag->AdvancedSearch->SearchCondition = @$filter["v_Day3Frag"];
+		$this->Day3Frag->AdvancedSearch->SearchValue2 = @$filter["y_Day3Frag"];
+		$this->Day3Frag->AdvancedSearch->SearchOperator2 = @$filter["w_Day3Frag"];
+		$this->Day3Frag->AdvancedSearch->save();
+
+		// Field Day3Symmetry
+		$this->Day3Symmetry->AdvancedSearch->SearchValue = @$filter["x_Day3Symmetry"];
+		$this->Day3Symmetry->AdvancedSearch->SearchOperator = @$filter["z_Day3Symmetry"];
+		$this->Day3Symmetry->AdvancedSearch->SearchCondition = @$filter["v_Day3Symmetry"];
+		$this->Day3Symmetry->AdvancedSearch->SearchValue2 = @$filter["y_Day3Symmetry"];
+		$this->Day3Symmetry->AdvancedSearch->SearchOperator2 = @$filter["w_Day3Symmetry"];
+		$this->Day3Symmetry->AdvancedSearch->save();
+
+		// Field Day3ZP
+		$this->Day3ZP->AdvancedSearch->SearchValue = @$filter["x_Day3ZP"];
+		$this->Day3ZP->AdvancedSearch->SearchOperator = @$filter["z_Day3ZP"];
+		$this->Day3ZP->AdvancedSearch->SearchCondition = @$filter["v_Day3ZP"];
+		$this->Day3ZP->AdvancedSearch->SearchValue2 = @$filter["y_Day3ZP"];
+		$this->Day3ZP->AdvancedSearch->SearchOperator2 = @$filter["w_Day3ZP"];
+		$this->Day3ZP->AdvancedSearch->save();
+
+		// Field Day3Vacoules
+		$this->Day3Vacoules->AdvancedSearch->SearchValue = @$filter["x_Day3Vacoules"];
+		$this->Day3Vacoules->AdvancedSearch->SearchOperator = @$filter["z_Day3Vacoules"];
+		$this->Day3Vacoules->AdvancedSearch->SearchCondition = @$filter["v_Day3Vacoules"];
+		$this->Day3Vacoules->AdvancedSearch->SearchValue2 = @$filter["y_Day3Vacoules"];
+		$this->Day3Vacoules->AdvancedSearch->SearchOperator2 = @$filter["w_Day3Vacoules"];
+		$this->Day3Vacoules->AdvancedSearch->save();
+
+		// Field Day3Grade
+		$this->Day3Grade->AdvancedSearch->SearchValue = @$filter["x_Day3Grade"];
+		$this->Day3Grade->AdvancedSearch->SearchOperator = @$filter["z_Day3Grade"];
+		$this->Day3Grade->AdvancedSearch->SearchCondition = @$filter["v_Day3Grade"];
+		$this->Day3Grade->AdvancedSearch->SearchValue2 = @$filter["y_Day3Grade"];
+		$this->Day3Grade->AdvancedSearch->SearchOperator2 = @$filter["w_Day3Grade"];
+		$this->Day3Grade->AdvancedSearch->save();
+
+		// Field Day3Cryoptop
+		$this->Day3Cryoptop->AdvancedSearch->SearchValue = @$filter["x_Day3Cryoptop"];
+		$this->Day3Cryoptop->AdvancedSearch->SearchOperator = @$filter["z_Day3Cryoptop"];
+		$this->Day3Cryoptop->AdvancedSearch->SearchCondition = @$filter["v_Day3Cryoptop"];
+		$this->Day3Cryoptop->AdvancedSearch->SearchValue2 = @$filter["y_Day3Cryoptop"];
+		$this->Day3Cryoptop->AdvancedSearch->SearchOperator2 = @$filter["w_Day3Cryoptop"];
+		$this->Day3Cryoptop->AdvancedSearch->save();
+
+		// Field Day3End
+		$this->Day3End->AdvancedSearch->SearchValue = @$filter["x_Day3End"];
+		$this->Day3End->AdvancedSearch->SearchOperator = @$filter["z_Day3End"];
+		$this->Day3End->AdvancedSearch->SearchCondition = @$filter["v_Day3End"];
+		$this->Day3End->AdvancedSearch->SearchValue2 = @$filter["y_Day3End"];
+		$this->Day3End->AdvancedSearch->SearchOperator2 = @$filter["w_Day3End"];
+		$this->Day3End->AdvancedSearch->save();
+
+		// Field Day4SiNo
+		$this->Day4SiNo->AdvancedSearch->SearchValue = @$filter["x_Day4SiNo"];
+		$this->Day4SiNo->AdvancedSearch->SearchOperator = @$filter["z_Day4SiNo"];
+		$this->Day4SiNo->AdvancedSearch->SearchCondition = @$filter["v_Day4SiNo"];
+		$this->Day4SiNo->AdvancedSearch->SearchValue2 = @$filter["y_Day4SiNo"];
+		$this->Day4SiNo->AdvancedSearch->SearchOperator2 = @$filter["w_Day4SiNo"];
+		$this->Day4SiNo->AdvancedSearch->save();
+
+		// Field Day4CellNo
+		$this->Day4CellNo->AdvancedSearch->SearchValue = @$filter["x_Day4CellNo"];
+		$this->Day4CellNo->AdvancedSearch->SearchOperator = @$filter["z_Day4CellNo"];
+		$this->Day4CellNo->AdvancedSearch->SearchCondition = @$filter["v_Day4CellNo"];
+		$this->Day4CellNo->AdvancedSearch->SearchValue2 = @$filter["y_Day4CellNo"];
+		$this->Day4CellNo->AdvancedSearch->SearchOperator2 = @$filter["w_Day4CellNo"];
+		$this->Day4CellNo->AdvancedSearch->save();
+
+		// Field Day4Frag
+		$this->Day4Frag->AdvancedSearch->SearchValue = @$filter["x_Day4Frag"];
+		$this->Day4Frag->AdvancedSearch->SearchOperator = @$filter["z_Day4Frag"];
+		$this->Day4Frag->AdvancedSearch->SearchCondition = @$filter["v_Day4Frag"];
+		$this->Day4Frag->AdvancedSearch->SearchValue2 = @$filter["y_Day4Frag"];
+		$this->Day4Frag->AdvancedSearch->SearchOperator2 = @$filter["w_Day4Frag"];
+		$this->Day4Frag->AdvancedSearch->save();
+
+		// Field Day4Symmetry
+		$this->Day4Symmetry->AdvancedSearch->SearchValue = @$filter["x_Day4Symmetry"];
+		$this->Day4Symmetry->AdvancedSearch->SearchOperator = @$filter["z_Day4Symmetry"];
+		$this->Day4Symmetry->AdvancedSearch->SearchCondition = @$filter["v_Day4Symmetry"];
+		$this->Day4Symmetry->AdvancedSearch->SearchValue2 = @$filter["y_Day4Symmetry"];
+		$this->Day4Symmetry->AdvancedSearch->SearchOperator2 = @$filter["w_Day4Symmetry"];
+		$this->Day4Symmetry->AdvancedSearch->save();
+
+		// Field Day4Grade
+		$this->Day4Grade->AdvancedSearch->SearchValue = @$filter["x_Day4Grade"];
+		$this->Day4Grade->AdvancedSearch->SearchOperator = @$filter["z_Day4Grade"];
+		$this->Day4Grade->AdvancedSearch->SearchCondition = @$filter["v_Day4Grade"];
+		$this->Day4Grade->AdvancedSearch->SearchValue2 = @$filter["y_Day4Grade"];
+		$this->Day4Grade->AdvancedSearch->SearchOperator2 = @$filter["w_Day4Grade"];
+		$this->Day4Grade->AdvancedSearch->save();
+
+		// Field Day4Cryoptop
+		$this->Day4Cryoptop->AdvancedSearch->SearchValue = @$filter["x_Day4Cryoptop"];
+		$this->Day4Cryoptop->AdvancedSearch->SearchOperator = @$filter["z_Day4Cryoptop"];
+		$this->Day4Cryoptop->AdvancedSearch->SearchCondition = @$filter["v_Day4Cryoptop"];
+		$this->Day4Cryoptop->AdvancedSearch->SearchValue2 = @$filter["y_Day4Cryoptop"];
+		$this->Day4Cryoptop->AdvancedSearch->SearchOperator2 = @$filter["w_Day4Cryoptop"];
+		$this->Day4Cryoptop->AdvancedSearch->save();
+
+		// Field Day4End
+		$this->Day4End->AdvancedSearch->SearchValue = @$filter["x_Day4End"];
+		$this->Day4End->AdvancedSearch->SearchOperator = @$filter["z_Day4End"];
+		$this->Day4End->AdvancedSearch->SearchCondition = @$filter["v_Day4End"];
+		$this->Day4End->AdvancedSearch->SearchValue2 = @$filter["y_Day4End"];
+		$this->Day4End->AdvancedSearch->SearchOperator2 = @$filter["w_Day4End"];
+		$this->Day4End->AdvancedSearch->save();
+
+		// Field Day5CellNo
+		$this->Day5CellNo->AdvancedSearch->SearchValue = @$filter["x_Day5CellNo"];
+		$this->Day5CellNo->AdvancedSearch->SearchOperator = @$filter["z_Day5CellNo"];
+		$this->Day5CellNo->AdvancedSearch->SearchCondition = @$filter["v_Day5CellNo"];
+		$this->Day5CellNo->AdvancedSearch->SearchValue2 = @$filter["y_Day5CellNo"];
+		$this->Day5CellNo->AdvancedSearch->SearchOperator2 = @$filter["w_Day5CellNo"];
+		$this->Day5CellNo->AdvancedSearch->save();
+
+		// Field Day5ICM
+		$this->Day5ICM->AdvancedSearch->SearchValue = @$filter["x_Day5ICM"];
+		$this->Day5ICM->AdvancedSearch->SearchOperator = @$filter["z_Day5ICM"];
+		$this->Day5ICM->AdvancedSearch->SearchCondition = @$filter["v_Day5ICM"];
+		$this->Day5ICM->AdvancedSearch->SearchValue2 = @$filter["y_Day5ICM"];
+		$this->Day5ICM->AdvancedSearch->SearchOperator2 = @$filter["w_Day5ICM"];
+		$this->Day5ICM->AdvancedSearch->save();
+
+		// Field Day5TE
+		$this->Day5TE->AdvancedSearch->SearchValue = @$filter["x_Day5TE"];
+		$this->Day5TE->AdvancedSearch->SearchOperator = @$filter["z_Day5TE"];
+		$this->Day5TE->AdvancedSearch->SearchCondition = @$filter["v_Day5TE"];
+		$this->Day5TE->AdvancedSearch->SearchValue2 = @$filter["y_Day5TE"];
+		$this->Day5TE->AdvancedSearch->SearchOperator2 = @$filter["w_Day5TE"];
+		$this->Day5TE->AdvancedSearch->save();
+
+		// Field Day5Observation
+		$this->Day5Observation->AdvancedSearch->SearchValue = @$filter["x_Day5Observation"];
+		$this->Day5Observation->AdvancedSearch->SearchOperator = @$filter["z_Day5Observation"];
+		$this->Day5Observation->AdvancedSearch->SearchCondition = @$filter["v_Day5Observation"];
+		$this->Day5Observation->AdvancedSearch->SearchValue2 = @$filter["y_Day5Observation"];
+		$this->Day5Observation->AdvancedSearch->SearchOperator2 = @$filter["w_Day5Observation"];
+		$this->Day5Observation->AdvancedSearch->save();
+
+		// Field Day5Collapsed
+		$this->Day5Collapsed->AdvancedSearch->SearchValue = @$filter["x_Day5Collapsed"];
+		$this->Day5Collapsed->AdvancedSearch->SearchOperator = @$filter["z_Day5Collapsed"];
+		$this->Day5Collapsed->AdvancedSearch->SearchCondition = @$filter["v_Day5Collapsed"];
+		$this->Day5Collapsed->AdvancedSearch->SearchValue2 = @$filter["y_Day5Collapsed"];
+		$this->Day5Collapsed->AdvancedSearch->SearchOperator2 = @$filter["w_Day5Collapsed"];
+		$this->Day5Collapsed->AdvancedSearch->save();
+
+		// Field Day5Vacoulles
+		$this->Day5Vacoulles->AdvancedSearch->SearchValue = @$filter["x_Day5Vacoulles"];
+		$this->Day5Vacoulles->AdvancedSearch->SearchOperator = @$filter["z_Day5Vacoulles"];
+		$this->Day5Vacoulles->AdvancedSearch->SearchCondition = @$filter["v_Day5Vacoulles"];
+		$this->Day5Vacoulles->AdvancedSearch->SearchValue2 = @$filter["y_Day5Vacoulles"];
+		$this->Day5Vacoulles->AdvancedSearch->SearchOperator2 = @$filter["w_Day5Vacoulles"];
+		$this->Day5Vacoulles->AdvancedSearch->save();
+
+		// Field Day5Grade
+		$this->Day5Grade->AdvancedSearch->SearchValue = @$filter["x_Day5Grade"];
+		$this->Day5Grade->AdvancedSearch->SearchOperator = @$filter["z_Day5Grade"];
+		$this->Day5Grade->AdvancedSearch->SearchCondition = @$filter["v_Day5Grade"];
+		$this->Day5Grade->AdvancedSearch->SearchValue2 = @$filter["y_Day5Grade"];
+		$this->Day5Grade->AdvancedSearch->SearchOperator2 = @$filter["w_Day5Grade"];
+		$this->Day5Grade->AdvancedSearch->save();
+
+		// Field Day6CellNo
+		$this->Day6CellNo->AdvancedSearch->SearchValue = @$filter["x_Day6CellNo"];
+		$this->Day6CellNo->AdvancedSearch->SearchOperator = @$filter["z_Day6CellNo"];
+		$this->Day6CellNo->AdvancedSearch->SearchCondition = @$filter["v_Day6CellNo"];
+		$this->Day6CellNo->AdvancedSearch->SearchValue2 = @$filter["y_Day6CellNo"];
+		$this->Day6CellNo->AdvancedSearch->SearchOperator2 = @$filter["w_Day6CellNo"];
+		$this->Day6CellNo->AdvancedSearch->save();
+
+		// Field Day6ICM
+		$this->Day6ICM->AdvancedSearch->SearchValue = @$filter["x_Day6ICM"];
+		$this->Day6ICM->AdvancedSearch->SearchOperator = @$filter["z_Day6ICM"];
+		$this->Day6ICM->AdvancedSearch->SearchCondition = @$filter["v_Day6ICM"];
+		$this->Day6ICM->AdvancedSearch->SearchValue2 = @$filter["y_Day6ICM"];
+		$this->Day6ICM->AdvancedSearch->SearchOperator2 = @$filter["w_Day6ICM"];
+		$this->Day6ICM->AdvancedSearch->save();
+
+		// Field Day6TE
+		$this->Day6TE->AdvancedSearch->SearchValue = @$filter["x_Day6TE"];
+		$this->Day6TE->AdvancedSearch->SearchOperator = @$filter["z_Day6TE"];
+		$this->Day6TE->AdvancedSearch->SearchCondition = @$filter["v_Day6TE"];
+		$this->Day6TE->AdvancedSearch->SearchValue2 = @$filter["y_Day6TE"];
+		$this->Day6TE->AdvancedSearch->SearchOperator2 = @$filter["w_Day6TE"];
+		$this->Day6TE->AdvancedSearch->save();
+
+		// Field Day6Observation
+		$this->Day6Observation->AdvancedSearch->SearchValue = @$filter["x_Day6Observation"];
+		$this->Day6Observation->AdvancedSearch->SearchOperator = @$filter["z_Day6Observation"];
+		$this->Day6Observation->AdvancedSearch->SearchCondition = @$filter["v_Day6Observation"];
+		$this->Day6Observation->AdvancedSearch->SearchValue2 = @$filter["y_Day6Observation"];
+		$this->Day6Observation->AdvancedSearch->SearchOperator2 = @$filter["w_Day6Observation"];
+		$this->Day6Observation->AdvancedSearch->save();
+
+		// Field Day6Collapsed
+		$this->Day6Collapsed->AdvancedSearch->SearchValue = @$filter["x_Day6Collapsed"];
+		$this->Day6Collapsed->AdvancedSearch->SearchOperator = @$filter["z_Day6Collapsed"];
+		$this->Day6Collapsed->AdvancedSearch->SearchCondition = @$filter["v_Day6Collapsed"];
+		$this->Day6Collapsed->AdvancedSearch->SearchValue2 = @$filter["y_Day6Collapsed"];
+		$this->Day6Collapsed->AdvancedSearch->SearchOperator2 = @$filter["w_Day6Collapsed"];
+		$this->Day6Collapsed->AdvancedSearch->save();
+
+		// Field Day6Vacoulles
+		$this->Day6Vacoulles->AdvancedSearch->SearchValue = @$filter["x_Day6Vacoulles"];
+		$this->Day6Vacoulles->AdvancedSearch->SearchOperator = @$filter["z_Day6Vacoulles"];
+		$this->Day6Vacoulles->AdvancedSearch->SearchCondition = @$filter["v_Day6Vacoulles"];
+		$this->Day6Vacoulles->AdvancedSearch->SearchValue2 = @$filter["y_Day6Vacoulles"];
+		$this->Day6Vacoulles->AdvancedSearch->SearchOperator2 = @$filter["w_Day6Vacoulles"];
+		$this->Day6Vacoulles->AdvancedSearch->save();
+
+		// Field Day6Grade
+		$this->Day6Grade->AdvancedSearch->SearchValue = @$filter["x_Day6Grade"];
+		$this->Day6Grade->AdvancedSearch->SearchOperator = @$filter["z_Day6Grade"];
+		$this->Day6Grade->AdvancedSearch->SearchCondition = @$filter["v_Day6Grade"];
+		$this->Day6Grade->AdvancedSearch->SearchValue2 = @$filter["y_Day6Grade"];
+		$this->Day6Grade->AdvancedSearch->SearchOperator2 = @$filter["w_Day6Grade"];
+		$this->Day6Grade->AdvancedSearch->save();
+
+		// Field Day6Cryoptop
+		$this->Day6Cryoptop->AdvancedSearch->SearchValue = @$filter["x_Day6Cryoptop"];
+		$this->Day6Cryoptop->AdvancedSearch->SearchOperator = @$filter["z_Day6Cryoptop"];
+		$this->Day6Cryoptop->AdvancedSearch->SearchCondition = @$filter["v_Day6Cryoptop"];
+		$this->Day6Cryoptop->AdvancedSearch->SearchValue2 = @$filter["y_Day6Cryoptop"];
+		$this->Day6Cryoptop->AdvancedSearch->SearchOperator2 = @$filter["w_Day6Cryoptop"];
+		$this->Day6Cryoptop->AdvancedSearch->save();
+
+		// Field EndSiNo
+		$this->EndSiNo->AdvancedSearch->SearchValue = @$filter["x_EndSiNo"];
+		$this->EndSiNo->AdvancedSearch->SearchOperator = @$filter["z_EndSiNo"];
+		$this->EndSiNo->AdvancedSearch->SearchCondition = @$filter["v_EndSiNo"];
+		$this->EndSiNo->AdvancedSearch->SearchValue2 = @$filter["y_EndSiNo"];
+		$this->EndSiNo->AdvancedSearch->SearchOperator2 = @$filter["w_EndSiNo"];
+		$this->EndSiNo->AdvancedSearch->save();
+
+		// Field EndingDay
+		$this->EndingDay->AdvancedSearch->SearchValue = @$filter["x_EndingDay"];
+		$this->EndingDay->AdvancedSearch->SearchOperator = @$filter["z_EndingDay"];
+		$this->EndingDay->AdvancedSearch->SearchCondition = @$filter["v_EndingDay"];
+		$this->EndingDay->AdvancedSearch->SearchValue2 = @$filter["y_EndingDay"];
+		$this->EndingDay->AdvancedSearch->SearchOperator2 = @$filter["w_EndingDay"];
+		$this->EndingDay->AdvancedSearch->save();
+
+		// Field EndingCellStage
+		$this->EndingCellStage->AdvancedSearch->SearchValue = @$filter["x_EndingCellStage"];
+		$this->EndingCellStage->AdvancedSearch->SearchOperator = @$filter["z_EndingCellStage"];
+		$this->EndingCellStage->AdvancedSearch->SearchCondition = @$filter["v_EndingCellStage"];
+		$this->EndingCellStage->AdvancedSearch->SearchValue2 = @$filter["y_EndingCellStage"];
+		$this->EndingCellStage->AdvancedSearch->SearchOperator2 = @$filter["w_EndingCellStage"];
+		$this->EndingCellStage->AdvancedSearch->save();
+
+		// Field EndingGrade
+		$this->EndingGrade->AdvancedSearch->SearchValue = @$filter["x_EndingGrade"];
+		$this->EndingGrade->AdvancedSearch->SearchOperator = @$filter["z_EndingGrade"];
+		$this->EndingGrade->AdvancedSearch->SearchCondition = @$filter["v_EndingGrade"];
+		$this->EndingGrade->AdvancedSearch->SearchValue2 = @$filter["y_EndingGrade"];
+		$this->EndingGrade->AdvancedSearch->SearchOperator2 = @$filter["w_EndingGrade"];
+		$this->EndingGrade->AdvancedSearch->save();
+
+		// Field EndingState
+		$this->EndingState->AdvancedSearch->SearchValue = @$filter["x_EndingState"];
+		$this->EndingState->AdvancedSearch->SearchOperator = @$filter["z_EndingState"];
+		$this->EndingState->AdvancedSearch->SearchCondition = @$filter["v_EndingState"];
+		$this->EndingState->AdvancedSearch->SearchValue2 = @$filter["y_EndingState"];
+		$this->EndingState->AdvancedSearch->SearchOperator2 = @$filter["w_EndingState"];
+		$this->EndingState->AdvancedSearch->save();
+
+		// Field TidNo
+		$this->TidNo->AdvancedSearch->SearchValue = @$filter["x_TidNo"];
+		$this->TidNo->AdvancedSearch->SearchOperator = @$filter["z_TidNo"];
+		$this->TidNo->AdvancedSearch->SearchCondition = @$filter["v_TidNo"];
+		$this->TidNo->AdvancedSearch->SearchValue2 = @$filter["y_TidNo"];
+		$this->TidNo->AdvancedSearch->SearchOperator2 = @$filter["w_TidNo"];
+		$this->TidNo->AdvancedSearch->save();
+
+		// Field DidNO
+		$this->DidNO->AdvancedSearch->SearchValue = @$filter["x_DidNO"];
+		$this->DidNO->AdvancedSearch->SearchOperator = @$filter["z_DidNO"];
+		$this->DidNO->AdvancedSearch->SearchCondition = @$filter["v_DidNO"];
+		$this->DidNO->AdvancedSearch->SearchValue2 = @$filter["y_DidNO"];
+		$this->DidNO->AdvancedSearch->SearchOperator2 = @$filter["w_DidNO"];
+		$this->DidNO->AdvancedSearch->save();
+
+		// Field ICSiIVFDateTime
+		$this->ICSiIVFDateTime->AdvancedSearch->SearchValue = @$filter["x_ICSiIVFDateTime"];
+		$this->ICSiIVFDateTime->AdvancedSearch->SearchOperator = @$filter["z_ICSiIVFDateTime"];
+		$this->ICSiIVFDateTime->AdvancedSearch->SearchCondition = @$filter["v_ICSiIVFDateTime"];
+		$this->ICSiIVFDateTime->AdvancedSearch->SearchValue2 = @$filter["y_ICSiIVFDateTime"];
+		$this->ICSiIVFDateTime->AdvancedSearch->SearchOperator2 = @$filter["w_ICSiIVFDateTime"];
+		$this->ICSiIVFDateTime->AdvancedSearch->save();
+
+		// Field PrimaryEmbrologist
+		$this->PrimaryEmbrologist->AdvancedSearch->SearchValue = @$filter["x_PrimaryEmbrologist"];
+		$this->PrimaryEmbrologist->AdvancedSearch->SearchOperator = @$filter["z_PrimaryEmbrologist"];
+		$this->PrimaryEmbrologist->AdvancedSearch->SearchCondition = @$filter["v_PrimaryEmbrologist"];
+		$this->PrimaryEmbrologist->AdvancedSearch->SearchValue2 = @$filter["y_PrimaryEmbrologist"];
+		$this->PrimaryEmbrologist->AdvancedSearch->SearchOperator2 = @$filter["w_PrimaryEmbrologist"];
+		$this->PrimaryEmbrologist->AdvancedSearch->save();
+
+		// Field SecondaryEmbrologist
+		$this->SecondaryEmbrologist->AdvancedSearch->SearchValue = @$filter["x_SecondaryEmbrologist"];
+		$this->SecondaryEmbrologist->AdvancedSearch->SearchOperator = @$filter["z_SecondaryEmbrologist"];
+		$this->SecondaryEmbrologist->AdvancedSearch->SearchCondition = @$filter["v_SecondaryEmbrologist"];
+		$this->SecondaryEmbrologist->AdvancedSearch->SearchValue2 = @$filter["y_SecondaryEmbrologist"];
+		$this->SecondaryEmbrologist->AdvancedSearch->SearchOperator2 = @$filter["w_SecondaryEmbrologist"];
+		$this->SecondaryEmbrologist->AdvancedSearch->save();
+
+		// Field Incubator
+		$this->Incubator->AdvancedSearch->SearchValue = @$filter["x_Incubator"];
+		$this->Incubator->AdvancedSearch->SearchOperator = @$filter["z_Incubator"];
+		$this->Incubator->AdvancedSearch->SearchCondition = @$filter["v_Incubator"];
+		$this->Incubator->AdvancedSearch->SearchValue2 = @$filter["y_Incubator"];
+		$this->Incubator->AdvancedSearch->SearchOperator2 = @$filter["w_Incubator"];
+		$this->Incubator->AdvancedSearch->save();
+
+		// Field location
+		$this->location->AdvancedSearch->SearchValue = @$filter["x_location"];
+		$this->location->AdvancedSearch->SearchOperator = @$filter["z_location"];
+		$this->location->AdvancedSearch->SearchCondition = @$filter["v_location"];
+		$this->location->AdvancedSearch->SearchValue2 = @$filter["y_location"];
+		$this->location->AdvancedSearch->SearchOperator2 = @$filter["w_location"];
+		$this->location->AdvancedSearch->save();
+
+		// Field OocyteNo
+		$this->OocyteNo->AdvancedSearch->SearchValue = @$filter["x_OocyteNo"];
+		$this->OocyteNo->AdvancedSearch->SearchOperator = @$filter["z_OocyteNo"];
+		$this->OocyteNo->AdvancedSearch->SearchCondition = @$filter["v_OocyteNo"];
+		$this->OocyteNo->AdvancedSearch->SearchValue2 = @$filter["y_OocyteNo"];
+		$this->OocyteNo->AdvancedSearch->SearchOperator2 = @$filter["w_OocyteNo"];
+		$this->OocyteNo->AdvancedSearch->save();
+
+		// Field Stage
+		$this->Stage->AdvancedSearch->SearchValue = @$filter["x_Stage"];
+		$this->Stage->AdvancedSearch->SearchOperator = @$filter["z_Stage"];
+		$this->Stage->AdvancedSearch->SearchCondition = @$filter["v_Stage"];
+		$this->Stage->AdvancedSearch->SearchValue2 = @$filter["y_Stage"];
+		$this->Stage->AdvancedSearch->SearchOperator2 = @$filter["w_Stage"];
+		$this->Stage->AdvancedSearch->save();
+
+		// Field Remarks
+		$this->Remarks->AdvancedSearch->SearchValue = @$filter["x_Remarks"];
+		$this->Remarks->AdvancedSearch->SearchOperator = @$filter["z_Remarks"];
+		$this->Remarks->AdvancedSearch->SearchCondition = @$filter["v_Remarks"];
+		$this->Remarks->AdvancedSearch->SearchValue2 = @$filter["y_Remarks"];
+		$this->Remarks->AdvancedSearch->SearchOperator2 = @$filter["w_Remarks"];
+		$this->Remarks->AdvancedSearch->save();
+
+		// Field vitrificationDate
+		$this->vitrificationDate->AdvancedSearch->SearchValue = @$filter["x_vitrificationDate"];
+		$this->vitrificationDate->AdvancedSearch->SearchOperator = @$filter["z_vitrificationDate"];
+		$this->vitrificationDate->AdvancedSearch->SearchCondition = @$filter["v_vitrificationDate"];
+		$this->vitrificationDate->AdvancedSearch->SearchValue2 = @$filter["y_vitrificationDate"];
+		$this->vitrificationDate->AdvancedSearch->SearchOperator2 = @$filter["w_vitrificationDate"];
+		$this->vitrificationDate->AdvancedSearch->save();
+
+		// Field vitriPrimaryEmbryologist
+		$this->vitriPrimaryEmbryologist->AdvancedSearch->SearchValue = @$filter["x_vitriPrimaryEmbryologist"];
+		$this->vitriPrimaryEmbryologist->AdvancedSearch->SearchOperator = @$filter["z_vitriPrimaryEmbryologist"];
+		$this->vitriPrimaryEmbryologist->AdvancedSearch->SearchCondition = @$filter["v_vitriPrimaryEmbryologist"];
+		$this->vitriPrimaryEmbryologist->AdvancedSearch->SearchValue2 = @$filter["y_vitriPrimaryEmbryologist"];
+		$this->vitriPrimaryEmbryologist->AdvancedSearch->SearchOperator2 = @$filter["w_vitriPrimaryEmbryologist"];
+		$this->vitriPrimaryEmbryologist->AdvancedSearch->save();
+
+		// Field vitriSecondaryEmbryologist
+		$this->vitriSecondaryEmbryologist->AdvancedSearch->SearchValue = @$filter["x_vitriSecondaryEmbryologist"];
+		$this->vitriSecondaryEmbryologist->AdvancedSearch->SearchOperator = @$filter["z_vitriSecondaryEmbryologist"];
+		$this->vitriSecondaryEmbryologist->AdvancedSearch->SearchCondition = @$filter["v_vitriSecondaryEmbryologist"];
+		$this->vitriSecondaryEmbryologist->AdvancedSearch->SearchValue2 = @$filter["y_vitriSecondaryEmbryologist"];
+		$this->vitriSecondaryEmbryologist->AdvancedSearch->SearchOperator2 = @$filter["w_vitriSecondaryEmbryologist"];
+		$this->vitriSecondaryEmbryologist->AdvancedSearch->save();
+
+		// Field vitriEmbryoNo
+		$this->vitriEmbryoNo->AdvancedSearch->SearchValue = @$filter["x_vitriEmbryoNo"];
+		$this->vitriEmbryoNo->AdvancedSearch->SearchOperator = @$filter["z_vitriEmbryoNo"];
+		$this->vitriEmbryoNo->AdvancedSearch->SearchCondition = @$filter["v_vitriEmbryoNo"];
+		$this->vitriEmbryoNo->AdvancedSearch->SearchValue2 = @$filter["y_vitriEmbryoNo"];
+		$this->vitriEmbryoNo->AdvancedSearch->SearchOperator2 = @$filter["w_vitriEmbryoNo"];
+		$this->vitriEmbryoNo->AdvancedSearch->save();
+
+		// Field thawReFrozen
+		$this->thawReFrozen->AdvancedSearch->SearchValue = @$filter["x_thawReFrozen"];
+		$this->thawReFrozen->AdvancedSearch->SearchOperator = @$filter["z_thawReFrozen"];
+		$this->thawReFrozen->AdvancedSearch->SearchCondition = @$filter["v_thawReFrozen"];
+		$this->thawReFrozen->AdvancedSearch->SearchValue2 = @$filter["y_thawReFrozen"];
+		$this->thawReFrozen->AdvancedSearch->SearchOperator2 = @$filter["w_thawReFrozen"];
+		$this->thawReFrozen->AdvancedSearch->save();
+
+		// Field vitriFertilisationDate
+		$this->vitriFertilisationDate->AdvancedSearch->SearchValue = @$filter["x_vitriFertilisationDate"];
+		$this->vitriFertilisationDate->AdvancedSearch->SearchOperator = @$filter["z_vitriFertilisationDate"];
+		$this->vitriFertilisationDate->AdvancedSearch->SearchCondition = @$filter["v_vitriFertilisationDate"];
+		$this->vitriFertilisationDate->AdvancedSearch->SearchValue2 = @$filter["y_vitriFertilisationDate"];
+		$this->vitriFertilisationDate->AdvancedSearch->SearchOperator2 = @$filter["w_vitriFertilisationDate"];
+		$this->vitriFertilisationDate->AdvancedSearch->save();
+
+		// Field vitriDay
+		$this->vitriDay->AdvancedSearch->SearchValue = @$filter["x_vitriDay"];
+		$this->vitriDay->AdvancedSearch->SearchOperator = @$filter["z_vitriDay"];
+		$this->vitriDay->AdvancedSearch->SearchCondition = @$filter["v_vitriDay"];
+		$this->vitriDay->AdvancedSearch->SearchValue2 = @$filter["y_vitriDay"];
+		$this->vitriDay->AdvancedSearch->SearchOperator2 = @$filter["w_vitriDay"];
+		$this->vitriDay->AdvancedSearch->save();
+
+		// Field vitriStage
+		$this->vitriStage->AdvancedSearch->SearchValue = @$filter["x_vitriStage"];
+		$this->vitriStage->AdvancedSearch->SearchOperator = @$filter["z_vitriStage"];
+		$this->vitriStage->AdvancedSearch->SearchCondition = @$filter["v_vitriStage"];
+		$this->vitriStage->AdvancedSearch->SearchValue2 = @$filter["y_vitriStage"];
+		$this->vitriStage->AdvancedSearch->SearchOperator2 = @$filter["w_vitriStage"];
+		$this->vitriStage->AdvancedSearch->save();
+
+		// Field vitriGrade
+		$this->vitriGrade->AdvancedSearch->SearchValue = @$filter["x_vitriGrade"];
+		$this->vitriGrade->AdvancedSearch->SearchOperator = @$filter["z_vitriGrade"];
+		$this->vitriGrade->AdvancedSearch->SearchCondition = @$filter["v_vitriGrade"];
+		$this->vitriGrade->AdvancedSearch->SearchValue2 = @$filter["y_vitriGrade"];
+		$this->vitriGrade->AdvancedSearch->SearchOperator2 = @$filter["w_vitriGrade"];
+		$this->vitriGrade->AdvancedSearch->save();
+
+		// Field vitriIncubator
+		$this->vitriIncubator->AdvancedSearch->SearchValue = @$filter["x_vitriIncubator"];
+		$this->vitriIncubator->AdvancedSearch->SearchOperator = @$filter["z_vitriIncubator"];
+		$this->vitriIncubator->AdvancedSearch->SearchCondition = @$filter["v_vitriIncubator"];
+		$this->vitriIncubator->AdvancedSearch->SearchValue2 = @$filter["y_vitriIncubator"];
+		$this->vitriIncubator->AdvancedSearch->SearchOperator2 = @$filter["w_vitriIncubator"];
+		$this->vitriIncubator->AdvancedSearch->save();
+
+		// Field vitriTank
+		$this->vitriTank->AdvancedSearch->SearchValue = @$filter["x_vitriTank"];
+		$this->vitriTank->AdvancedSearch->SearchOperator = @$filter["z_vitriTank"];
+		$this->vitriTank->AdvancedSearch->SearchCondition = @$filter["v_vitriTank"];
+		$this->vitriTank->AdvancedSearch->SearchValue2 = @$filter["y_vitriTank"];
+		$this->vitriTank->AdvancedSearch->SearchOperator2 = @$filter["w_vitriTank"];
+		$this->vitriTank->AdvancedSearch->save();
+
+		// Field vitriCanister
+		$this->vitriCanister->AdvancedSearch->SearchValue = @$filter["x_vitriCanister"];
+		$this->vitriCanister->AdvancedSearch->SearchOperator = @$filter["z_vitriCanister"];
+		$this->vitriCanister->AdvancedSearch->SearchCondition = @$filter["v_vitriCanister"];
+		$this->vitriCanister->AdvancedSearch->SearchValue2 = @$filter["y_vitriCanister"];
+		$this->vitriCanister->AdvancedSearch->SearchOperator2 = @$filter["w_vitriCanister"];
+		$this->vitriCanister->AdvancedSearch->save();
+
+		// Field vitriGobiet
+		$this->vitriGobiet->AdvancedSearch->SearchValue = @$filter["x_vitriGobiet"];
+		$this->vitriGobiet->AdvancedSearch->SearchOperator = @$filter["z_vitriGobiet"];
+		$this->vitriGobiet->AdvancedSearch->SearchCondition = @$filter["v_vitriGobiet"];
+		$this->vitriGobiet->AdvancedSearch->SearchValue2 = @$filter["y_vitriGobiet"];
+		$this->vitriGobiet->AdvancedSearch->SearchOperator2 = @$filter["w_vitriGobiet"];
+		$this->vitriGobiet->AdvancedSearch->save();
+
+		// Field vitriViscotube
+		$this->vitriViscotube->AdvancedSearch->SearchValue = @$filter["x_vitriViscotube"];
+		$this->vitriViscotube->AdvancedSearch->SearchOperator = @$filter["z_vitriViscotube"];
+		$this->vitriViscotube->AdvancedSearch->SearchCondition = @$filter["v_vitriViscotube"];
+		$this->vitriViscotube->AdvancedSearch->SearchValue2 = @$filter["y_vitriViscotube"];
+		$this->vitriViscotube->AdvancedSearch->SearchOperator2 = @$filter["w_vitriViscotube"];
+		$this->vitriViscotube->AdvancedSearch->save();
+
+		// Field vitriCryolockNo
+		$this->vitriCryolockNo->AdvancedSearch->SearchValue = @$filter["x_vitriCryolockNo"];
+		$this->vitriCryolockNo->AdvancedSearch->SearchOperator = @$filter["z_vitriCryolockNo"];
+		$this->vitriCryolockNo->AdvancedSearch->SearchCondition = @$filter["v_vitriCryolockNo"];
+		$this->vitriCryolockNo->AdvancedSearch->SearchValue2 = @$filter["y_vitriCryolockNo"];
+		$this->vitriCryolockNo->AdvancedSearch->SearchOperator2 = @$filter["w_vitriCryolockNo"];
+		$this->vitriCryolockNo->AdvancedSearch->save();
+
+		// Field vitriCryolockColour
+		$this->vitriCryolockColour->AdvancedSearch->SearchValue = @$filter["x_vitriCryolockColour"];
+		$this->vitriCryolockColour->AdvancedSearch->SearchOperator = @$filter["z_vitriCryolockColour"];
+		$this->vitriCryolockColour->AdvancedSearch->SearchCondition = @$filter["v_vitriCryolockColour"];
+		$this->vitriCryolockColour->AdvancedSearch->SearchValue2 = @$filter["y_vitriCryolockColour"];
+		$this->vitriCryolockColour->AdvancedSearch->SearchOperator2 = @$filter["w_vitriCryolockColour"];
+		$this->vitriCryolockColour->AdvancedSearch->save();
+
+		// Field thawDate
+		$this->thawDate->AdvancedSearch->SearchValue = @$filter["x_thawDate"];
+		$this->thawDate->AdvancedSearch->SearchOperator = @$filter["z_thawDate"];
+		$this->thawDate->AdvancedSearch->SearchCondition = @$filter["v_thawDate"];
+		$this->thawDate->AdvancedSearch->SearchValue2 = @$filter["y_thawDate"];
+		$this->thawDate->AdvancedSearch->SearchOperator2 = @$filter["w_thawDate"];
+		$this->thawDate->AdvancedSearch->save();
+
+		// Field thawPrimaryEmbryologist
+		$this->thawPrimaryEmbryologist->AdvancedSearch->SearchValue = @$filter["x_thawPrimaryEmbryologist"];
+		$this->thawPrimaryEmbryologist->AdvancedSearch->SearchOperator = @$filter["z_thawPrimaryEmbryologist"];
+		$this->thawPrimaryEmbryologist->AdvancedSearch->SearchCondition = @$filter["v_thawPrimaryEmbryologist"];
+		$this->thawPrimaryEmbryologist->AdvancedSearch->SearchValue2 = @$filter["y_thawPrimaryEmbryologist"];
+		$this->thawPrimaryEmbryologist->AdvancedSearch->SearchOperator2 = @$filter["w_thawPrimaryEmbryologist"];
+		$this->thawPrimaryEmbryologist->AdvancedSearch->save();
+
+		// Field thawSecondaryEmbryologist
+		$this->thawSecondaryEmbryologist->AdvancedSearch->SearchValue = @$filter["x_thawSecondaryEmbryologist"];
+		$this->thawSecondaryEmbryologist->AdvancedSearch->SearchOperator = @$filter["z_thawSecondaryEmbryologist"];
+		$this->thawSecondaryEmbryologist->AdvancedSearch->SearchCondition = @$filter["v_thawSecondaryEmbryologist"];
+		$this->thawSecondaryEmbryologist->AdvancedSearch->SearchValue2 = @$filter["y_thawSecondaryEmbryologist"];
+		$this->thawSecondaryEmbryologist->AdvancedSearch->SearchOperator2 = @$filter["w_thawSecondaryEmbryologist"];
+		$this->thawSecondaryEmbryologist->AdvancedSearch->save();
+
+		// Field thawET
+		$this->thawET->AdvancedSearch->SearchValue = @$filter["x_thawET"];
+		$this->thawET->AdvancedSearch->SearchOperator = @$filter["z_thawET"];
+		$this->thawET->AdvancedSearch->SearchCondition = @$filter["v_thawET"];
+		$this->thawET->AdvancedSearch->SearchValue2 = @$filter["y_thawET"];
+		$this->thawET->AdvancedSearch->SearchOperator2 = @$filter["w_thawET"];
+		$this->thawET->AdvancedSearch->save();
+
+		// Field thawAbserve
+		$this->thawAbserve->AdvancedSearch->SearchValue = @$filter["x_thawAbserve"];
+		$this->thawAbserve->AdvancedSearch->SearchOperator = @$filter["z_thawAbserve"];
+		$this->thawAbserve->AdvancedSearch->SearchCondition = @$filter["v_thawAbserve"];
+		$this->thawAbserve->AdvancedSearch->SearchValue2 = @$filter["y_thawAbserve"];
+		$this->thawAbserve->AdvancedSearch->SearchOperator2 = @$filter["w_thawAbserve"];
+		$this->thawAbserve->AdvancedSearch->save();
+
+		// Field thawDiscard
+		$this->thawDiscard->AdvancedSearch->SearchValue = @$filter["x_thawDiscard"];
+		$this->thawDiscard->AdvancedSearch->SearchOperator = @$filter["z_thawDiscard"];
+		$this->thawDiscard->AdvancedSearch->SearchCondition = @$filter["v_thawDiscard"];
+		$this->thawDiscard->AdvancedSearch->SearchValue2 = @$filter["y_thawDiscard"];
+		$this->thawDiscard->AdvancedSearch->SearchOperator2 = @$filter["w_thawDiscard"];
+		$this->thawDiscard->AdvancedSearch->save();
+
+		// Field ETCatheter
+		$this->ETCatheter->AdvancedSearch->SearchValue = @$filter["x_ETCatheter"];
+		$this->ETCatheter->AdvancedSearch->SearchOperator = @$filter["z_ETCatheter"];
+		$this->ETCatheter->AdvancedSearch->SearchCondition = @$filter["v_ETCatheter"];
+		$this->ETCatheter->AdvancedSearch->SearchValue2 = @$filter["y_ETCatheter"];
+		$this->ETCatheter->AdvancedSearch->SearchOperator2 = @$filter["w_ETCatheter"];
+		$this->ETCatheter->AdvancedSearch->save();
+
+		// Field ETDifficulty
+		$this->ETDifficulty->AdvancedSearch->SearchValue = @$filter["x_ETDifficulty"];
+		$this->ETDifficulty->AdvancedSearch->SearchOperator = @$filter["z_ETDifficulty"];
+		$this->ETDifficulty->AdvancedSearch->SearchCondition = @$filter["v_ETDifficulty"];
+		$this->ETDifficulty->AdvancedSearch->SearchValue2 = @$filter["y_ETDifficulty"];
+		$this->ETDifficulty->AdvancedSearch->SearchOperator2 = @$filter["w_ETDifficulty"];
+		$this->ETDifficulty->AdvancedSearch->save();
+
+		// Field ETEasy
+		$this->ETEasy->AdvancedSearch->SearchValue = @$filter["x_ETEasy"];
+		$this->ETEasy->AdvancedSearch->SearchOperator = @$filter["z_ETEasy"];
+		$this->ETEasy->AdvancedSearch->SearchCondition = @$filter["v_ETEasy"];
+		$this->ETEasy->AdvancedSearch->SearchValue2 = @$filter["y_ETEasy"];
+		$this->ETEasy->AdvancedSearch->SearchOperator2 = @$filter["w_ETEasy"];
+		$this->ETEasy->AdvancedSearch->save();
+
+		// Field ETComments
+		$this->ETComments->AdvancedSearch->SearchValue = @$filter["x_ETComments"];
+		$this->ETComments->AdvancedSearch->SearchOperator = @$filter["z_ETComments"];
+		$this->ETComments->AdvancedSearch->SearchCondition = @$filter["v_ETComments"];
+		$this->ETComments->AdvancedSearch->SearchValue2 = @$filter["y_ETComments"];
+		$this->ETComments->AdvancedSearch->SearchOperator2 = @$filter["w_ETComments"];
+		$this->ETComments->AdvancedSearch->save();
+
+		// Field ETDoctor
+		$this->ETDoctor->AdvancedSearch->SearchValue = @$filter["x_ETDoctor"];
+		$this->ETDoctor->AdvancedSearch->SearchOperator = @$filter["z_ETDoctor"];
+		$this->ETDoctor->AdvancedSearch->SearchCondition = @$filter["v_ETDoctor"];
+		$this->ETDoctor->AdvancedSearch->SearchValue2 = @$filter["y_ETDoctor"];
+		$this->ETDoctor->AdvancedSearch->SearchOperator2 = @$filter["w_ETDoctor"];
+		$this->ETDoctor->AdvancedSearch->save();
+
+		// Field ETEmbryologist
+		$this->ETEmbryologist->AdvancedSearch->SearchValue = @$filter["x_ETEmbryologist"];
+		$this->ETEmbryologist->AdvancedSearch->SearchOperator = @$filter["z_ETEmbryologist"];
+		$this->ETEmbryologist->AdvancedSearch->SearchCondition = @$filter["v_ETEmbryologist"];
+		$this->ETEmbryologist->AdvancedSearch->SearchValue2 = @$filter["y_ETEmbryologist"];
+		$this->ETEmbryologist->AdvancedSearch->SearchOperator2 = @$filter["w_ETEmbryologist"];
+		$this->ETEmbryologist->AdvancedSearch->save();
+
+		// Field ETDate
+		$this->ETDate->AdvancedSearch->SearchValue = @$filter["x_ETDate"];
+		$this->ETDate->AdvancedSearch->SearchOperator = @$filter["z_ETDate"];
+		$this->ETDate->AdvancedSearch->SearchCondition = @$filter["v_ETDate"];
+		$this->ETDate->AdvancedSearch->SearchValue2 = @$filter["y_ETDate"];
+		$this->ETDate->AdvancedSearch->SearchOperator2 = @$filter["w_ETDate"];
+		$this->ETDate->AdvancedSearch->save();
+
+		// Field Day1End
+		$this->Day1End->AdvancedSearch->SearchValue = @$filter["x_Day1End"];
+		$this->Day1End->AdvancedSearch->SearchOperator = @$filter["z_Day1End"];
+		$this->Day1End->AdvancedSearch->SearchCondition = @$filter["v_Day1End"];
+		$this->Day1End->AdvancedSearch->SearchValue2 = @$filter["y_Day1End"];
+		$this->Day1End->AdvancedSearch->SearchOperator2 = @$filter["w_Day1End"];
+		$this->Day1End->AdvancedSearch->save();
+		$this->BasicSearch->setKeyword(@$filter[TABLE_BASIC_SEARCH]);
+		$this->BasicSearch->setType(@$filter[TABLE_BASIC_SEARCH_TYPE]);
+	}
+
+	// Return basic search SQL
+	protected function basicSearchSql($arKeywords, $type)
+	{
+		$where = "";
+		$this->buildBasicSearchSql($where, $this->Name, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->ARTCycle, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->SpermOrigin, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->InseminatinTechnique, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->IndicationForART, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day0sino, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day0OocyteStage, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day0PolarBodyPosition, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day0Breakage, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day0Attempts, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day0SPZMorpho, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day0SPZLocation, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day0SpOrgin, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day5Cryoptop, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day1Sperm, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day1PN, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day1PB, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day1Pronucleus, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day1Nucleolus, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day1Halo, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day2SiNo, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day2CellNo, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day2Frag, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day2Symmetry, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day2Cryoptop, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day2Grade, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day2End, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day3Sino, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day3CellNo, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day3Frag, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day3Symmetry, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day3ZP, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day3Vacoules, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day3Grade, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day3Cryoptop, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day3End, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day4SiNo, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day4CellNo, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day4Frag, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day4Symmetry, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day4Grade, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day4Cryoptop, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day4End, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day5CellNo, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day5ICM, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day5TE, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day5Observation, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day5Collapsed, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day5Vacoulles, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day5Grade, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day6CellNo, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day6ICM, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day6TE, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day6Observation, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day6Collapsed, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day6Vacoulles, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day6Grade, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day6Cryoptop, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->EndSiNo, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->EndingDay, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->EndingCellStage, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->EndingGrade, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->EndingState, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->DidNO, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->PrimaryEmbrologist, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->SecondaryEmbrologist, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Incubator, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->location, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->OocyteNo, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Stage, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Remarks, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->vitriPrimaryEmbryologist, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->vitriSecondaryEmbryologist, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->vitriEmbryoNo, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->thawReFrozen, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->vitriDay, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->vitriStage, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->vitriGrade, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->vitriIncubator, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->vitriTank, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->vitriCanister, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->vitriGobiet, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->vitriViscotube, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->vitriCryolockNo, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->vitriCryolockColour, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->thawPrimaryEmbryologist, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->thawSecondaryEmbryologist, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->thawET, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->thawAbserve, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->thawDiscard, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->ETCatheter, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->ETDifficulty, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->ETEasy, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->ETComments, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->ETDoctor, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->ETEmbryologist, $arKeywords, $type);
+		$this->buildBasicSearchSql($where, $this->Day1End, $arKeywords, $type);
+		return $where;
+	}
+
+	// Build basic search SQL
+	protected function buildBasicSearchSql(&$where, &$fld, $arKeywords, $type)
+	{
+		global $BASIC_SEARCH_IGNORE_PATTERN;
+		$defCond = ($type == "OR") ? "OR" : "AND";
+		$arSql = array(); // Array for SQL parts
+		$arCond = array(); // Array for search conditions
+		$cnt = count($arKeywords);
+		$j = 0; // Number of SQL parts
+		for ($i = 0; $i < $cnt; $i++) {
+			$keyword = $arKeywords[$i];
+			$keyword = trim($keyword);
+			if ($BASIC_SEARCH_IGNORE_PATTERN <> "") {
+				$keyword = preg_replace($BASIC_SEARCH_IGNORE_PATTERN, "\\", $keyword);
+				$ar = explode("\\", $keyword);
+			} else {
+				$ar = array($keyword);
+			}
+			foreach ($ar as $keyword) {
+				if ($keyword <> "") {
+					$wrk = "";
+					if ($keyword == "OR" && $type == "") {
+						if ($j > 0)
+							$arCond[$j - 1] = "OR";
+					} elseif ($keyword == NULL_VALUE) {
+						$wrk = $fld->Expression . " IS NULL";
+					} elseif ($keyword == NOT_NULL_VALUE) {
+						$wrk = $fld->Expression . " IS NOT NULL";
+					} elseif ($fld->IsVirtual) {
+						$wrk = $fld->VirtualExpression . Like(QuotedValue("%" . $keyword . "%", DATATYPE_STRING, $this->Dbid), $this->Dbid);
+					} elseif ($fld->DataType != DATATYPE_NUMBER || is_numeric($keyword)) {
+						$wrk = $fld->BasicSearchExpression . Like(QuotedValue("%" . $keyword . "%", DATATYPE_STRING, $this->Dbid), $this->Dbid);
+					}
+					if ($wrk <> "") {
+						$arSql[$j] = $wrk;
+						$arCond[$j] = $defCond;
+						$j += 1;
+					}
+				}
+			}
+		}
+		$cnt = count($arSql);
+		$quoted = FALSE;
+		$sql = "";
+		if ($cnt > 0) {
+			for ($i = 0; $i < $cnt - 1; $i++) {
+				if ($arCond[$i] == "OR") {
+					if (!$quoted)
+						$sql .= "(";
+					$quoted = TRUE;
+				}
+				$sql .= $arSql[$i];
+				if ($quoted && $arCond[$i] <> "OR") {
+					$sql .= ")";
+					$quoted = FALSE;
+				}
+				$sql .= " " . $arCond[$i] . " ";
+			}
+			$sql .= $arSql[$cnt - 1];
+			if ($quoted)
+				$sql .= ")";
+		}
+		if ($sql <> "") {
+			if ($where <> "")
+				$where .= " OR ";
+			$where .= "(" . $sql . ")";
+		}
+	}
+
+	// Return basic search WHERE clause based on search keyword and type
+	protected function basicSearchWhere($default = FALSE)
+	{
+		global $Security;
+		$searchStr = "";
+		if (!$Security->canSearch())
+			return "";
+		$searchKeyword = ($default) ? $this->BasicSearch->KeywordDefault : $this->BasicSearch->Keyword;
+		$searchType = ($default) ? $this->BasicSearch->TypeDefault : $this->BasicSearch->Type;
+
+		// Get search SQL
+		if ($searchKeyword <> "") {
+			$ar = $this->BasicSearch->keywordList($default);
+
+			// Search keyword in any fields
+			if (($searchType == "OR" || $searchType == "AND") && $this->BasicSearch->BasicSearchAnyFields) {
+				foreach ($ar as $keyword) {
+					if ($keyword <> "") {
+						if ($searchStr <> "")
+							$searchStr .= " " . $searchType . " ";
+						$searchStr .= "(" . $this->basicSearchSql(array($keyword), $searchType) . ")";
+					}
+				}
+			} else {
+				$searchStr = $this->basicSearchSql($ar, $searchType);
+			}
+			if (!$default && in_array($this->Command, array("", "reset", "resetall")))
+				$this->Command = "search";
+		}
+		if (!$default && $this->Command == "search") {
+			$this->BasicSearch->setKeyword($searchKeyword);
+			$this->BasicSearch->setType($searchType);
+		}
+		return $searchStr;
+	}
+
+	// Check if search parm exists
+	protected function checkSearchParms()
+	{
+
+		// Check basic search
+		if ($this->BasicSearch->issetSession())
+			return TRUE;
+		return FALSE;
+	}
+
+	// Clear all search parameters
+	protected function resetSearchParms()
+	{
+
+		// Clear search WHERE clause
+		$this->SearchWhere = "";
+		$this->setSearchWhere($this->SearchWhere);
+
+		// Clear basic search parameters
+		$this->resetBasicSearchParms();
+	}
+
+	// Load advanced search default values
+	protected function loadAdvancedSearchDefault()
+	{
+		return FALSE;
+	}
+
+	// Clear all basic search parameters
+	protected function resetBasicSearchParms()
+	{
+		$this->BasicSearch->unsetSession();
+	}
+
+	// Restore all search parameters
+	protected function restoreSearchParms()
+	{
+		$this->RestoreSearch = TRUE;
+
+		// Restore basic search values
+		$this->BasicSearch->load();
+	}
+
+	// Set up sort parameters
+	protected function setupSortOrder()
+	{
+
+		// Check for "order" parameter
+		if (Get("order") !== NULL) {
+			$this->CurrentOrder = Get("order");
+			$this->CurrentOrderType = Get("ordertype", "");
+			$this->updateSort($this->id); // id
+			$this->updateSort($this->RIDNo); // RIDNo
+			$this->updateSort($this->Name); // Name
+			$this->updateSort($this->ARTCycle); // ARTCycle
+			$this->updateSort($this->SpermOrigin); // SpermOrigin
+			$this->updateSort($this->InseminatinTechnique); // InseminatinTechnique
+			$this->updateSort($this->IndicationForART); // IndicationForART
+			$this->updateSort($this->Day0sino); // Day0sino
+			$this->updateSort($this->Day0OocyteStage); // Day0OocyteStage
+			$this->updateSort($this->Day0PolarBodyPosition); // Day0PolarBodyPosition
+			$this->updateSort($this->Day0Breakage); // Day0Breakage
+			$this->updateSort($this->Day0Attempts); // Day0Attempts
+			$this->updateSort($this->Day0SPZMorpho); // Day0SPZMorpho
+			$this->updateSort($this->Day0SPZLocation); // Day0SPZLocation
+			$this->updateSort($this->Day0SpOrgin); // Day0SpOrgin
+			$this->updateSort($this->Day5Cryoptop); // Day5Cryoptop
+			$this->updateSort($this->Day1Sperm); // Day1Sperm
+			$this->updateSort($this->Day1PN); // Day1PN
+			$this->updateSort($this->Day1PB); // Day1PB
+			$this->updateSort($this->Day1Pronucleus); // Day1Pronucleus
+			$this->updateSort($this->Day1Nucleolus); // Day1Nucleolus
+			$this->updateSort($this->Day1Halo); // Day1Halo
+			$this->updateSort($this->Day2SiNo); // Day2SiNo
+			$this->updateSort($this->Day2CellNo); // Day2CellNo
+			$this->updateSort($this->Day2Frag); // Day2Frag
+			$this->updateSort($this->Day2Symmetry); // Day2Symmetry
+			$this->updateSort($this->Day2Cryoptop); // Day2Cryoptop
+			$this->updateSort($this->Day2Grade); // Day2Grade
+			$this->updateSort($this->Day2End); // Day2End
+			$this->updateSort($this->Day3Sino); // Day3Sino
+			$this->updateSort($this->Day3CellNo); // Day3CellNo
+			$this->updateSort($this->Day3Frag); // Day3Frag
+			$this->updateSort($this->Day3Symmetry); // Day3Symmetry
+			$this->updateSort($this->Day3ZP); // Day3ZP
+			$this->updateSort($this->Day3Vacoules); // Day3Vacoules
+			$this->updateSort($this->Day3Grade); // Day3Grade
+			$this->updateSort($this->Day3Cryoptop); // Day3Cryoptop
+			$this->updateSort($this->Day3End); // Day3End
+			$this->updateSort($this->Day4SiNo); // Day4SiNo
+			$this->updateSort($this->Day4CellNo); // Day4CellNo
+			$this->updateSort($this->Day4Frag); // Day4Frag
+			$this->updateSort($this->Day4Symmetry); // Day4Symmetry
+			$this->updateSort($this->Day4Grade); // Day4Grade
+			$this->updateSort($this->Day4Cryoptop); // Day4Cryoptop
+			$this->updateSort($this->Day4End); // Day4End
+			$this->updateSort($this->Day5CellNo); // Day5CellNo
+			$this->updateSort($this->Day5ICM); // Day5ICM
+			$this->updateSort($this->Day5TE); // Day5TE
+			$this->updateSort($this->Day5Observation); // Day5Observation
+			$this->updateSort($this->Day5Collapsed); // Day5Collapsed
+			$this->updateSort($this->Day5Vacoulles); // Day5Vacoulles
+			$this->updateSort($this->Day5Grade); // Day5Grade
+			$this->updateSort($this->Day6CellNo); // Day6CellNo
+			$this->updateSort($this->Day6ICM); // Day6ICM
+			$this->updateSort($this->Day6TE); // Day6TE
+			$this->updateSort($this->Day6Observation); // Day6Observation
+			$this->updateSort($this->Day6Collapsed); // Day6Collapsed
+			$this->updateSort($this->Day6Vacoulles); // Day6Vacoulles
+			$this->updateSort($this->Day6Grade); // Day6Grade
+			$this->updateSort($this->Day6Cryoptop); // Day6Cryoptop
+			$this->updateSort($this->EndSiNo); // EndSiNo
+			$this->updateSort($this->EndingDay); // EndingDay
+			$this->updateSort($this->EndingCellStage); // EndingCellStage
+			$this->updateSort($this->EndingGrade); // EndingGrade
+			$this->updateSort($this->EndingState); // EndingState
+			$this->updateSort($this->TidNo); // TidNo
+			$this->updateSort($this->DidNO); // DidNO
+			$this->updateSort($this->ICSiIVFDateTime); // ICSiIVFDateTime
+			$this->updateSort($this->PrimaryEmbrologist); // PrimaryEmbrologist
+			$this->updateSort($this->SecondaryEmbrologist); // SecondaryEmbrologist
+			$this->updateSort($this->Incubator); // Incubator
+			$this->updateSort($this->location); // location
+			$this->updateSort($this->OocyteNo); // OocyteNo
+			$this->updateSort($this->Stage); // Stage
+			$this->updateSort($this->Remarks); // Remarks
+			$this->updateSort($this->vitrificationDate); // vitrificationDate
+			$this->updateSort($this->vitriPrimaryEmbryologist); // vitriPrimaryEmbryologist
+			$this->updateSort($this->vitriSecondaryEmbryologist); // vitriSecondaryEmbryologist
+			$this->updateSort($this->vitriEmbryoNo); // vitriEmbryoNo
+			$this->updateSort($this->thawReFrozen); // thawReFrozen
+			$this->updateSort($this->vitriFertilisationDate); // vitriFertilisationDate
+			$this->updateSort($this->vitriDay); // vitriDay
+			$this->updateSort($this->vitriStage); // vitriStage
+			$this->updateSort($this->vitriGrade); // vitriGrade
+			$this->updateSort($this->vitriIncubator); // vitriIncubator
+			$this->updateSort($this->vitriTank); // vitriTank
+			$this->updateSort($this->vitriCanister); // vitriCanister
+			$this->updateSort($this->vitriGobiet); // vitriGobiet
+			$this->updateSort($this->vitriViscotube); // vitriViscotube
+			$this->updateSort($this->vitriCryolockNo); // vitriCryolockNo
+			$this->updateSort($this->vitriCryolockColour); // vitriCryolockColour
+			$this->updateSort($this->thawDate); // thawDate
+			$this->updateSort($this->thawPrimaryEmbryologist); // thawPrimaryEmbryologist
+			$this->updateSort($this->thawSecondaryEmbryologist); // thawSecondaryEmbryologist
+			$this->updateSort($this->thawET); // thawET
+			$this->updateSort($this->thawAbserve); // thawAbserve
+			$this->updateSort($this->thawDiscard); // thawDiscard
+			$this->updateSort($this->ETCatheter); // ETCatheter
+			$this->updateSort($this->ETDifficulty); // ETDifficulty
+			$this->updateSort($this->ETEasy); // ETEasy
+			$this->updateSort($this->ETComments); // ETComments
+			$this->updateSort($this->ETDoctor); // ETDoctor
+			$this->updateSort($this->ETEmbryologist); // ETEmbryologist
+			$this->updateSort($this->ETDate); // ETDate
+			$this->updateSort($this->Day1End); // Day1End
+			$this->setStartRecordNumber(1); // Reset start position
+		}
+	}
+
+	// Load sort order parameters
+	protected function loadSortOrder()
+	{
+		$orderBy = $this->getSessionOrderBy(); // Get ORDER BY from Session
+		if ($orderBy == "") {
+			if ($this->getSqlOrderBy() <> "") {
+				$orderBy = $this->getSqlOrderBy();
+				$this->setSessionOrderBy($orderBy);
+			}
+		}
+	}
+
+	// Reset command
+	// - cmd=reset (Reset search parameters)
+	// - cmd=resetall (Reset search and master/detail parameters)
+	// - cmd=resetsort (Reset sort parameters)
+
+	protected function resetCmd()
+	{
+
+		// Check if reset command
+		if (substr($this->Command,0,5) == "reset") {
+
+			// Reset search criteria
+			if ($this->Command == "reset" || $this->Command == "resetall")
+				$this->resetSearchParms();
+
+			// Reset master/detail keys
+			if ($this->Command == "resetall") {
+				$this->setCurrentMasterTable(""); // Clear master table
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+				$this->RIDNo->setSessionValue("");
+				$this->Name->setSessionValue("");
+				$this->TidNo->setSessionValue("");
+				$this->DidNO->setSessionValue("");
+			}
+
+			// Reset sorting order
+			if ($this->Command == "resetsort") {
+				$orderBy = "";
+				$this->setSessionOrderBy($orderBy);
+				$this->id->setSort("");
+				$this->RIDNo->setSort("");
+				$this->Name->setSort("");
+				$this->ARTCycle->setSort("");
+				$this->SpermOrigin->setSort("");
+				$this->InseminatinTechnique->setSort("");
+				$this->IndicationForART->setSort("");
+				$this->Day0sino->setSort("");
+				$this->Day0OocyteStage->setSort("");
+				$this->Day0PolarBodyPosition->setSort("");
+				$this->Day0Breakage->setSort("");
+				$this->Day0Attempts->setSort("");
+				$this->Day0SPZMorpho->setSort("");
+				$this->Day0SPZLocation->setSort("");
+				$this->Day0SpOrgin->setSort("");
+				$this->Day5Cryoptop->setSort("");
+				$this->Day1Sperm->setSort("");
+				$this->Day1PN->setSort("");
+				$this->Day1PB->setSort("");
+				$this->Day1Pronucleus->setSort("");
+				$this->Day1Nucleolus->setSort("");
+				$this->Day1Halo->setSort("");
+				$this->Day2SiNo->setSort("");
+				$this->Day2CellNo->setSort("");
+				$this->Day2Frag->setSort("");
+				$this->Day2Symmetry->setSort("");
+				$this->Day2Cryoptop->setSort("");
+				$this->Day2Grade->setSort("");
+				$this->Day2End->setSort("");
+				$this->Day3Sino->setSort("");
+				$this->Day3CellNo->setSort("");
+				$this->Day3Frag->setSort("");
+				$this->Day3Symmetry->setSort("");
+				$this->Day3ZP->setSort("");
+				$this->Day3Vacoules->setSort("");
+				$this->Day3Grade->setSort("");
+				$this->Day3Cryoptop->setSort("");
+				$this->Day3End->setSort("");
+				$this->Day4SiNo->setSort("");
+				$this->Day4CellNo->setSort("");
+				$this->Day4Frag->setSort("");
+				$this->Day4Symmetry->setSort("");
+				$this->Day4Grade->setSort("");
+				$this->Day4Cryoptop->setSort("");
+				$this->Day4End->setSort("");
+				$this->Day5CellNo->setSort("");
+				$this->Day5ICM->setSort("");
+				$this->Day5TE->setSort("");
+				$this->Day5Observation->setSort("");
+				$this->Day5Collapsed->setSort("");
+				$this->Day5Vacoulles->setSort("");
+				$this->Day5Grade->setSort("");
+				$this->Day6CellNo->setSort("");
+				$this->Day6ICM->setSort("");
+				$this->Day6TE->setSort("");
+				$this->Day6Observation->setSort("");
+				$this->Day6Collapsed->setSort("");
+				$this->Day6Vacoulles->setSort("");
+				$this->Day6Grade->setSort("");
+				$this->Day6Cryoptop->setSort("");
+				$this->EndSiNo->setSort("");
+				$this->EndingDay->setSort("");
+				$this->EndingCellStage->setSort("");
+				$this->EndingGrade->setSort("");
+				$this->EndingState->setSort("");
+				$this->TidNo->setSort("");
+				$this->DidNO->setSort("");
+				$this->ICSiIVFDateTime->setSort("");
+				$this->PrimaryEmbrologist->setSort("");
+				$this->SecondaryEmbrologist->setSort("");
+				$this->Incubator->setSort("");
+				$this->location->setSort("");
+				$this->OocyteNo->setSort("");
+				$this->Stage->setSort("");
+				$this->Remarks->setSort("");
+				$this->vitrificationDate->setSort("");
+				$this->vitriPrimaryEmbryologist->setSort("");
+				$this->vitriSecondaryEmbryologist->setSort("");
+				$this->vitriEmbryoNo->setSort("");
+				$this->thawReFrozen->setSort("");
+				$this->vitriFertilisationDate->setSort("");
+				$this->vitriDay->setSort("");
+				$this->vitriStage->setSort("");
+				$this->vitriGrade->setSort("");
+				$this->vitriIncubator->setSort("");
+				$this->vitriTank->setSort("");
+				$this->vitriCanister->setSort("");
+				$this->vitriGobiet->setSort("");
+				$this->vitriViscotube->setSort("");
+				$this->vitriCryolockNo->setSort("");
+				$this->vitriCryolockColour->setSort("");
+				$this->thawDate->setSort("");
+				$this->thawPrimaryEmbryologist->setSort("");
+				$this->thawSecondaryEmbryologist->setSort("");
+				$this->thawET->setSort("");
+				$this->thawAbserve->setSort("");
+				$this->thawDiscard->setSort("");
+				$this->ETCatheter->setSort("");
+				$this->ETDifficulty->setSort("");
+				$this->ETEasy->setSort("");
+				$this->ETComments->setSort("");
+				$this->ETDoctor->setSort("");
+				$this->ETEmbryologist->setSort("");
+				$this->ETDate->setSort("");
+				$this->Day1End->setSort("");
+			}
+
+			// Reset start position
+			$this->StartRec = 1;
+			$this->setStartRecordNumber($this->StartRec);
+		}
+	}
+
+	// Set up list options
+	protected function setupListOptions()
+	{
+		global $Security, $Language;
+
+		// "griddelete"
+		if ($this->AllowAddDeleteRow) {
+			$item = &$this->ListOptions->add("griddelete");
+			$item->CssClass = "text-nowrap";
+			$item->OnLeft = TRUE;
+			$item->Visible = FALSE; // Default hidden
+		}
+
+		// Add group option item
+		$item = &$this->ListOptions->add($this->ListOptions->GroupOptionName);
+		$item->Body = "";
+		$item->OnLeft = TRUE;
+		$item->Visible = FALSE;
+
+		// "view"
+		$item = &$this->ListOptions->add("view");
+		$item->CssClass = "text-nowrap";
+		$item->Visible = $Security->canView();
+		$item->OnLeft = TRUE;
+
+		// "edit"
+		$item = &$this->ListOptions->add("edit");
+		$item->CssClass = "text-nowrap";
+		$item->Visible = $Security->canEdit();
+		$item->OnLeft = TRUE;
+
+		// "copy"
+		$item = &$this->ListOptions->add("copy");
+		$item->CssClass = "text-nowrap";
+		$item->Visible = $Security->canAdd();
+		$item->OnLeft = TRUE;
+
+		// "delete"
+		$item = &$this->ListOptions->add("delete");
+		$item->CssClass = "text-nowrap";
+		$item->Visible = $Security->canDelete();
+		$item->OnLeft = TRUE;
+
+		// List actions
+		$item = &$this->ListOptions->add("listactions");
+		$item->CssClass = "text-nowrap";
+		$item->OnLeft = TRUE;
+		$item->Visible = FALSE;
+		$item->ShowInButtonGroup = FALSE;
+		$item->ShowInDropDown = FALSE;
+
+		// "checkbox"
+		$item = &$this->ListOptions->add("checkbox");
+		$item->Visible = FALSE;
+		$item->OnLeft = TRUE;
+		$item->Header = "<input type=\"checkbox\" name=\"key\" id=\"key\" onclick=\"ew.selectAllKey(this);\">";
+		$item->moveTo(0);
+		$item->ShowInDropDown = FALSE;
+		$item->ShowInButtonGroup = FALSE;
+
+		// Drop down button for ListOptions
+		$this->ListOptions->UseDropDownButton = FALSE;
+		$this->ListOptions->DropDownButtonPhrase = $Language->phrase("ButtonListOptions");
+		$this->ListOptions->UseButtonGroup = TRUE;
+		if ($this->ListOptions->UseButtonGroup && IsMobile())
+			$this->ListOptions->UseDropDownButton = TRUE;
+
+		//$this->ListOptions->ButtonClass = ""; // Class for button group
+		// Call ListOptions_Load event
+
+		$this->ListOptions_Load();
+		$this->setupListOptionsExt();
+		$item = &$this->ListOptions->getItem($this->ListOptions->GroupOptionName);
+		$item->Visible = $this->ListOptions->groupOptionVisible();
+	}
+
+	// Render list options
+	public function renderListOptions()
+	{
+		global $Security, $Language, $CurrentForm;
+		$this->ListOptions->loadDefault();
+
+		// Call ListOptions_Rendering event
+		$this->ListOptions_Rendering();
+
+		// Set up row action and key
+		if (is_numeric($this->RowIndex) && $this->CurrentMode <> "view") {
+			$CurrentForm->Index = $this->RowIndex;
+			$actionName = str_replace("k_", "k" . $this->RowIndex . "_", $this->FormActionName);
+			$oldKeyName = str_replace("k_", "k" . $this->RowIndex . "_", $this->FormOldKeyName);
+			$keyName = str_replace("k_", "k" . $this->RowIndex . "_", $this->FormKeyName);
+			$blankRowName = str_replace("k_", "k" . $this->RowIndex . "_", $this->FormBlankRowName);
+			if ($this->RowAction <> "")
+				$this->MultiSelectKey .= "<input type=\"hidden\" name=\"" . $actionName . "\" id=\"" . $actionName . "\" value=\"" . $this->RowAction . "\">";
+			if ($this->RowAction == "delete") {
+				$rowkey = $CurrentForm->getValue($this->FormKeyName);
+				$this->setupKeyValues($rowkey);
+			}
+			if ($this->RowAction == "insert" && $this->isConfirm() && $this->emptyRow())
+				$this->MultiSelectKey .= "<input type=\"hidden\" name=\"" . $blankRowName . "\" id=\"" . $blankRowName . "\" value=\"1\">";
+		}
+
+		// "delete"
+		if ($this->AllowAddDeleteRow) {
+			if ($this->isGridAdd() || $this->isGridEdit()) {
+				$options = &$this->ListOptions;
+				$options->UseButtonGroup = TRUE; // Use button group for grid delete button
+				$opt = &$options->Items["griddelete"];
+				if (!$Security->canDelete() && is_numeric($this->RowIndex) && ($this->RowAction == "" || $this->RowAction == "edit")) { // Do not allow delete existing record
+					$opt->Body = "&nbsp;";
+				} else {
+					$opt->Body = "<a class=\"ew-grid-link ew-grid-delete\" title=\"" . HtmlTitle($Language->phrase("DeleteLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("DeleteLink")) . "\" onclick=\"return ew.deleteGridRow(this, " . $this->RowIndex . ");\">" . $Language->phrase("DeleteLink") . "</a>";
+				}
+			}
+		}
+
+		// "copy"
+		$opt = &$this->ListOptions->Items["copy"];
+		if ($this->isInlineAddRow() || $this->isInlineCopyRow()) { // Inline Add/Copy
+			$this->ListOptions->CustomItem = "copy"; // Show copy column only
+			$opt->Body = "<div" . (($opt->OnLeft) ? " class=\"text-right\"" : "") . ">" .
+				"<a class=\"ew-grid-link ew-inline-insert\" title=\"" . HtmlTitle($Language->phrase("InsertLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("InsertLink")) . "\" href=\"\" onclick=\"return ew.forms(this).submit('" . $this->pageName() . "');\">" . $Language->phrase("InsertLink") . "</a>&nbsp;" .
+				"<a class=\"ew-grid-link ew-inline-cancel\" title=\"" . HtmlTitle($Language->phrase("CancelLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("CancelLink")) . "\" href=\"" . $this->CancelUrl . "\">" . $Language->phrase("CancelLink") . "</a>" .
+				"<input type=\"hidden\" name=\"action\" id=\"action\" value=\"insert\"></div>";
+			return;
+		}
+
+		// "edit"
+		$opt = &$this->ListOptions->Items["edit"];
+		if ($this->isInlineEditRow()) { // Inline-Edit
+			$this->ListOptions->CustomItem = "edit"; // Show edit column only
+				$opt->Body = "<div" . (($opt->OnLeft) ? " class=\"text-right\"" : "") . ">" .
+					"<a class=\"ew-grid-link ew-inline-update\" title=\"" . HtmlTitle($Language->phrase("UpdateLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("UpdateLink")) . "\" href=\"\" onclick=\"return ew.forms(this).submit('" . UrlAddHash($this->pageName(), "r" . $this->RowCnt . "_" . $this->TableVar) . "');\">" . $Language->phrase("UpdateLink") . "</a>&nbsp;" .
+					"<a class=\"ew-grid-link ew-inline-cancel\" title=\"" . HtmlTitle($Language->phrase("CancelLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("CancelLink")) . "\" href=\"" . $this->CancelUrl . "\">" . $Language->phrase("CancelLink") . "</a>" .
+					"<input type=\"hidden\" name=\"action\" id=\"action\" value=\"update\"></div>";
+			$opt->Body .= "<input type=\"hidden\" name=\"k" . $this->RowIndex . "_key\" id=\"k" . $this->RowIndex . "_key\" value=\"" . HtmlEncode($this->id->CurrentValue) . "\">";
+			return;
+		}
+
+		// "view"
+		$opt = &$this->ListOptions->Items["view"];
+		$viewcaption = HtmlTitle($Language->phrase("ViewLink"));
+		if ($Security->canView()) {
+			$opt->Body = "<a class=\"ew-row-link ew-view\" title=\"" . $viewcaption . "\" data-caption=\"" . $viewcaption . "\" href=\"" . HtmlEncode($this->ViewUrl) . "\">" . $Language->phrase("ViewLink") . "</a>";
+		} else {
+			$opt->Body = "";
+		}
+
+		// "edit"
+		$opt = &$this->ListOptions->Items["edit"];
+		$editcaption = HtmlTitle($Language->phrase("EditLink"));
+		if ($Security->canEdit()) {
+			$opt->Body = "<a class=\"ew-row-link ew-edit\" title=\"" . HtmlTitle($Language->phrase("EditLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("EditLink")) . "\" href=\"" . HtmlEncode($this->EditUrl) . "\">" . $Language->phrase("EditLink") . "</a>";
+			$opt->Body .= "<a class=\"ew-row-link ew-inline-edit\" title=\"" . HtmlTitle($Language->phrase("InlineEditLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("InlineEditLink")) . "\" href=\"" . HtmlEncode(UrlAddHash($this->InlineEditUrl, "r" . $this->RowCnt . "_" . $this->TableVar)) . "\">" . $Language->phrase("InlineEditLink") . "</a>";
+		} else {
+			$opt->Body = "";
+		}
+
+		// "copy"
+		$opt = &$this->ListOptions->Items["copy"];
+		$copycaption = HtmlTitle($Language->phrase("CopyLink"));
+		if ($Security->canAdd()) {
+			$opt->Body = "<a class=\"ew-row-link ew-copy\" title=\"" . $copycaption . "\" data-caption=\"" . $copycaption . "\" href=\"" . HtmlEncode($this->CopyUrl) . "\">" . $Language->phrase("CopyLink") . "</a>";
+			$opt->Body .= "<a class=\"ew-row-link ew-inline-copy\" title=\"" . HtmlTitle($Language->phrase("InlineCopyLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("InlineCopyLink")) . "\" href=\"" . HtmlEncode($this->InlineCopyUrl) . "\">" . $Language->phrase("InlineCopyLink") . "</a>";
+		} else {
+			$opt->Body = "";
+		}
+
+		// "delete"
+		$opt = &$this->ListOptions->Items["delete"];
+		if ($Security->canDelete())
+			$opt->Body = "<a class=\"ew-row-link ew-delete\"" . "" . " title=\"" . HtmlTitle($Language->phrase("DeleteLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("DeleteLink")) . "\" href=\"" . HtmlEncode($this->DeleteUrl) . "\">" . $Language->phrase("DeleteLink") . "</a>";
+		else
+			$opt->Body = "";
+
+		// Set up list action buttons
+		$opt = &$this->ListOptions->getItem("listactions");
+		if ($opt && !$this->isExport() && !$this->CurrentAction) {
+			$body = "";
+			$links = array();
+			foreach ($this->ListActions->Items as $listaction) {
+				if ($listaction->Select == ACTION_SINGLE && $listaction->Allow) {
+					$action = $listaction->Action;
+					$caption = $listaction->Caption;
+					$icon = ($listaction->Icon <> "") ? "<i class=\"" . HtmlEncode(str_replace(" ew-icon", "", $listaction->Icon)) . "\" data-caption=\"" . HtmlTitle($caption) . "\"></i> " : "";
+					$links[] = "<li><a class=\"dropdown-item ew-action ew-list-action\" data-action=\"" . HtmlEncode($action) . "\" data-caption=\"" . HtmlTitle($caption) . "\" href=\"\" onclick=\"ew.submitAction(event,jQuery.extend({key:" . $this->keyToJson(TRUE) . "}," . $listaction->toJson(TRUE) . "));return false;\">" . $icon . $listaction->Caption . "</a></li>";
+					if (count($links) == 1) // Single button
+						$body = "<a class=\"ew-action ew-list-action\" data-action=\"" . HtmlEncode($action) . "\" title=\"" . HtmlTitle($caption) . "\" data-caption=\"" . HtmlTitle($caption) . "\" href=\"\" onclick=\"ew.submitAction(event,jQuery.extend({key:" . $this->keyToJson(TRUE) . "}," . $listaction->toJson(TRUE) . "));return false;\">" . $Language->phrase("ListActionButton") . "</a>";
+				}
+			}
+			if (count($links) > 1) { // More than one buttons, use dropdown
+				$body = "<button class=\"dropdown-toggle btn btn-default ew-actions\" title=\"" . HtmlTitle($Language->phrase("ListActionButton")) . "\" data-toggle=\"dropdown\">" . $Language->phrase("ListActionButton") . "</button>";
+				$content = "";
+				foreach ($links as $link)
+					$content .= "<li>" . $link . "</li>";
+				$body .= "<ul class=\"dropdown-menu" . ($opt->OnLeft ? "" : " dropdown-menu-right") . "\">". $content . "</ul>";
+				$body = "<div class=\"btn-group btn-group-sm\">" . $body . "</div>";
+			}
+			if (count($links) > 0) {
+				$opt->Body = $body;
+				$opt->Visible = TRUE;
+			}
+		}
+
+		// "checkbox"
+		$opt = &$this->ListOptions->Items["checkbox"];
+		$opt->Body = "<input type=\"checkbox\" name=\"key_m[]\" class=\"ew-multi-select\" value=\"" . HtmlEncode($this->id->CurrentValue) . "\" onclick=\"ew.clickMultiCheckbox(event);\">";
+		if ($this->isGridEdit() && is_numeric($this->RowIndex)) {
+			$this->MultiSelectKey .= "<input type=\"hidden\" name=\"" . $keyName . "\" id=\"" . $keyName . "\" value=\"" . $this->id->CurrentValue . "\">";
+		}
+		$this->renderListOptionsExt();
+
+		// Call ListOptions_Rendered event
+		$this->ListOptions_Rendered();
+	}
+
+	// Set up other options
+	protected function setupOtherOptions()
+	{
+		global $Language, $Security;
+		$options = &$this->OtherOptions;
+		$option = $options["addedit"];
+
+		// Add
+		$item = &$option->add("add");
+		$addcaption = HtmlTitle($Language->phrase("AddLink"));
+		$item->Body = "<a class=\"ew-add-edit ew-add\" title=\"" . $addcaption . "\" data-caption=\"" . $addcaption . "\" href=\"" . HtmlEncode($this->AddUrl) . "\">" . $Language->phrase("AddLink") . "</a>";
+		$item->Visible = ($this->AddUrl <> "" && $Security->canAdd());
+
+		// Inline Add
+		$item = &$option->add("inlineadd");
+		$item->Body = "<a class=\"ew-add-edit ew-inline-add\" title=\"" . HtmlTitle($Language->phrase("InlineAddLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("InlineAddLink")) . "\" href=\"" . HtmlEncode($this->InlineAddUrl) . "\">" .$Language->phrase("InlineAddLink") . "</a>";
+		$item->Visible = ($this->InlineAddUrl <> "" && $Security->canAdd());
+		$item = &$option->add("gridadd");
+		$item->Body = "<a class=\"ew-add-edit ew-grid-add\" title=\"" . HtmlTitle($Language->phrase("GridAddLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("GridAddLink")) . "\" href=\"" . HtmlEncode($this->GridAddUrl) . "\">" . $Language->phrase("GridAddLink") . "</a>";
+		$item->Visible = ($this->GridAddUrl <> "" && $Security->canAdd());
+
+		// Add grid edit
+		$option = $options["addedit"];
+		$item = &$option->add("gridedit");
+		$item->Body = "<a class=\"ew-add-edit ew-grid-edit\" title=\"" . HtmlTitle($Language->phrase("GridEditLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("GridEditLink")) . "\" href=\"" . HtmlEncode($this->GridEditUrl) . "\">" . $Language->phrase("GridEditLink") . "</a>";
+		$item->Visible = ($this->GridEditUrl <> "" && $Security->canEdit());
+		$option = $options["action"];
+
+		// Set up options default
+		foreach ($options as &$option) {
+			$option->UseDropDownButton = TRUE;
+			$option->UseButtonGroup = TRUE;
+
+			//$option->ButtonClass = ""; // Class for button group
+			$item = &$option->add($option->GroupOptionName);
+			$item->Body = "";
+			$item->Visible = FALSE;
+		}
+		$options["addedit"]->DropDownButtonPhrase = $Language->phrase("ButtonAddEdit");
+		$options["detail"]->DropDownButtonPhrase = $Language->phrase("ButtonDetails");
+		$options["action"]->DropDownButtonPhrase = $Language->phrase("ButtonActions");
+
+		// Filter button
+		$item = &$this->FilterOptions->add("savecurrentfilter");
+		$item->Body = "<a class=\"ew-save-filter\" data-form=\"fivf_embryology_chartlistsrch\" href=\"#\">" . $Language->phrase("SaveCurrentFilter") . "</a>";
+		$item->Visible = TRUE;
+		$item = &$this->FilterOptions->add("deletefilter");
+		$item->Body = "<a class=\"ew-delete-filter\" data-form=\"fivf_embryology_chartlistsrch\" href=\"#\">" . $Language->phrase("DeleteFilter") . "</a>";
+		$item->Visible = TRUE;
+		$this->FilterOptions->UseDropDownButton = TRUE;
+		$this->FilterOptions->UseButtonGroup = !$this->FilterOptions->UseDropDownButton;
+		$this->FilterOptions->DropDownButtonPhrase = $Language->phrase("Filters");
+
+		// Add group option item
+		$item = &$this->FilterOptions->add($this->FilterOptions->GroupOptionName);
+		$item->Body = "";
+		$item->Visible = FALSE;
+	}
+
+	// Render other options
+	public function renderOtherOptions()
+	{
+		global $Language, $Security;
+		$options = &$this->OtherOptions;
+		if (!$this->isGridAdd() && !$this->isGridEdit()) { // Not grid add/edit mode
+			$option = &$options["action"];
+
+			// Set up list action buttons
+			foreach ($this->ListActions->Items as $listaction) {
+				if ($listaction->Select == ACTION_MULTIPLE) {
+					$item = &$option->add("custom_" . $listaction->Action);
+					$caption = $listaction->Caption;
+					$icon = ($listaction->Icon <> "") ? "<i class=\"" . HtmlEncode($listaction->Icon) . "\" data-caption=\"" . HtmlEncode($caption) . "\"></i> " . $caption : $caption;
+					$item->Body = "<a class=\"ew-action ew-list-action\" title=\"" . HtmlEncode($caption) . "\" data-caption=\"" . HtmlEncode($caption) . "\" href=\"\" onclick=\"ew.submitAction(event,jQuery.extend({f:document.fivf_embryology_chartlist}," . $listaction->toJson(TRUE) . "));return false;\">" . $icon . "</a>";
+					$item->Visible = $listaction->Allow;
+				}
+			}
+
+			// Hide grid edit and other options
+			if ($this->TotalRecs <= 0) {
+				$option = &$options["addedit"];
+				$item = &$option->getItem("gridedit");
+				if ($item) $item->Visible = FALSE;
+				$option = &$options["action"];
+				$option->hideAllOptions();
+			}
+		} else { // Grid add/edit mode
+
+			// Hide all options first
+			foreach ($options as &$option)
+				$option->hideAllOptions();
+			if ($this->isGridAdd()) {
+				if ($this->AllowAddDeleteRow) {
+
+					// Add add blank row
+					$option = &$options["addedit"];
+					$option->UseDropDownButton = FALSE;
+					$item = &$option->add("addblankrow");
+					$item->Body = "<a class=\"ew-add-edit ew-add-blank-row\" title=\"" . HtmlTitle($Language->phrase("AddBlankRow")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("AddBlankRow")) . "\" href=\"javascript:void(0);\" onclick=\"ew.addGridRow(this);\">" . $Language->phrase("AddBlankRow") . "</a>";
+					$item->Visible = $Security->canAdd();
+				}
+				$option = &$options["action"];
+				$option->UseDropDownButton = FALSE;
+
+				// Add grid insert
+				$item = &$option->add("gridinsert");
+				$item->Body = "<a class=\"ew-action ew-grid-insert\" title=\"" . HtmlTitle($Language->phrase("GridInsertLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("GridInsertLink")) . "\" href=\"\" onclick=\"return ew.forms(this).submit('" . $this->pageName() . "');\">" . $Language->phrase("GridInsertLink") . "</a>";
+
+				// Add grid cancel
+				$item = &$option->add("gridcancel");
+				$item->Body = "<a class=\"ew-action ew-grid-cancel\" title=\"" . HtmlTitle($Language->phrase("GridCancelLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("GridCancelLink")) . "\" href=\"" . $this->CancelUrl . "\">" . $Language->phrase("GridCancelLink") . "</a>";
+			}
+			if ($this->isGridEdit()) {
+				if ($this->AllowAddDeleteRow) {
+
+					// Add add blank row
+					$option = &$options["addedit"];
+					$option->UseDropDownButton = FALSE;
+					$item = &$option->add("addblankrow");
+					$item->Body = "<a class=\"ew-add-edit ew-add-blank-row\" title=\"" . HtmlTitle($Language->phrase("AddBlankRow")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("AddBlankRow")) . "\" href=\"javascript:void(0);\" onclick=\"ew.addGridRow(this);\">" . $Language->phrase("AddBlankRow") . "</a>";
+					$item->Visible = $Security->canAdd();
+				}
+				$option = &$options["action"];
+				$option->UseDropDownButton = FALSE;
+					$item = &$option->add("gridsave");
+					$item->Body = "<a class=\"ew-action ew-grid-save\" title=\"" . HtmlTitle($Language->phrase("GridSaveLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("GridSaveLink")) . "\" href=\"\" onclick=\"return ew.forms(this).submit('" . $this->pageName() . "');\">" . $Language->phrase("GridSaveLink") . "</a>";
+					$item = &$option->add("gridcancel");
+					$item->Body = "<a class=\"ew-action ew-grid-cancel\" title=\"" . HtmlTitle($Language->phrase("GridCancelLink")) . "\" data-caption=\"" . HtmlTitle($Language->phrase("GridCancelLink")) . "\" href=\"" . $this->CancelUrl . "\">" . $Language->phrase("GridCancelLink") . "</a>";
+			}
+		}
+	}
+
+	// Process list action
+	protected function processListAction()
+	{
+		global $Language, $Security;
+		$userlist = "";
+		$user = "";
+		$filter = $this->getFilterFromRecordKeys();
+		$userAction = Post("useraction", "");
+		if ($filter <> "" && $userAction <> "") {
+
+			// Check permission first
+			$actionCaption = $userAction;
+			if (array_key_exists($userAction, $this->ListActions->Items)) {
+				$actionCaption = $this->ListActions->Items[$userAction]->Caption;
+				if (!$this->ListActions->Items[$userAction]->Allow) {
+					$errmsg = str_replace('%s', $actionCaption, $Language->phrase("CustomActionNotAllowed"));
+					if (Post("ajax") == $userAction) // Ajax
+						echo "<p class=\"text-danger\">" . $errmsg . "</p>";
+					else
+						$this->setFailureMessage($errmsg);
+					return FALSE;
+				}
+			}
+			$this->CurrentFilter = $filter;
+			$sql = $this->getCurrentSql();
+			$conn = &$this->getConnection();
+			$conn->raiseErrorFn = $GLOBALS["ERROR_FUNC"];
+			$rs = $conn->execute($sql);
+			$conn->raiseErrorFn = '';
+			$this->CurrentAction = $userAction;
+
+			// Call row action event
+			if ($rs && !$rs->EOF) {
+				$conn->beginTrans();
+				$this->SelectedCount = $rs->RecordCount();
+				$this->SelectedIndex = 0;
+				while (!$rs->EOF) {
+					$this->SelectedIndex++;
+					$row = $rs->fields;
+					$processed = $this->Row_CustomAction($userAction, $row);
+					if (!$processed)
+						break;
+					$rs->moveNext();
+				}
+				if ($processed) {
+					$conn->commitTrans(); // Commit the changes
+					if ($this->getSuccessMessage() == "" && !ob_get_length()) // No output
+						$this->setSuccessMessage(str_replace('%s', $actionCaption, $Language->phrase("CustomActionCompleted"))); // Set up success message
+				} else {
+					$conn->rollbackTrans(); // Rollback changes
+
+					// Set up error message
+					if ($this->getSuccessMessage() <> "" || $this->getFailureMessage() <> "") {
+
+						// Use the message, do nothing
+					} elseif ($this->CancelMessage <> "") {
+						$this->setFailureMessage($this->CancelMessage);
+						$this->CancelMessage = "";
+					} else {
+						$this->setFailureMessage(str_replace('%s', $actionCaption, $Language->phrase("CustomActionFailed")));
+					}
+				}
+			}
+			if ($rs)
+				$rs->close();
+			$this->CurrentAction = ""; // Clear action
+			if (Post("ajax") == $userAction) { // Ajax
+				if ($this->getSuccessMessage() <> "") {
+					echo "<p class=\"text-success\">" . $this->getSuccessMessage() . "</p>";
+					$this->clearSuccessMessage(); // Clear message
+				}
+				if ($this->getFailureMessage() <> "") {
+					echo "<p class=\"text-danger\">" . $this->getFailureMessage() . "</p>";
+					$this->clearFailureMessage(); // Clear message
+				}
+				return TRUE;
+			}
+		}
+		return FALSE; // Not ajax request
+	}
+
+	// Set up search options
+	protected function setupSearchOptions()
+	{
+		global $Language;
+		$this->SearchOptions = new ListOptions();
+		$this->SearchOptions->Tag = "div";
+		$this->SearchOptions->TagClassName = "ew-search-option";
+
+		// Search button
+		$item = &$this->SearchOptions->add("searchtoggle");
+		$searchToggleClass = ($this->SearchWhere <> "") ? " active" : " active";
+		$item->Body = "<button type=\"button\" class=\"btn btn-default ew-search-toggle" . $searchToggleClass . "\" title=\"" . $Language->phrase("SearchPanel") . "\" data-caption=\"" . $Language->phrase("SearchPanel") . "\" data-toggle=\"button\" data-form=\"fivf_embryology_chartlistsrch\">" . $Language->phrase("SearchLink") . "</button>";
+		$item->Visible = TRUE;
+
+		// Show all button
+		$item = &$this->SearchOptions->add("showall");
+		$item->Body = "<a class=\"btn btn-default ew-show-all\" title=\"" . $Language->phrase("ShowAll") . "\" data-caption=\"" . $Language->phrase("ShowAll") . "\" href=\"" . $this->pageUrl() . "cmd=reset\">" . $Language->phrase("ShowAllBtn") . "</a>";
+		$item->Visible = ($this->SearchWhere <> $this->DefaultSearchWhere && $this->SearchWhere <> "0=101");
+
+		// Button group for search
+		$this->SearchOptions->UseDropDownButton = FALSE;
+		$this->SearchOptions->UseButtonGroup = TRUE;
+		$this->SearchOptions->DropDownButtonPhrase = $Language->phrase("ButtonSearch");
+
+		// Add group option item
+		$item = &$this->SearchOptions->add($this->SearchOptions->GroupOptionName);
+		$item->Body = "";
+		$item->Visible = FALSE;
+
+		// Hide search options
+		if ($this->isExport() || $this->CurrentAction)
+			$this->SearchOptions->hideAllOptions();
+		global $Security;
+		if (!$Security->canSearch()) {
+			$this->SearchOptions->hideAllOptions();
+			$this->FilterOptions->hideAllOptions();
+		}
+	}
+	protected function setupListOptionsExt()
+	{
+		global $Security, $Language;
+
+		// Hide detail items for dropdown if necessary
+		$this->ListOptions->hideDetailItemsForDropDown();
+	}
+	protected function renderListOptionsExt()
+	{
+		global $Security, $Language;
+	}
+
+	// Set up starting record parameters
+	public function setupStartRec()
+	{
+		if ($this->DisplayRecs == 0)
+			return;
+		if ($this->isPageRequest()) { // Validate request
+			if (Get(TABLE_START_REC) !== NULL) { // Check for "start" parameter
+				$this->StartRec = Get(TABLE_START_REC);
+				$this->setStartRecordNumber($this->StartRec);
+			} elseif (Get(TABLE_PAGE_NO) !== NULL) {
+				$pageNo = Get(TABLE_PAGE_NO);
+				if (is_numeric($pageNo)) {
+					$this->StartRec = ($pageNo - 1) * $this->DisplayRecs + 1;
+					if ($this->StartRec <= 0) {
+						$this->StartRec = 1;
+					} elseif ($this->StartRec >= (int)(($this->TotalRecs - 1)/$this->DisplayRecs) * $this->DisplayRecs + 1) {
+						$this->StartRec = (int)(($this->TotalRecs - 1)/$this->DisplayRecs) * $this->DisplayRecs + 1;
+					}
+					$this->setStartRecordNumber($this->StartRec);
+				}
+			}
+		}
+		$this->StartRec = $this->getStartRecordNumber();
+
+		// Check if correct start record counter
+		if (!is_numeric($this->StartRec) || $this->StartRec == "") { // Avoid invalid start record counter
+			$this->StartRec = 1; // Reset start record counter
+			$this->setStartRecordNumber($this->StartRec);
+		} elseif ($this->StartRec > $this->TotalRecs) { // Avoid starting record > total records
+			$this->StartRec = (int)(($this->TotalRecs - 1)/$this->DisplayRecs) * $this->DisplayRecs + 1; // Point to last page first record
+			$this->setStartRecordNumber($this->StartRec);
+		} elseif (($this->StartRec - 1) % $this->DisplayRecs <> 0) {
+			$this->StartRec = (int)(($this->StartRec - 1)/$this->DisplayRecs) * $this->DisplayRecs + 1; // Point to page boundary
+			$this->setStartRecordNumber($this->StartRec);
+		}
+	}
+
+	// Load default values
+	protected function loadDefaultValues()
+	{
+		$this->id->CurrentValue = NULL;
+		$this->id->OldValue = $this->id->CurrentValue;
+		$this->RIDNo->CurrentValue = NULL;
+		$this->RIDNo->OldValue = $this->RIDNo->CurrentValue;
+		$this->Name->CurrentValue = NULL;
+		$this->Name->OldValue = $this->Name->CurrentValue;
+		$this->ARTCycle->CurrentValue = NULL;
+		$this->ARTCycle->OldValue = $this->ARTCycle->CurrentValue;
+		$this->SpermOrigin->CurrentValue = NULL;
+		$this->SpermOrigin->OldValue = $this->SpermOrigin->CurrentValue;
+		$this->InseminatinTechnique->CurrentValue = NULL;
+		$this->InseminatinTechnique->OldValue = $this->InseminatinTechnique->CurrentValue;
+		$this->IndicationForART->CurrentValue = NULL;
+		$this->IndicationForART->OldValue = $this->IndicationForART->CurrentValue;
+		$this->Day0sino->CurrentValue = NULL;
+		$this->Day0sino->OldValue = $this->Day0sino->CurrentValue;
+		$this->Day0OocyteStage->CurrentValue = NULL;
+		$this->Day0OocyteStage->OldValue = $this->Day0OocyteStage->CurrentValue;
+		$this->Day0PolarBodyPosition->CurrentValue = NULL;
+		$this->Day0PolarBodyPosition->OldValue = $this->Day0PolarBodyPosition->CurrentValue;
+		$this->Day0Breakage->CurrentValue = NULL;
+		$this->Day0Breakage->OldValue = $this->Day0Breakage->CurrentValue;
+		$this->Day0Attempts->CurrentValue = NULL;
+		$this->Day0Attempts->OldValue = $this->Day0Attempts->CurrentValue;
+		$this->Day0SPZMorpho->CurrentValue = NULL;
+		$this->Day0SPZMorpho->OldValue = $this->Day0SPZMorpho->CurrentValue;
+		$this->Day0SPZLocation->CurrentValue = NULL;
+		$this->Day0SPZLocation->OldValue = $this->Day0SPZLocation->CurrentValue;
+		$this->Day0SpOrgin->CurrentValue = NULL;
+		$this->Day0SpOrgin->OldValue = $this->Day0SpOrgin->CurrentValue;
+		$this->Day5Cryoptop->CurrentValue = NULL;
+		$this->Day5Cryoptop->OldValue = $this->Day5Cryoptop->CurrentValue;
+		$this->Day1Sperm->CurrentValue = NULL;
+		$this->Day1Sperm->OldValue = $this->Day1Sperm->CurrentValue;
+		$this->Day1PN->CurrentValue = NULL;
+		$this->Day1PN->OldValue = $this->Day1PN->CurrentValue;
+		$this->Day1PB->CurrentValue = NULL;
+		$this->Day1PB->OldValue = $this->Day1PB->CurrentValue;
+		$this->Day1Pronucleus->CurrentValue = NULL;
+		$this->Day1Pronucleus->OldValue = $this->Day1Pronucleus->CurrentValue;
+		$this->Day1Nucleolus->CurrentValue = NULL;
+		$this->Day1Nucleolus->OldValue = $this->Day1Nucleolus->CurrentValue;
+		$this->Day1Halo->CurrentValue = NULL;
+		$this->Day1Halo->OldValue = $this->Day1Halo->CurrentValue;
+		$this->Day2SiNo->CurrentValue = NULL;
+		$this->Day2SiNo->OldValue = $this->Day2SiNo->CurrentValue;
+		$this->Day2CellNo->CurrentValue = NULL;
+		$this->Day2CellNo->OldValue = $this->Day2CellNo->CurrentValue;
+		$this->Day2Frag->CurrentValue = NULL;
+		$this->Day2Frag->OldValue = $this->Day2Frag->CurrentValue;
+		$this->Day2Symmetry->CurrentValue = NULL;
+		$this->Day2Symmetry->OldValue = $this->Day2Symmetry->CurrentValue;
+		$this->Day2Cryoptop->CurrentValue = NULL;
+		$this->Day2Cryoptop->OldValue = $this->Day2Cryoptop->CurrentValue;
+		$this->Day2Grade->CurrentValue = NULL;
+		$this->Day2Grade->OldValue = $this->Day2Grade->CurrentValue;
+		$this->Day2End->CurrentValue = NULL;
+		$this->Day2End->OldValue = $this->Day2End->CurrentValue;
+		$this->Day3Sino->CurrentValue = NULL;
+		$this->Day3Sino->OldValue = $this->Day3Sino->CurrentValue;
+		$this->Day3CellNo->CurrentValue = NULL;
+		$this->Day3CellNo->OldValue = $this->Day3CellNo->CurrentValue;
+		$this->Day3Frag->CurrentValue = NULL;
+		$this->Day3Frag->OldValue = $this->Day3Frag->CurrentValue;
+		$this->Day3Symmetry->CurrentValue = NULL;
+		$this->Day3Symmetry->OldValue = $this->Day3Symmetry->CurrentValue;
+		$this->Day3ZP->CurrentValue = NULL;
+		$this->Day3ZP->OldValue = $this->Day3ZP->CurrentValue;
+		$this->Day3Vacoules->CurrentValue = NULL;
+		$this->Day3Vacoules->OldValue = $this->Day3Vacoules->CurrentValue;
+		$this->Day3Grade->CurrentValue = NULL;
+		$this->Day3Grade->OldValue = $this->Day3Grade->CurrentValue;
+		$this->Day3Cryoptop->CurrentValue = NULL;
+		$this->Day3Cryoptop->OldValue = $this->Day3Cryoptop->CurrentValue;
+		$this->Day3End->CurrentValue = NULL;
+		$this->Day3End->OldValue = $this->Day3End->CurrentValue;
+		$this->Day4SiNo->CurrentValue = NULL;
+		$this->Day4SiNo->OldValue = $this->Day4SiNo->CurrentValue;
+		$this->Day4CellNo->CurrentValue = NULL;
+		$this->Day4CellNo->OldValue = $this->Day4CellNo->CurrentValue;
+		$this->Day4Frag->CurrentValue = NULL;
+		$this->Day4Frag->OldValue = $this->Day4Frag->CurrentValue;
+		$this->Day4Symmetry->CurrentValue = NULL;
+		$this->Day4Symmetry->OldValue = $this->Day4Symmetry->CurrentValue;
+		$this->Day4Grade->CurrentValue = NULL;
+		$this->Day4Grade->OldValue = $this->Day4Grade->CurrentValue;
+		$this->Day4Cryoptop->CurrentValue = NULL;
+		$this->Day4Cryoptop->OldValue = $this->Day4Cryoptop->CurrentValue;
+		$this->Day4End->CurrentValue = NULL;
+		$this->Day4End->OldValue = $this->Day4End->CurrentValue;
+		$this->Day5CellNo->CurrentValue = NULL;
+		$this->Day5CellNo->OldValue = $this->Day5CellNo->CurrentValue;
+		$this->Day5ICM->CurrentValue = NULL;
+		$this->Day5ICM->OldValue = $this->Day5ICM->CurrentValue;
+		$this->Day5TE->CurrentValue = NULL;
+		$this->Day5TE->OldValue = $this->Day5TE->CurrentValue;
+		$this->Day5Observation->CurrentValue = NULL;
+		$this->Day5Observation->OldValue = $this->Day5Observation->CurrentValue;
+		$this->Day5Collapsed->CurrentValue = NULL;
+		$this->Day5Collapsed->OldValue = $this->Day5Collapsed->CurrentValue;
+		$this->Day5Vacoulles->CurrentValue = NULL;
+		$this->Day5Vacoulles->OldValue = $this->Day5Vacoulles->CurrentValue;
+		$this->Day5Grade->CurrentValue = NULL;
+		$this->Day5Grade->OldValue = $this->Day5Grade->CurrentValue;
+		$this->Day6CellNo->CurrentValue = NULL;
+		$this->Day6CellNo->OldValue = $this->Day6CellNo->CurrentValue;
+		$this->Day6ICM->CurrentValue = NULL;
+		$this->Day6ICM->OldValue = $this->Day6ICM->CurrentValue;
+		$this->Day6TE->CurrentValue = NULL;
+		$this->Day6TE->OldValue = $this->Day6TE->CurrentValue;
+		$this->Day6Observation->CurrentValue = NULL;
+		$this->Day6Observation->OldValue = $this->Day6Observation->CurrentValue;
+		$this->Day6Collapsed->CurrentValue = NULL;
+		$this->Day6Collapsed->OldValue = $this->Day6Collapsed->CurrentValue;
+		$this->Day6Vacoulles->CurrentValue = NULL;
+		$this->Day6Vacoulles->OldValue = $this->Day6Vacoulles->CurrentValue;
+		$this->Day6Grade->CurrentValue = NULL;
+		$this->Day6Grade->OldValue = $this->Day6Grade->CurrentValue;
+		$this->Day6Cryoptop->CurrentValue = NULL;
+		$this->Day6Cryoptop->OldValue = $this->Day6Cryoptop->CurrentValue;
+		$this->EndSiNo->CurrentValue = NULL;
+		$this->EndSiNo->OldValue = $this->EndSiNo->CurrentValue;
+		$this->EndingDay->CurrentValue = NULL;
+		$this->EndingDay->OldValue = $this->EndingDay->CurrentValue;
+		$this->EndingCellStage->CurrentValue = NULL;
+		$this->EndingCellStage->OldValue = $this->EndingCellStage->CurrentValue;
+		$this->EndingGrade->CurrentValue = NULL;
+		$this->EndingGrade->OldValue = $this->EndingGrade->CurrentValue;
+		$this->EndingState->CurrentValue = NULL;
+		$this->EndingState->OldValue = $this->EndingState->CurrentValue;
+		$this->TidNo->CurrentValue = NULL;
+		$this->TidNo->OldValue = $this->TidNo->CurrentValue;
+		$this->DidNO->CurrentValue = NULL;
+		$this->DidNO->OldValue = $this->DidNO->CurrentValue;
+		$this->ICSiIVFDateTime->CurrentValue = NULL;
+		$this->ICSiIVFDateTime->OldValue = $this->ICSiIVFDateTime->CurrentValue;
+		$this->PrimaryEmbrologist->CurrentValue = NULL;
+		$this->PrimaryEmbrologist->OldValue = $this->PrimaryEmbrologist->CurrentValue;
+		$this->SecondaryEmbrologist->CurrentValue = NULL;
+		$this->SecondaryEmbrologist->OldValue = $this->SecondaryEmbrologist->CurrentValue;
+		$this->Incubator->CurrentValue = NULL;
+		$this->Incubator->OldValue = $this->Incubator->CurrentValue;
+		$this->location->CurrentValue = NULL;
+		$this->location->OldValue = $this->location->CurrentValue;
+		$this->OocyteNo->CurrentValue = NULL;
+		$this->OocyteNo->OldValue = $this->OocyteNo->CurrentValue;
+		$this->Stage->CurrentValue = NULL;
+		$this->Stage->OldValue = $this->Stage->CurrentValue;
+		$this->Remarks->CurrentValue = NULL;
+		$this->Remarks->OldValue = $this->Remarks->CurrentValue;
+		$this->vitrificationDate->CurrentValue = NULL;
+		$this->vitrificationDate->OldValue = $this->vitrificationDate->CurrentValue;
+		$this->vitriPrimaryEmbryologist->CurrentValue = NULL;
+		$this->vitriPrimaryEmbryologist->OldValue = $this->vitriPrimaryEmbryologist->CurrentValue;
+		$this->vitriSecondaryEmbryologist->CurrentValue = NULL;
+		$this->vitriSecondaryEmbryologist->OldValue = $this->vitriSecondaryEmbryologist->CurrentValue;
+		$this->vitriEmbryoNo->CurrentValue = NULL;
+		$this->vitriEmbryoNo->OldValue = $this->vitriEmbryoNo->CurrentValue;
+		$this->thawReFrozen->CurrentValue = NULL;
+		$this->thawReFrozen->OldValue = $this->thawReFrozen->CurrentValue;
+		$this->vitriFertilisationDate->CurrentValue = NULL;
+		$this->vitriFertilisationDate->OldValue = $this->vitriFertilisationDate->CurrentValue;
+		$this->vitriDay->CurrentValue = NULL;
+		$this->vitriDay->OldValue = $this->vitriDay->CurrentValue;
+		$this->vitriStage->CurrentValue = NULL;
+		$this->vitriStage->OldValue = $this->vitriStage->CurrentValue;
+		$this->vitriGrade->CurrentValue = NULL;
+		$this->vitriGrade->OldValue = $this->vitriGrade->CurrentValue;
+		$this->vitriIncubator->CurrentValue = NULL;
+		$this->vitriIncubator->OldValue = $this->vitriIncubator->CurrentValue;
+		$this->vitriTank->CurrentValue = NULL;
+		$this->vitriTank->OldValue = $this->vitriTank->CurrentValue;
+		$this->vitriCanister->CurrentValue = NULL;
+		$this->vitriCanister->OldValue = $this->vitriCanister->CurrentValue;
+		$this->vitriGobiet->CurrentValue = NULL;
+		$this->vitriGobiet->OldValue = $this->vitriGobiet->CurrentValue;
+		$this->vitriViscotube->CurrentValue = NULL;
+		$this->vitriViscotube->OldValue = $this->vitriViscotube->CurrentValue;
+		$this->vitriCryolockNo->CurrentValue = NULL;
+		$this->vitriCryolockNo->OldValue = $this->vitriCryolockNo->CurrentValue;
+		$this->vitriCryolockColour->CurrentValue = NULL;
+		$this->vitriCryolockColour->OldValue = $this->vitriCryolockColour->CurrentValue;
+		$this->thawDate->CurrentValue = NULL;
+		$this->thawDate->OldValue = $this->thawDate->CurrentValue;
+		$this->thawPrimaryEmbryologist->CurrentValue = NULL;
+		$this->thawPrimaryEmbryologist->OldValue = $this->thawPrimaryEmbryologist->CurrentValue;
+		$this->thawSecondaryEmbryologist->CurrentValue = NULL;
+		$this->thawSecondaryEmbryologist->OldValue = $this->thawSecondaryEmbryologist->CurrentValue;
+		$this->thawET->CurrentValue = NULL;
+		$this->thawET->OldValue = $this->thawET->CurrentValue;
+		$this->thawAbserve->CurrentValue = NULL;
+		$this->thawAbserve->OldValue = $this->thawAbserve->CurrentValue;
+		$this->thawDiscard->CurrentValue = NULL;
+		$this->thawDiscard->OldValue = $this->thawDiscard->CurrentValue;
+		$this->ETCatheter->CurrentValue = NULL;
+		$this->ETCatheter->OldValue = $this->ETCatheter->CurrentValue;
+		$this->ETDifficulty->CurrentValue = NULL;
+		$this->ETDifficulty->OldValue = $this->ETDifficulty->CurrentValue;
+		$this->ETEasy->CurrentValue = NULL;
+		$this->ETEasy->OldValue = $this->ETEasy->CurrentValue;
+		$this->ETComments->CurrentValue = NULL;
+		$this->ETComments->OldValue = $this->ETComments->CurrentValue;
+		$this->ETDoctor->CurrentValue = NULL;
+		$this->ETDoctor->OldValue = $this->ETDoctor->CurrentValue;
+		$this->ETEmbryologist->CurrentValue = NULL;
+		$this->ETEmbryologist->OldValue = $this->ETEmbryologist->CurrentValue;
+		$this->ETDate->CurrentValue = NULL;
+		$this->ETDate->OldValue = $this->ETDate->CurrentValue;
+		$this->Day1End->CurrentValue = NULL;
+		$this->Day1End->OldValue = $this->Day1End->CurrentValue;
+	}
+
+	// Load basic search values
+	protected function loadBasicSearchValues()
+	{
+		$this->BasicSearch->setKeyword(Get(TABLE_BASIC_SEARCH, ""), FALSE);
+		if ($this->BasicSearch->Keyword <> "" && $this->Command == "")
+			$this->Command = "search";
+		$this->BasicSearch->setType(Get(TABLE_BASIC_SEARCH_TYPE, ""), FALSE);
+	}
+
+	// Load form values
+	protected function loadFormValues()
+	{
+
+		// Load from form
+		global $CurrentForm;
+
+		// Check field name 'id' first before field var 'x_id'
+		$val = $CurrentForm->hasValue("id") ? $CurrentForm->getValue("id") : $CurrentForm->getValue("x_id");
+		if (!$this->id->IsDetailKey && !$this->isGridAdd() && !$this->isAdd())
+			$this->id->setFormValue($val);
+
+		// Check field name 'RIDNo' first before field var 'x_RIDNo'
+		$val = $CurrentForm->hasValue("RIDNo") ? $CurrentForm->getValue("RIDNo") : $CurrentForm->getValue("x_RIDNo");
+		if (!$this->RIDNo->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->RIDNo->Visible = FALSE; // Disable update for API request
+			else
+				$this->RIDNo->setFormValue($val);
+		}
+		$this->RIDNo->setOldValue($CurrentForm->getValue("o_RIDNo"));
+
+		// Check field name 'Name' first before field var 'x_Name'
+		$val = $CurrentForm->hasValue("Name") ? $CurrentForm->getValue("Name") : $CurrentForm->getValue("x_Name");
+		if (!$this->Name->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Name->Visible = FALSE; // Disable update for API request
+			else
+				$this->Name->setFormValue($val);
+		}
+		$this->Name->setOldValue($CurrentForm->getValue("o_Name"));
+
+		// Check field name 'ARTCycle' first before field var 'x_ARTCycle'
+		$val = $CurrentForm->hasValue("ARTCycle") ? $CurrentForm->getValue("ARTCycle") : $CurrentForm->getValue("x_ARTCycle");
+		if (!$this->ARTCycle->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->ARTCycle->Visible = FALSE; // Disable update for API request
+			else
+				$this->ARTCycle->setFormValue($val);
+		}
+		$this->ARTCycle->setOldValue($CurrentForm->getValue("o_ARTCycle"));
+
+		// Check field name 'SpermOrigin' first before field var 'x_SpermOrigin'
+		$val = $CurrentForm->hasValue("SpermOrigin") ? $CurrentForm->getValue("SpermOrigin") : $CurrentForm->getValue("x_SpermOrigin");
+		if (!$this->SpermOrigin->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->SpermOrigin->Visible = FALSE; // Disable update for API request
+			else
+				$this->SpermOrigin->setFormValue($val);
+		}
+		$this->SpermOrigin->setOldValue($CurrentForm->getValue("o_SpermOrigin"));
+
+		// Check field name 'InseminatinTechnique' first before field var 'x_InseminatinTechnique'
+		$val = $CurrentForm->hasValue("InseminatinTechnique") ? $CurrentForm->getValue("InseminatinTechnique") : $CurrentForm->getValue("x_InseminatinTechnique");
+		if (!$this->InseminatinTechnique->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->InseminatinTechnique->Visible = FALSE; // Disable update for API request
+			else
+				$this->InseminatinTechnique->setFormValue($val);
+		}
+		$this->InseminatinTechnique->setOldValue($CurrentForm->getValue("o_InseminatinTechnique"));
+
+		// Check field name 'IndicationForART' first before field var 'x_IndicationForART'
+		$val = $CurrentForm->hasValue("IndicationForART") ? $CurrentForm->getValue("IndicationForART") : $CurrentForm->getValue("x_IndicationForART");
+		if (!$this->IndicationForART->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->IndicationForART->Visible = FALSE; // Disable update for API request
+			else
+				$this->IndicationForART->setFormValue($val);
+		}
+		$this->IndicationForART->setOldValue($CurrentForm->getValue("o_IndicationForART"));
+
+		// Check field name 'Day0sino' first before field var 'x_Day0sino'
+		$val = $CurrentForm->hasValue("Day0sino") ? $CurrentForm->getValue("Day0sino") : $CurrentForm->getValue("x_Day0sino");
+		if (!$this->Day0sino->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day0sino->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day0sino->setFormValue($val);
+		}
+		$this->Day0sino->setOldValue($CurrentForm->getValue("o_Day0sino"));
+
+		// Check field name 'Day0OocyteStage' first before field var 'x_Day0OocyteStage'
+		$val = $CurrentForm->hasValue("Day0OocyteStage") ? $CurrentForm->getValue("Day0OocyteStage") : $CurrentForm->getValue("x_Day0OocyteStage");
+		if (!$this->Day0OocyteStage->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day0OocyteStage->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day0OocyteStage->setFormValue($val);
+		}
+		$this->Day0OocyteStage->setOldValue($CurrentForm->getValue("o_Day0OocyteStage"));
+
+		// Check field name 'Day0PolarBodyPosition' first before field var 'x_Day0PolarBodyPosition'
+		$val = $CurrentForm->hasValue("Day0PolarBodyPosition") ? $CurrentForm->getValue("Day0PolarBodyPosition") : $CurrentForm->getValue("x_Day0PolarBodyPosition");
+		if (!$this->Day0PolarBodyPosition->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day0PolarBodyPosition->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day0PolarBodyPosition->setFormValue($val);
+		}
+		$this->Day0PolarBodyPosition->setOldValue($CurrentForm->getValue("o_Day0PolarBodyPosition"));
+
+		// Check field name 'Day0Breakage' first before field var 'x_Day0Breakage'
+		$val = $CurrentForm->hasValue("Day0Breakage") ? $CurrentForm->getValue("Day0Breakage") : $CurrentForm->getValue("x_Day0Breakage");
+		if (!$this->Day0Breakage->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day0Breakage->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day0Breakage->setFormValue($val);
+		}
+		$this->Day0Breakage->setOldValue($CurrentForm->getValue("o_Day0Breakage"));
+
+		// Check field name 'Day0Attempts' first before field var 'x_Day0Attempts'
+		$val = $CurrentForm->hasValue("Day0Attempts") ? $CurrentForm->getValue("Day0Attempts") : $CurrentForm->getValue("x_Day0Attempts");
+		if (!$this->Day0Attempts->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day0Attempts->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day0Attempts->setFormValue($val);
+		}
+		$this->Day0Attempts->setOldValue($CurrentForm->getValue("o_Day0Attempts"));
+
+		// Check field name 'Day0SPZMorpho' first before field var 'x_Day0SPZMorpho'
+		$val = $CurrentForm->hasValue("Day0SPZMorpho") ? $CurrentForm->getValue("Day0SPZMorpho") : $CurrentForm->getValue("x_Day0SPZMorpho");
+		if (!$this->Day0SPZMorpho->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day0SPZMorpho->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day0SPZMorpho->setFormValue($val);
+		}
+		$this->Day0SPZMorpho->setOldValue($CurrentForm->getValue("o_Day0SPZMorpho"));
+
+		// Check field name 'Day0SPZLocation' first before field var 'x_Day0SPZLocation'
+		$val = $CurrentForm->hasValue("Day0SPZLocation") ? $CurrentForm->getValue("Day0SPZLocation") : $CurrentForm->getValue("x_Day0SPZLocation");
+		if (!$this->Day0SPZLocation->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day0SPZLocation->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day0SPZLocation->setFormValue($val);
+		}
+		$this->Day0SPZLocation->setOldValue($CurrentForm->getValue("o_Day0SPZLocation"));
+
+		// Check field name 'Day0SpOrgin' first before field var 'x_Day0SpOrgin'
+		$val = $CurrentForm->hasValue("Day0SpOrgin") ? $CurrentForm->getValue("Day0SpOrgin") : $CurrentForm->getValue("x_Day0SpOrgin");
+		if (!$this->Day0SpOrgin->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day0SpOrgin->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day0SpOrgin->setFormValue($val);
+		}
+		$this->Day0SpOrgin->setOldValue($CurrentForm->getValue("o_Day0SpOrgin"));
+
+		// Check field name 'Day5Cryoptop' first before field var 'x_Day5Cryoptop'
+		$val = $CurrentForm->hasValue("Day5Cryoptop") ? $CurrentForm->getValue("Day5Cryoptop") : $CurrentForm->getValue("x_Day5Cryoptop");
+		if (!$this->Day5Cryoptop->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day5Cryoptop->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day5Cryoptop->setFormValue($val);
+		}
+		$this->Day5Cryoptop->setOldValue($CurrentForm->getValue("o_Day5Cryoptop"));
+
+		// Check field name 'Day1Sperm' first before field var 'x_Day1Sperm'
+		$val = $CurrentForm->hasValue("Day1Sperm") ? $CurrentForm->getValue("Day1Sperm") : $CurrentForm->getValue("x_Day1Sperm");
+		if (!$this->Day1Sperm->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day1Sperm->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day1Sperm->setFormValue($val);
+		}
+		$this->Day1Sperm->setOldValue($CurrentForm->getValue("o_Day1Sperm"));
+
+		// Check field name 'Day1PN' first before field var 'x_Day1PN'
+		$val = $CurrentForm->hasValue("Day1PN") ? $CurrentForm->getValue("Day1PN") : $CurrentForm->getValue("x_Day1PN");
+		if (!$this->Day1PN->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day1PN->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day1PN->setFormValue($val);
+		}
+		$this->Day1PN->setOldValue($CurrentForm->getValue("o_Day1PN"));
+
+		// Check field name 'Day1PB' first before field var 'x_Day1PB'
+		$val = $CurrentForm->hasValue("Day1PB") ? $CurrentForm->getValue("Day1PB") : $CurrentForm->getValue("x_Day1PB");
+		if (!$this->Day1PB->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day1PB->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day1PB->setFormValue($val);
+		}
+		$this->Day1PB->setOldValue($CurrentForm->getValue("o_Day1PB"));
+
+		// Check field name 'Day1Pronucleus' first before field var 'x_Day1Pronucleus'
+		$val = $CurrentForm->hasValue("Day1Pronucleus") ? $CurrentForm->getValue("Day1Pronucleus") : $CurrentForm->getValue("x_Day1Pronucleus");
+		if (!$this->Day1Pronucleus->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day1Pronucleus->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day1Pronucleus->setFormValue($val);
+		}
+		$this->Day1Pronucleus->setOldValue($CurrentForm->getValue("o_Day1Pronucleus"));
+
+		// Check field name 'Day1Nucleolus' first before field var 'x_Day1Nucleolus'
+		$val = $CurrentForm->hasValue("Day1Nucleolus") ? $CurrentForm->getValue("Day1Nucleolus") : $CurrentForm->getValue("x_Day1Nucleolus");
+		if (!$this->Day1Nucleolus->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day1Nucleolus->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day1Nucleolus->setFormValue($val);
+		}
+		$this->Day1Nucleolus->setOldValue($CurrentForm->getValue("o_Day1Nucleolus"));
+
+		// Check field name 'Day1Halo' first before field var 'x_Day1Halo'
+		$val = $CurrentForm->hasValue("Day1Halo") ? $CurrentForm->getValue("Day1Halo") : $CurrentForm->getValue("x_Day1Halo");
+		if (!$this->Day1Halo->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day1Halo->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day1Halo->setFormValue($val);
+		}
+		$this->Day1Halo->setOldValue($CurrentForm->getValue("o_Day1Halo"));
+
+		// Check field name 'Day2SiNo' first before field var 'x_Day2SiNo'
+		$val = $CurrentForm->hasValue("Day2SiNo") ? $CurrentForm->getValue("Day2SiNo") : $CurrentForm->getValue("x_Day2SiNo");
+		if (!$this->Day2SiNo->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day2SiNo->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day2SiNo->setFormValue($val);
+		}
+		$this->Day2SiNo->setOldValue($CurrentForm->getValue("o_Day2SiNo"));
+
+		// Check field name 'Day2CellNo' first before field var 'x_Day2CellNo'
+		$val = $CurrentForm->hasValue("Day2CellNo") ? $CurrentForm->getValue("Day2CellNo") : $CurrentForm->getValue("x_Day2CellNo");
+		if (!$this->Day2CellNo->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day2CellNo->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day2CellNo->setFormValue($val);
+		}
+		$this->Day2CellNo->setOldValue($CurrentForm->getValue("o_Day2CellNo"));
+
+		// Check field name 'Day2Frag' first before field var 'x_Day2Frag'
+		$val = $CurrentForm->hasValue("Day2Frag") ? $CurrentForm->getValue("Day2Frag") : $CurrentForm->getValue("x_Day2Frag");
+		if (!$this->Day2Frag->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day2Frag->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day2Frag->setFormValue($val);
+		}
+		$this->Day2Frag->setOldValue($CurrentForm->getValue("o_Day2Frag"));
+
+		// Check field name 'Day2Symmetry' first before field var 'x_Day2Symmetry'
+		$val = $CurrentForm->hasValue("Day2Symmetry") ? $CurrentForm->getValue("Day2Symmetry") : $CurrentForm->getValue("x_Day2Symmetry");
+		if (!$this->Day2Symmetry->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day2Symmetry->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day2Symmetry->setFormValue($val);
+		}
+		$this->Day2Symmetry->setOldValue($CurrentForm->getValue("o_Day2Symmetry"));
+
+		// Check field name 'Day2Cryoptop' first before field var 'x_Day2Cryoptop'
+		$val = $CurrentForm->hasValue("Day2Cryoptop") ? $CurrentForm->getValue("Day2Cryoptop") : $CurrentForm->getValue("x_Day2Cryoptop");
+		if (!$this->Day2Cryoptop->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day2Cryoptop->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day2Cryoptop->setFormValue($val);
+		}
+		$this->Day2Cryoptop->setOldValue($CurrentForm->getValue("o_Day2Cryoptop"));
+
+		// Check field name 'Day2Grade' first before field var 'x_Day2Grade'
+		$val = $CurrentForm->hasValue("Day2Grade") ? $CurrentForm->getValue("Day2Grade") : $CurrentForm->getValue("x_Day2Grade");
+		if (!$this->Day2Grade->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day2Grade->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day2Grade->setFormValue($val);
+		}
+		$this->Day2Grade->setOldValue($CurrentForm->getValue("o_Day2Grade"));
+
+		// Check field name 'Day2End' first before field var 'x_Day2End'
+		$val = $CurrentForm->hasValue("Day2End") ? $CurrentForm->getValue("Day2End") : $CurrentForm->getValue("x_Day2End");
+		if (!$this->Day2End->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day2End->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day2End->setFormValue($val);
+		}
+		$this->Day2End->setOldValue($CurrentForm->getValue("o_Day2End"));
+
+		// Check field name 'Day3Sino' first before field var 'x_Day3Sino'
+		$val = $CurrentForm->hasValue("Day3Sino") ? $CurrentForm->getValue("Day3Sino") : $CurrentForm->getValue("x_Day3Sino");
+		if (!$this->Day3Sino->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day3Sino->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day3Sino->setFormValue($val);
+		}
+		$this->Day3Sino->setOldValue($CurrentForm->getValue("o_Day3Sino"));
+
+		// Check field name 'Day3CellNo' first before field var 'x_Day3CellNo'
+		$val = $CurrentForm->hasValue("Day3CellNo") ? $CurrentForm->getValue("Day3CellNo") : $CurrentForm->getValue("x_Day3CellNo");
+		if (!$this->Day3CellNo->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day3CellNo->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day3CellNo->setFormValue($val);
+		}
+		$this->Day3CellNo->setOldValue($CurrentForm->getValue("o_Day3CellNo"));
+
+		// Check field name 'Day3Frag' first before field var 'x_Day3Frag'
+		$val = $CurrentForm->hasValue("Day3Frag") ? $CurrentForm->getValue("Day3Frag") : $CurrentForm->getValue("x_Day3Frag");
+		if (!$this->Day3Frag->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day3Frag->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day3Frag->setFormValue($val);
+		}
+		$this->Day3Frag->setOldValue($CurrentForm->getValue("o_Day3Frag"));
+
+		// Check field name 'Day3Symmetry' first before field var 'x_Day3Symmetry'
+		$val = $CurrentForm->hasValue("Day3Symmetry") ? $CurrentForm->getValue("Day3Symmetry") : $CurrentForm->getValue("x_Day3Symmetry");
+		if (!$this->Day3Symmetry->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day3Symmetry->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day3Symmetry->setFormValue($val);
+		}
+		$this->Day3Symmetry->setOldValue($CurrentForm->getValue("o_Day3Symmetry"));
+
+		// Check field name 'Day3ZP' first before field var 'x_Day3ZP'
+		$val = $CurrentForm->hasValue("Day3ZP") ? $CurrentForm->getValue("Day3ZP") : $CurrentForm->getValue("x_Day3ZP");
+		if (!$this->Day3ZP->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day3ZP->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day3ZP->setFormValue($val);
+		}
+		$this->Day3ZP->setOldValue($CurrentForm->getValue("o_Day3ZP"));
+
+		// Check field name 'Day3Vacoules' first before field var 'x_Day3Vacoules'
+		$val = $CurrentForm->hasValue("Day3Vacoules") ? $CurrentForm->getValue("Day3Vacoules") : $CurrentForm->getValue("x_Day3Vacoules");
+		if (!$this->Day3Vacoules->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day3Vacoules->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day3Vacoules->setFormValue($val);
+		}
+		$this->Day3Vacoules->setOldValue($CurrentForm->getValue("o_Day3Vacoules"));
+
+		// Check field name 'Day3Grade' first before field var 'x_Day3Grade'
+		$val = $CurrentForm->hasValue("Day3Grade") ? $CurrentForm->getValue("Day3Grade") : $CurrentForm->getValue("x_Day3Grade");
+		if (!$this->Day3Grade->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day3Grade->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day3Grade->setFormValue($val);
+		}
+		$this->Day3Grade->setOldValue($CurrentForm->getValue("o_Day3Grade"));
+
+		// Check field name 'Day3Cryoptop' first before field var 'x_Day3Cryoptop'
+		$val = $CurrentForm->hasValue("Day3Cryoptop") ? $CurrentForm->getValue("Day3Cryoptop") : $CurrentForm->getValue("x_Day3Cryoptop");
+		if (!$this->Day3Cryoptop->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day3Cryoptop->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day3Cryoptop->setFormValue($val);
+		}
+		$this->Day3Cryoptop->setOldValue($CurrentForm->getValue("o_Day3Cryoptop"));
+
+		// Check field name 'Day3End' first before field var 'x_Day3End'
+		$val = $CurrentForm->hasValue("Day3End") ? $CurrentForm->getValue("Day3End") : $CurrentForm->getValue("x_Day3End");
+		if (!$this->Day3End->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day3End->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day3End->setFormValue($val);
+		}
+		$this->Day3End->setOldValue($CurrentForm->getValue("o_Day3End"));
+
+		// Check field name 'Day4SiNo' first before field var 'x_Day4SiNo'
+		$val = $CurrentForm->hasValue("Day4SiNo") ? $CurrentForm->getValue("Day4SiNo") : $CurrentForm->getValue("x_Day4SiNo");
+		if (!$this->Day4SiNo->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day4SiNo->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day4SiNo->setFormValue($val);
+		}
+		$this->Day4SiNo->setOldValue($CurrentForm->getValue("o_Day4SiNo"));
+
+		// Check field name 'Day4CellNo' first before field var 'x_Day4CellNo'
+		$val = $CurrentForm->hasValue("Day4CellNo") ? $CurrentForm->getValue("Day4CellNo") : $CurrentForm->getValue("x_Day4CellNo");
+		if (!$this->Day4CellNo->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day4CellNo->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day4CellNo->setFormValue($val);
+		}
+		$this->Day4CellNo->setOldValue($CurrentForm->getValue("o_Day4CellNo"));
+
+		// Check field name 'Day4Frag' first before field var 'x_Day4Frag'
+		$val = $CurrentForm->hasValue("Day4Frag") ? $CurrentForm->getValue("Day4Frag") : $CurrentForm->getValue("x_Day4Frag");
+		if (!$this->Day4Frag->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day4Frag->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day4Frag->setFormValue($val);
+		}
+		$this->Day4Frag->setOldValue($CurrentForm->getValue("o_Day4Frag"));
+
+		// Check field name 'Day4Symmetry' first before field var 'x_Day4Symmetry'
+		$val = $CurrentForm->hasValue("Day4Symmetry") ? $CurrentForm->getValue("Day4Symmetry") : $CurrentForm->getValue("x_Day4Symmetry");
+		if (!$this->Day4Symmetry->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day4Symmetry->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day4Symmetry->setFormValue($val);
+		}
+		$this->Day4Symmetry->setOldValue($CurrentForm->getValue("o_Day4Symmetry"));
+
+		// Check field name 'Day4Grade' first before field var 'x_Day4Grade'
+		$val = $CurrentForm->hasValue("Day4Grade") ? $CurrentForm->getValue("Day4Grade") : $CurrentForm->getValue("x_Day4Grade");
+		if (!$this->Day4Grade->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day4Grade->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day4Grade->setFormValue($val);
+		}
+		$this->Day4Grade->setOldValue($CurrentForm->getValue("o_Day4Grade"));
+
+		// Check field name 'Day4Cryoptop' first before field var 'x_Day4Cryoptop'
+		$val = $CurrentForm->hasValue("Day4Cryoptop") ? $CurrentForm->getValue("Day4Cryoptop") : $CurrentForm->getValue("x_Day4Cryoptop");
+		if (!$this->Day4Cryoptop->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day4Cryoptop->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day4Cryoptop->setFormValue($val);
+		}
+		$this->Day4Cryoptop->setOldValue($CurrentForm->getValue("o_Day4Cryoptop"));
+
+		// Check field name 'Day4End' first before field var 'x_Day4End'
+		$val = $CurrentForm->hasValue("Day4End") ? $CurrentForm->getValue("Day4End") : $CurrentForm->getValue("x_Day4End");
+		if (!$this->Day4End->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day4End->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day4End->setFormValue($val);
+		}
+		$this->Day4End->setOldValue($CurrentForm->getValue("o_Day4End"));
+
+		// Check field name 'Day5CellNo' first before field var 'x_Day5CellNo'
+		$val = $CurrentForm->hasValue("Day5CellNo") ? $CurrentForm->getValue("Day5CellNo") : $CurrentForm->getValue("x_Day5CellNo");
+		if (!$this->Day5CellNo->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day5CellNo->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day5CellNo->setFormValue($val);
+		}
+		$this->Day5CellNo->setOldValue($CurrentForm->getValue("o_Day5CellNo"));
+
+		// Check field name 'Day5ICM' first before field var 'x_Day5ICM'
+		$val = $CurrentForm->hasValue("Day5ICM") ? $CurrentForm->getValue("Day5ICM") : $CurrentForm->getValue("x_Day5ICM");
+		if (!$this->Day5ICM->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day5ICM->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day5ICM->setFormValue($val);
+		}
+		$this->Day5ICM->setOldValue($CurrentForm->getValue("o_Day5ICM"));
+
+		// Check field name 'Day5TE' first before field var 'x_Day5TE'
+		$val = $CurrentForm->hasValue("Day5TE") ? $CurrentForm->getValue("Day5TE") : $CurrentForm->getValue("x_Day5TE");
+		if (!$this->Day5TE->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day5TE->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day5TE->setFormValue($val);
+		}
+		$this->Day5TE->setOldValue($CurrentForm->getValue("o_Day5TE"));
+
+		// Check field name 'Day5Observation' first before field var 'x_Day5Observation'
+		$val = $CurrentForm->hasValue("Day5Observation") ? $CurrentForm->getValue("Day5Observation") : $CurrentForm->getValue("x_Day5Observation");
+		if (!$this->Day5Observation->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day5Observation->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day5Observation->setFormValue($val);
+		}
+		$this->Day5Observation->setOldValue($CurrentForm->getValue("o_Day5Observation"));
+
+		// Check field name 'Day5Collapsed' first before field var 'x_Day5Collapsed'
+		$val = $CurrentForm->hasValue("Day5Collapsed") ? $CurrentForm->getValue("Day5Collapsed") : $CurrentForm->getValue("x_Day5Collapsed");
+		if (!$this->Day5Collapsed->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day5Collapsed->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day5Collapsed->setFormValue($val);
+		}
+		$this->Day5Collapsed->setOldValue($CurrentForm->getValue("o_Day5Collapsed"));
+
+		// Check field name 'Day5Vacoulles' first before field var 'x_Day5Vacoulles'
+		$val = $CurrentForm->hasValue("Day5Vacoulles") ? $CurrentForm->getValue("Day5Vacoulles") : $CurrentForm->getValue("x_Day5Vacoulles");
+		if (!$this->Day5Vacoulles->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day5Vacoulles->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day5Vacoulles->setFormValue($val);
+		}
+		$this->Day5Vacoulles->setOldValue($CurrentForm->getValue("o_Day5Vacoulles"));
+
+		// Check field name 'Day5Grade' first before field var 'x_Day5Grade'
+		$val = $CurrentForm->hasValue("Day5Grade") ? $CurrentForm->getValue("Day5Grade") : $CurrentForm->getValue("x_Day5Grade");
+		if (!$this->Day5Grade->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day5Grade->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day5Grade->setFormValue($val);
+		}
+		$this->Day5Grade->setOldValue($CurrentForm->getValue("o_Day5Grade"));
+
+		// Check field name 'Day6CellNo' first before field var 'x_Day6CellNo'
+		$val = $CurrentForm->hasValue("Day6CellNo") ? $CurrentForm->getValue("Day6CellNo") : $CurrentForm->getValue("x_Day6CellNo");
+		if (!$this->Day6CellNo->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day6CellNo->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day6CellNo->setFormValue($val);
+		}
+		$this->Day6CellNo->setOldValue($CurrentForm->getValue("o_Day6CellNo"));
+
+		// Check field name 'Day6ICM' first before field var 'x_Day6ICM'
+		$val = $CurrentForm->hasValue("Day6ICM") ? $CurrentForm->getValue("Day6ICM") : $CurrentForm->getValue("x_Day6ICM");
+		if (!$this->Day6ICM->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day6ICM->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day6ICM->setFormValue($val);
+		}
+		$this->Day6ICM->setOldValue($CurrentForm->getValue("o_Day6ICM"));
+
+		// Check field name 'Day6TE' first before field var 'x_Day6TE'
+		$val = $CurrentForm->hasValue("Day6TE") ? $CurrentForm->getValue("Day6TE") : $CurrentForm->getValue("x_Day6TE");
+		if (!$this->Day6TE->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day6TE->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day6TE->setFormValue($val);
+		}
+		$this->Day6TE->setOldValue($CurrentForm->getValue("o_Day6TE"));
+
+		// Check field name 'Day6Observation' first before field var 'x_Day6Observation'
+		$val = $CurrentForm->hasValue("Day6Observation") ? $CurrentForm->getValue("Day6Observation") : $CurrentForm->getValue("x_Day6Observation");
+		if (!$this->Day6Observation->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day6Observation->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day6Observation->setFormValue($val);
+		}
+		$this->Day6Observation->setOldValue($CurrentForm->getValue("o_Day6Observation"));
+
+		// Check field name 'Day6Collapsed' first before field var 'x_Day6Collapsed'
+		$val = $CurrentForm->hasValue("Day6Collapsed") ? $CurrentForm->getValue("Day6Collapsed") : $CurrentForm->getValue("x_Day6Collapsed");
+		if (!$this->Day6Collapsed->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day6Collapsed->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day6Collapsed->setFormValue($val);
+		}
+		$this->Day6Collapsed->setOldValue($CurrentForm->getValue("o_Day6Collapsed"));
+
+		// Check field name 'Day6Vacoulles' first before field var 'x_Day6Vacoulles'
+		$val = $CurrentForm->hasValue("Day6Vacoulles") ? $CurrentForm->getValue("Day6Vacoulles") : $CurrentForm->getValue("x_Day6Vacoulles");
+		if (!$this->Day6Vacoulles->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day6Vacoulles->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day6Vacoulles->setFormValue($val);
+		}
+		$this->Day6Vacoulles->setOldValue($CurrentForm->getValue("o_Day6Vacoulles"));
+
+		// Check field name 'Day6Grade' first before field var 'x_Day6Grade'
+		$val = $CurrentForm->hasValue("Day6Grade") ? $CurrentForm->getValue("Day6Grade") : $CurrentForm->getValue("x_Day6Grade");
+		if (!$this->Day6Grade->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day6Grade->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day6Grade->setFormValue($val);
+		}
+		$this->Day6Grade->setOldValue($CurrentForm->getValue("o_Day6Grade"));
+
+		// Check field name 'Day6Cryoptop' first before field var 'x_Day6Cryoptop'
+		$val = $CurrentForm->hasValue("Day6Cryoptop") ? $CurrentForm->getValue("Day6Cryoptop") : $CurrentForm->getValue("x_Day6Cryoptop");
+		if (!$this->Day6Cryoptop->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day6Cryoptop->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day6Cryoptop->setFormValue($val);
+		}
+		$this->Day6Cryoptop->setOldValue($CurrentForm->getValue("o_Day6Cryoptop"));
+
+		// Check field name 'EndSiNo' first before field var 'x_EndSiNo'
+		$val = $CurrentForm->hasValue("EndSiNo") ? $CurrentForm->getValue("EndSiNo") : $CurrentForm->getValue("x_EndSiNo");
+		if (!$this->EndSiNo->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->EndSiNo->Visible = FALSE; // Disable update for API request
+			else
+				$this->EndSiNo->setFormValue($val);
+		}
+		$this->EndSiNo->setOldValue($CurrentForm->getValue("o_EndSiNo"));
+
+		// Check field name 'EndingDay' first before field var 'x_EndingDay'
+		$val = $CurrentForm->hasValue("EndingDay") ? $CurrentForm->getValue("EndingDay") : $CurrentForm->getValue("x_EndingDay");
+		if (!$this->EndingDay->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->EndingDay->Visible = FALSE; // Disable update for API request
+			else
+				$this->EndingDay->setFormValue($val);
+		}
+		$this->EndingDay->setOldValue($CurrentForm->getValue("o_EndingDay"));
+
+		// Check field name 'EndingCellStage' first before field var 'x_EndingCellStage'
+		$val = $CurrentForm->hasValue("EndingCellStage") ? $CurrentForm->getValue("EndingCellStage") : $CurrentForm->getValue("x_EndingCellStage");
+		if (!$this->EndingCellStage->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->EndingCellStage->Visible = FALSE; // Disable update for API request
+			else
+				$this->EndingCellStage->setFormValue($val);
+		}
+		$this->EndingCellStage->setOldValue($CurrentForm->getValue("o_EndingCellStage"));
+
+		// Check field name 'EndingGrade' first before field var 'x_EndingGrade'
+		$val = $CurrentForm->hasValue("EndingGrade") ? $CurrentForm->getValue("EndingGrade") : $CurrentForm->getValue("x_EndingGrade");
+		if (!$this->EndingGrade->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->EndingGrade->Visible = FALSE; // Disable update for API request
+			else
+				$this->EndingGrade->setFormValue($val);
+		}
+		$this->EndingGrade->setOldValue($CurrentForm->getValue("o_EndingGrade"));
+
+		// Check field name 'EndingState' first before field var 'x_EndingState'
+		$val = $CurrentForm->hasValue("EndingState") ? $CurrentForm->getValue("EndingState") : $CurrentForm->getValue("x_EndingState");
+		if (!$this->EndingState->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->EndingState->Visible = FALSE; // Disable update for API request
+			else
+				$this->EndingState->setFormValue($val);
+		}
+		$this->EndingState->setOldValue($CurrentForm->getValue("o_EndingState"));
+
+		// Check field name 'TidNo' first before field var 'x_TidNo'
+		$val = $CurrentForm->hasValue("TidNo") ? $CurrentForm->getValue("TidNo") : $CurrentForm->getValue("x_TidNo");
+		if (!$this->TidNo->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->TidNo->Visible = FALSE; // Disable update for API request
+			else
+				$this->TidNo->setFormValue($val);
+		}
+		$this->TidNo->setOldValue($CurrentForm->getValue("o_TidNo"));
+
+		// Check field name 'DidNO' first before field var 'x_DidNO'
+		$val = $CurrentForm->hasValue("DidNO") ? $CurrentForm->getValue("DidNO") : $CurrentForm->getValue("x_DidNO");
+		if (!$this->DidNO->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->DidNO->Visible = FALSE; // Disable update for API request
+			else
+				$this->DidNO->setFormValue($val);
+		}
+		$this->DidNO->setOldValue($CurrentForm->getValue("o_DidNO"));
+
+		// Check field name 'ICSiIVFDateTime' first before field var 'x_ICSiIVFDateTime'
+		$val = $CurrentForm->hasValue("ICSiIVFDateTime") ? $CurrentForm->getValue("ICSiIVFDateTime") : $CurrentForm->getValue("x_ICSiIVFDateTime");
+		if (!$this->ICSiIVFDateTime->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->ICSiIVFDateTime->Visible = FALSE; // Disable update for API request
+			else
+				$this->ICSiIVFDateTime->setFormValue($val);
+			$this->ICSiIVFDateTime->CurrentValue = UnFormatDateTime($this->ICSiIVFDateTime->CurrentValue, 0);
+		}
+		$this->ICSiIVFDateTime->setOldValue($CurrentForm->getValue("o_ICSiIVFDateTime"));
+
+		// Check field name 'PrimaryEmbrologist' first before field var 'x_PrimaryEmbrologist'
+		$val = $CurrentForm->hasValue("PrimaryEmbrologist") ? $CurrentForm->getValue("PrimaryEmbrologist") : $CurrentForm->getValue("x_PrimaryEmbrologist");
+		if (!$this->PrimaryEmbrologist->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->PrimaryEmbrologist->Visible = FALSE; // Disable update for API request
+			else
+				$this->PrimaryEmbrologist->setFormValue($val);
+		}
+		$this->PrimaryEmbrologist->setOldValue($CurrentForm->getValue("o_PrimaryEmbrologist"));
+
+		// Check field name 'SecondaryEmbrologist' first before field var 'x_SecondaryEmbrologist'
+		$val = $CurrentForm->hasValue("SecondaryEmbrologist") ? $CurrentForm->getValue("SecondaryEmbrologist") : $CurrentForm->getValue("x_SecondaryEmbrologist");
+		if (!$this->SecondaryEmbrologist->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->SecondaryEmbrologist->Visible = FALSE; // Disable update for API request
+			else
+				$this->SecondaryEmbrologist->setFormValue($val);
+		}
+		$this->SecondaryEmbrologist->setOldValue($CurrentForm->getValue("o_SecondaryEmbrologist"));
+
+		// Check field name 'Incubator' first before field var 'x_Incubator'
+		$val = $CurrentForm->hasValue("Incubator") ? $CurrentForm->getValue("Incubator") : $CurrentForm->getValue("x_Incubator");
+		if (!$this->Incubator->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Incubator->Visible = FALSE; // Disable update for API request
+			else
+				$this->Incubator->setFormValue($val);
+		}
+		$this->Incubator->setOldValue($CurrentForm->getValue("o_Incubator"));
+
+		// Check field name 'location' first before field var 'x_location'
+		$val = $CurrentForm->hasValue("location") ? $CurrentForm->getValue("location") : $CurrentForm->getValue("x_location");
+		if (!$this->location->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->location->Visible = FALSE; // Disable update for API request
+			else
+				$this->location->setFormValue($val);
+		}
+		$this->location->setOldValue($CurrentForm->getValue("o_location"));
+
+		// Check field name 'OocyteNo' first before field var 'x_OocyteNo'
+		$val = $CurrentForm->hasValue("OocyteNo") ? $CurrentForm->getValue("OocyteNo") : $CurrentForm->getValue("x_OocyteNo");
+		if (!$this->OocyteNo->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->OocyteNo->Visible = FALSE; // Disable update for API request
+			else
+				$this->OocyteNo->setFormValue($val);
+		}
+		$this->OocyteNo->setOldValue($CurrentForm->getValue("o_OocyteNo"));
+
+		// Check field name 'Stage' first before field var 'x_Stage'
+		$val = $CurrentForm->hasValue("Stage") ? $CurrentForm->getValue("Stage") : $CurrentForm->getValue("x_Stage");
+		if (!$this->Stage->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Stage->Visible = FALSE; // Disable update for API request
+			else
+				$this->Stage->setFormValue($val);
+		}
+		$this->Stage->setOldValue($CurrentForm->getValue("o_Stage"));
+
+		// Check field name 'Remarks' first before field var 'x_Remarks'
+		$val = $CurrentForm->hasValue("Remarks") ? $CurrentForm->getValue("Remarks") : $CurrentForm->getValue("x_Remarks");
+		if (!$this->Remarks->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Remarks->Visible = FALSE; // Disable update for API request
+			else
+				$this->Remarks->setFormValue($val);
+		}
+		$this->Remarks->setOldValue($CurrentForm->getValue("o_Remarks"));
+
+		// Check field name 'vitrificationDate' first before field var 'x_vitrificationDate'
+		$val = $CurrentForm->hasValue("vitrificationDate") ? $CurrentForm->getValue("vitrificationDate") : $CurrentForm->getValue("x_vitrificationDate");
+		if (!$this->vitrificationDate->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->vitrificationDate->Visible = FALSE; // Disable update for API request
+			else
+				$this->vitrificationDate->setFormValue($val);
+			$this->vitrificationDate->CurrentValue = UnFormatDateTime($this->vitrificationDate->CurrentValue, 0);
+		}
+		$this->vitrificationDate->setOldValue($CurrentForm->getValue("o_vitrificationDate"));
+
+		// Check field name 'vitriPrimaryEmbryologist' first before field var 'x_vitriPrimaryEmbryologist'
+		$val = $CurrentForm->hasValue("vitriPrimaryEmbryologist") ? $CurrentForm->getValue("vitriPrimaryEmbryologist") : $CurrentForm->getValue("x_vitriPrimaryEmbryologist");
+		if (!$this->vitriPrimaryEmbryologist->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->vitriPrimaryEmbryologist->Visible = FALSE; // Disable update for API request
+			else
+				$this->vitriPrimaryEmbryologist->setFormValue($val);
+		}
+		$this->vitriPrimaryEmbryologist->setOldValue($CurrentForm->getValue("o_vitriPrimaryEmbryologist"));
+
+		// Check field name 'vitriSecondaryEmbryologist' first before field var 'x_vitriSecondaryEmbryologist'
+		$val = $CurrentForm->hasValue("vitriSecondaryEmbryologist") ? $CurrentForm->getValue("vitriSecondaryEmbryologist") : $CurrentForm->getValue("x_vitriSecondaryEmbryologist");
+		if (!$this->vitriSecondaryEmbryologist->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->vitriSecondaryEmbryologist->Visible = FALSE; // Disable update for API request
+			else
+				$this->vitriSecondaryEmbryologist->setFormValue($val);
+		}
+		$this->vitriSecondaryEmbryologist->setOldValue($CurrentForm->getValue("o_vitriSecondaryEmbryologist"));
+
+		// Check field name 'vitriEmbryoNo' first before field var 'x_vitriEmbryoNo'
+		$val = $CurrentForm->hasValue("vitriEmbryoNo") ? $CurrentForm->getValue("vitriEmbryoNo") : $CurrentForm->getValue("x_vitriEmbryoNo");
+		if (!$this->vitriEmbryoNo->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->vitriEmbryoNo->Visible = FALSE; // Disable update for API request
+			else
+				$this->vitriEmbryoNo->setFormValue($val);
+		}
+		$this->vitriEmbryoNo->setOldValue($CurrentForm->getValue("o_vitriEmbryoNo"));
+
+		// Check field name 'thawReFrozen' first before field var 'x_thawReFrozen'
+		$val = $CurrentForm->hasValue("thawReFrozen") ? $CurrentForm->getValue("thawReFrozen") : $CurrentForm->getValue("x_thawReFrozen");
+		if (!$this->thawReFrozen->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->thawReFrozen->Visible = FALSE; // Disable update for API request
+			else
+				$this->thawReFrozen->setFormValue($val);
+		}
+		$this->thawReFrozen->setOldValue($CurrentForm->getValue("o_thawReFrozen"));
+
+		// Check field name 'vitriFertilisationDate' first before field var 'x_vitriFertilisationDate'
+		$val = $CurrentForm->hasValue("vitriFertilisationDate") ? $CurrentForm->getValue("vitriFertilisationDate") : $CurrentForm->getValue("x_vitriFertilisationDate");
+		if (!$this->vitriFertilisationDate->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->vitriFertilisationDate->Visible = FALSE; // Disable update for API request
+			else
+				$this->vitriFertilisationDate->setFormValue($val);
+			$this->vitriFertilisationDate->CurrentValue = UnFormatDateTime($this->vitriFertilisationDate->CurrentValue, 0);
+		}
+		$this->vitriFertilisationDate->setOldValue($CurrentForm->getValue("o_vitriFertilisationDate"));
+
+		// Check field name 'vitriDay' first before field var 'x_vitriDay'
+		$val = $CurrentForm->hasValue("vitriDay") ? $CurrentForm->getValue("vitriDay") : $CurrentForm->getValue("x_vitriDay");
+		if (!$this->vitriDay->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->vitriDay->Visible = FALSE; // Disable update for API request
+			else
+				$this->vitriDay->setFormValue($val);
+		}
+		$this->vitriDay->setOldValue($CurrentForm->getValue("o_vitriDay"));
+
+		// Check field name 'vitriStage' first before field var 'x_vitriStage'
+		$val = $CurrentForm->hasValue("vitriStage") ? $CurrentForm->getValue("vitriStage") : $CurrentForm->getValue("x_vitriStage");
+		if (!$this->vitriStage->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->vitriStage->Visible = FALSE; // Disable update for API request
+			else
+				$this->vitriStage->setFormValue($val);
+		}
+		$this->vitriStage->setOldValue($CurrentForm->getValue("o_vitriStage"));
+
+		// Check field name 'vitriGrade' first before field var 'x_vitriGrade'
+		$val = $CurrentForm->hasValue("vitriGrade") ? $CurrentForm->getValue("vitriGrade") : $CurrentForm->getValue("x_vitriGrade");
+		if (!$this->vitriGrade->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->vitriGrade->Visible = FALSE; // Disable update for API request
+			else
+				$this->vitriGrade->setFormValue($val);
+		}
+		$this->vitriGrade->setOldValue($CurrentForm->getValue("o_vitriGrade"));
+
+		// Check field name 'vitriIncubator' first before field var 'x_vitriIncubator'
+		$val = $CurrentForm->hasValue("vitriIncubator") ? $CurrentForm->getValue("vitriIncubator") : $CurrentForm->getValue("x_vitriIncubator");
+		if (!$this->vitriIncubator->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->vitriIncubator->Visible = FALSE; // Disable update for API request
+			else
+				$this->vitriIncubator->setFormValue($val);
+		}
+		$this->vitriIncubator->setOldValue($CurrentForm->getValue("o_vitriIncubator"));
+
+		// Check field name 'vitriTank' first before field var 'x_vitriTank'
+		$val = $CurrentForm->hasValue("vitriTank") ? $CurrentForm->getValue("vitriTank") : $CurrentForm->getValue("x_vitriTank");
+		if (!$this->vitriTank->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->vitriTank->Visible = FALSE; // Disable update for API request
+			else
+				$this->vitriTank->setFormValue($val);
+		}
+		$this->vitriTank->setOldValue($CurrentForm->getValue("o_vitriTank"));
+
+		// Check field name 'vitriCanister' first before field var 'x_vitriCanister'
+		$val = $CurrentForm->hasValue("vitriCanister") ? $CurrentForm->getValue("vitriCanister") : $CurrentForm->getValue("x_vitriCanister");
+		if (!$this->vitriCanister->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->vitriCanister->Visible = FALSE; // Disable update for API request
+			else
+				$this->vitriCanister->setFormValue($val);
+		}
+		$this->vitriCanister->setOldValue($CurrentForm->getValue("o_vitriCanister"));
+
+		// Check field name 'vitriGobiet' first before field var 'x_vitriGobiet'
+		$val = $CurrentForm->hasValue("vitriGobiet") ? $CurrentForm->getValue("vitriGobiet") : $CurrentForm->getValue("x_vitriGobiet");
+		if (!$this->vitriGobiet->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->vitriGobiet->Visible = FALSE; // Disable update for API request
+			else
+				$this->vitriGobiet->setFormValue($val);
+		}
+		$this->vitriGobiet->setOldValue($CurrentForm->getValue("o_vitriGobiet"));
+
+		// Check field name 'vitriViscotube' first before field var 'x_vitriViscotube'
+		$val = $CurrentForm->hasValue("vitriViscotube") ? $CurrentForm->getValue("vitriViscotube") : $CurrentForm->getValue("x_vitriViscotube");
+		if (!$this->vitriViscotube->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->vitriViscotube->Visible = FALSE; // Disable update for API request
+			else
+				$this->vitriViscotube->setFormValue($val);
+		}
+		$this->vitriViscotube->setOldValue($CurrentForm->getValue("o_vitriViscotube"));
+
+		// Check field name 'vitriCryolockNo' first before field var 'x_vitriCryolockNo'
+		$val = $CurrentForm->hasValue("vitriCryolockNo") ? $CurrentForm->getValue("vitriCryolockNo") : $CurrentForm->getValue("x_vitriCryolockNo");
+		if (!$this->vitriCryolockNo->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->vitriCryolockNo->Visible = FALSE; // Disable update for API request
+			else
+				$this->vitriCryolockNo->setFormValue($val);
+		}
+		$this->vitriCryolockNo->setOldValue($CurrentForm->getValue("o_vitriCryolockNo"));
+
+		// Check field name 'vitriCryolockColour' first before field var 'x_vitriCryolockColour'
+		$val = $CurrentForm->hasValue("vitriCryolockColour") ? $CurrentForm->getValue("vitriCryolockColour") : $CurrentForm->getValue("x_vitriCryolockColour");
+		if (!$this->vitriCryolockColour->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->vitriCryolockColour->Visible = FALSE; // Disable update for API request
+			else
+				$this->vitriCryolockColour->setFormValue($val);
+		}
+		$this->vitriCryolockColour->setOldValue($CurrentForm->getValue("o_vitriCryolockColour"));
+
+		// Check field name 'thawDate' first before field var 'x_thawDate'
+		$val = $CurrentForm->hasValue("thawDate") ? $CurrentForm->getValue("thawDate") : $CurrentForm->getValue("x_thawDate");
+		if (!$this->thawDate->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->thawDate->Visible = FALSE; // Disable update for API request
+			else
+				$this->thawDate->setFormValue($val);
+			$this->thawDate->CurrentValue = UnFormatDateTime($this->thawDate->CurrentValue, 0);
+		}
+		$this->thawDate->setOldValue($CurrentForm->getValue("o_thawDate"));
+
+		// Check field name 'thawPrimaryEmbryologist' first before field var 'x_thawPrimaryEmbryologist'
+		$val = $CurrentForm->hasValue("thawPrimaryEmbryologist") ? $CurrentForm->getValue("thawPrimaryEmbryologist") : $CurrentForm->getValue("x_thawPrimaryEmbryologist");
+		if (!$this->thawPrimaryEmbryologist->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->thawPrimaryEmbryologist->Visible = FALSE; // Disable update for API request
+			else
+				$this->thawPrimaryEmbryologist->setFormValue($val);
+		}
+		$this->thawPrimaryEmbryologist->setOldValue($CurrentForm->getValue("o_thawPrimaryEmbryologist"));
+
+		// Check field name 'thawSecondaryEmbryologist' first before field var 'x_thawSecondaryEmbryologist'
+		$val = $CurrentForm->hasValue("thawSecondaryEmbryologist") ? $CurrentForm->getValue("thawSecondaryEmbryologist") : $CurrentForm->getValue("x_thawSecondaryEmbryologist");
+		if (!$this->thawSecondaryEmbryologist->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->thawSecondaryEmbryologist->Visible = FALSE; // Disable update for API request
+			else
+				$this->thawSecondaryEmbryologist->setFormValue($val);
+		}
+		$this->thawSecondaryEmbryologist->setOldValue($CurrentForm->getValue("o_thawSecondaryEmbryologist"));
+
+		// Check field name 'thawET' first before field var 'x_thawET'
+		$val = $CurrentForm->hasValue("thawET") ? $CurrentForm->getValue("thawET") : $CurrentForm->getValue("x_thawET");
+		if (!$this->thawET->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->thawET->Visible = FALSE; // Disable update for API request
+			else
+				$this->thawET->setFormValue($val);
+		}
+		$this->thawET->setOldValue($CurrentForm->getValue("o_thawET"));
+
+		// Check field name 'thawAbserve' first before field var 'x_thawAbserve'
+		$val = $CurrentForm->hasValue("thawAbserve") ? $CurrentForm->getValue("thawAbserve") : $CurrentForm->getValue("x_thawAbserve");
+		if (!$this->thawAbserve->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->thawAbserve->Visible = FALSE; // Disable update for API request
+			else
+				$this->thawAbserve->setFormValue($val);
+		}
+		$this->thawAbserve->setOldValue($CurrentForm->getValue("o_thawAbserve"));
+
+		// Check field name 'thawDiscard' first before field var 'x_thawDiscard'
+		$val = $CurrentForm->hasValue("thawDiscard") ? $CurrentForm->getValue("thawDiscard") : $CurrentForm->getValue("x_thawDiscard");
+		if (!$this->thawDiscard->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->thawDiscard->Visible = FALSE; // Disable update for API request
+			else
+				$this->thawDiscard->setFormValue($val);
+		}
+		$this->thawDiscard->setOldValue($CurrentForm->getValue("o_thawDiscard"));
+
+		// Check field name 'ETCatheter' first before field var 'x_ETCatheter'
+		$val = $CurrentForm->hasValue("ETCatheter") ? $CurrentForm->getValue("ETCatheter") : $CurrentForm->getValue("x_ETCatheter");
+		if (!$this->ETCatheter->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->ETCatheter->Visible = FALSE; // Disable update for API request
+			else
+				$this->ETCatheter->setFormValue($val);
+		}
+		$this->ETCatheter->setOldValue($CurrentForm->getValue("o_ETCatheter"));
+
+		// Check field name 'ETDifficulty' first before field var 'x_ETDifficulty'
+		$val = $CurrentForm->hasValue("ETDifficulty") ? $CurrentForm->getValue("ETDifficulty") : $CurrentForm->getValue("x_ETDifficulty");
+		if (!$this->ETDifficulty->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->ETDifficulty->Visible = FALSE; // Disable update for API request
+			else
+				$this->ETDifficulty->setFormValue($val);
+		}
+		$this->ETDifficulty->setOldValue($CurrentForm->getValue("o_ETDifficulty"));
+
+		// Check field name 'ETEasy' first before field var 'x_ETEasy'
+		$val = $CurrentForm->hasValue("ETEasy") ? $CurrentForm->getValue("ETEasy") : $CurrentForm->getValue("x_ETEasy");
+		if (!$this->ETEasy->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->ETEasy->Visible = FALSE; // Disable update for API request
+			else
+				$this->ETEasy->setFormValue($val);
+		}
+		$this->ETEasy->setOldValue($CurrentForm->getValue("o_ETEasy"));
+
+		// Check field name 'ETComments' first before field var 'x_ETComments'
+		$val = $CurrentForm->hasValue("ETComments") ? $CurrentForm->getValue("ETComments") : $CurrentForm->getValue("x_ETComments");
+		if (!$this->ETComments->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->ETComments->Visible = FALSE; // Disable update for API request
+			else
+				$this->ETComments->setFormValue($val);
+		}
+		$this->ETComments->setOldValue($CurrentForm->getValue("o_ETComments"));
+
+		// Check field name 'ETDoctor' first before field var 'x_ETDoctor'
+		$val = $CurrentForm->hasValue("ETDoctor") ? $CurrentForm->getValue("ETDoctor") : $CurrentForm->getValue("x_ETDoctor");
+		if (!$this->ETDoctor->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->ETDoctor->Visible = FALSE; // Disable update for API request
+			else
+				$this->ETDoctor->setFormValue($val);
+		}
+		$this->ETDoctor->setOldValue($CurrentForm->getValue("o_ETDoctor"));
+
+		// Check field name 'ETEmbryologist' first before field var 'x_ETEmbryologist'
+		$val = $CurrentForm->hasValue("ETEmbryologist") ? $CurrentForm->getValue("ETEmbryologist") : $CurrentForm->getValue("x_ETEmbryologist");
+		if (!$this->ETEmbryologist->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->ETEmbryologist->Visible = FALSE; // Disable update for API request
+			else
+				$this->ETEmbryologist->setFormValue($val);
+		}
+		$this->ETEmbryologist->setOldValue($CurrentForm->getValue("o_ETEmbryologist"));
+
+		// Check field name 'ETDate' first before field var 'x_ETDate'
+		$val = $CurrentForm->hasValue("ETDate") ? $CurrentForm->getValue("ETDate") : $CurrentForm->getValue("x_ETDate");
+		if (!$this->ETDate->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->ETDate->Visible = FALSE; // Disable update for API request
+			else
+				$this->ETDate->setFormValue($val);
+			$this->ETDate->CurrentValue = UnFormatDateTime($this->ETDate->CurrentValue, 0);
+		}
+		$this->ETDate->setOldValue($CurrentForm->getValue("o_ETDate"));
+
+		// Check field name 'Day1End' first before field var 'x_Day1End'
+		$val = $CurrentForm->hasValue("Day1End") ? $CurrentForm->getValue("Day1End") : $CurrentForm->getValue("x_Day1End");
+		if (!$this->Day1End->IsDetailKey) {
+			if (IsApi() && $val == NULL)
+				$this->Day1End->Visible = FALSE; // Disable update for API request
+			else
+				$this->Day1End->setFormValue($val);
+		}
+		$this->Day1End->setOldValue($CurrentForm->getValue("o_Day1End"));
+	}
+
+	// Restore form values
+	public function restoreFormValues()
+	{
+		global $CurrentForm;
+		if (!$this->isGridAdd() && !$this->isAdd())
+			$this->id->CurrentValue = $this->id->FormValue;
+		$this->RIDNo->CurrentValue = $this->RIDNo->FormValue;
+		$this->Name->CurrentValue = $this->Name->FormValue;
+		$this->ARTCycle->CurrentValue = $this->ARTCycle->FormValue;
+		$this->SpermOrigin->CurrentValue = $this->SpermOrigin->FormValue;
+		$this->InseminatinTechnique->CurrentValue = $this->InseminatinTechnique->FormValue;
+		$this->IndicationForART->CurrentValue = $this->IndicationForART->FormValue;
+		$this->Day0sino->CurrentValue = $this->Day0sino->FormValue;
+		$this->Day0OocyteStage->CurrentValue = $this->Day0OocyteStage->FormValue;
+		$this->Day0PolarBodyPosition->CurrentValue = $this->Day0PolarBodyPosition->FormValue;
+		$this->Day0Breakage->CurrentValue = $this->Day0Breakage->FormValue;
+		$this->Day0Attempts->CurrentValue = $this->Day0Attempts->FormValue;
+		$this->Day0SPZMorpho->CurrentValue = $this->Day0SPZMorpho->FormValue;
+		$this->Day0SPZLocation->CurrentValue = $this->Day0SPZLocation->FormValue;
+		$this->Day0SpOrgin->CurrentValue = $this->Day0SpOrgin->FormValue;
+		$this->Day5Cryoptop->CurrentValue = $this->Day5Cryoptop->FormValue;
+		$this->Day1Sperm->CurrentValue = $this->Day1Sperm->FormValue;
+		$this->Day1PN->CurrentValue = $this->Day1PN->FormValue;
+		$this->Day1PB->CurrentValue = $this->Day1PB->FormValue;
+		$this->Day1Pronucleus->CurrentValue = $this->Day1Pronucleus->FormValue;
+		$this->Day1Nucleolus->CurrentValue = $this->Day1Nucleolus->FormValue;
+		$this->Day1Halo->CurrentValue = $this->Day1Halo->FormValue;
+		$this->Day2SiNo->CurrentValue = $this->Day2SiNo->FormValue;
+		$this->Day2CellNo->CurrentValue = $this->Day2CellNo->FormValue;
+		$this->Day2Frag->CurrentValue = $this->Day2Frag->FormValue;
+		$this->Day2Symmetry->CurrentValue = $this->Day2Symmetry->FormValue;
+		$this->Day2Cryoptop->CurrentValue = $this->Day2Cryoptop->FormValue;
+		$this->Day2Grade->CurrentValue = $this->Day2Grade->FormValue;
+		$this->Day2End->CurrentValue = $this->Day2End->FormValue;
+		$this->Day3Sino->CurrentValue = $this->Day3Sino->FormValue;
+		$this->Day3CellNo->CurrentValue = $this->Day3CellNo->FormValue;
+		$this->Day3Frag->CurrentValue = $this->Day3Frag->FormValue;
+		$this->Day3Symmetry->CurrentValue = $this->Day3Symmetry->FormValue;
+		$this->Day3ZP->CurrentValue = $this->Day3ZP->FormValue;
+		$this->Day3Vacoules->CurrentValue = $this->Day3Vacoules->FormValue;
+		$this->Day3Grade->CurrentValue = $this->Day3Grade->FormValue;
+		$this->Day3Cryoptop->CurrentValue = $this->Day3Cryoptop->FormValue;
+		$this->Day3End->CurrentValue = $this->Day3End->FormValue;
+		$this->Day4SiNo->CurrentValue = $this->Day4SiNo->FormValue;
+		$this->Day4CellNo->CurrentValue = $this->Day4CellNo->FormValue;
+		$this->Day4Frag->CurrentValue = $this->Day4Frag->FormValue;
+		$this->Day4Symmetry->CurrentValue = $this->Day4Symmetry->FormValue;
+		$this->Day4Grade->CurrentValue = $this->Day4Grade->FormValue;
+		$this->Day4Cryoptop->CurrentValue = $this->Day4Cryoptop->FormValue;
+		$this->Day4End->CurrentValue = $this->Day4End->FormValue;
+		$this->Day5CellNo->CurrentValue = $this->Day5CellNo->FormValue;
+		$this->Day5ICM->CurrentValue = $this->Day5ICM->FormValue;
+		$this->Day5TE->CurrentValue = $this->Day5TE->FormValue;
+		$this->Day5Observation->CurrentValue = $this->Day5Observation->FormValue;
+		$this->Day5Collapsed->CurrentValue = $this->Day5Collapsed->FormValue;
+		$this->Day5Vacoulles->CurrentValue = $this->Day5Vacoulles->FormValue;
+		$this->Day5Grade->CurrentValue = $this->Day5Grade->FormValue;
+		$this->Day6CellNo->CurrentValue = $this->Day6CellNo->FormValue;
+		$this->Day6ICM->CurrentValue = $this->Day6ICM->FormValue;
+		$this->Day6TE->CurrentValue = $this->Day6TE->FormValue;
+		$this->Day6Observation->CurrentValue = $this->Day6Observation->FormValue;
+		$this->Day6Collapsed->CurrentValue = $this->Day6Collapsed->FormValue;
+		$this->Day6Vacoulles->CurrentValue = $this->Day6Vacoulles->FormValue;
+		$this->Day6Grade->CurrentValue = $this->Day6Grade->FormValue;
+		$this->Day6Cryoptop->CurrentValue = $this->Day6Cryoptop->FormValue;
+		$this->EndSiNo->CurrentValue = $this->EndSiNo->FormValue;
+		$this->EndingDay->CurrentValue = $this->EndingDay->FormValue;
+		$this->EndingCellStage->CurrentValue = $this->EndingCellStage->FormValue;
+		$this->EndingGrade->CurrentValue = $this->EndingGrade->FormValue;
+		$this->EndingState->CurrentValue = $this->EndingState->FormValue;
+		$this->TidNo->CurrentValue = $this->TidNo->FormValue;
+		$this->DidNO->CurrentValue = $this->DidNO->FormValue;
+		$this->ICSiIVFDateTime->CurrentValue = $this->ICSiIVFDateTime->FormValue;
+		$this->ICSiIVFDateTime->CurrentValue = UnFormatDateTime($this->ICSiIVFDateTime->CurrentValue, 0);
+		$this->PrimaryEmbrologist->CurrentValue = $this->PrimaryEmbrologist->FormValue;
+		$this->SecondaryEmbrologist->CurrentValue = $this->SecondaryEmbrologist->FormValue;
+		$this->Incubator->CurrentValue = $this->Incubator->FormValue;
+		$this->location->CurrentValue = $this->location->FormValue;
+		$this->OocyteNo->CurrentValue = $this->OocyteNo->FormValue;
+		$this->Stage->CurrentValue = $this->Stage->FormValue;
+		$this->Remarks->CurrentValue = $this->Remarks->FormValue;
+		$this->vitrificationDate->CurrentValue = $this->vitrificationDate->FormValue;
+		$this->vitrificationDate->CurrentValue = UnFormatDateTime($this->vitrificationDate->CurrentValue, 0);
+		$this->vitriPrimaryEmbryologist->CurrentValue = $this->vitriPrimaryEmbryologist->FormValue;
+		$this->vitriSecondaryEmbryologist->CurrentValue = $this->vitriSecondaryEmbryologist->FormValue;
+		$this->vitriEmbryoNo->CurrentValue = $this->vitriEmbryoNo->FormValue;
+		$this->thawReFrozen->CurrentValue = $this->thawReFrozen->FormValue;
+		$this->vitriFertilisationDate->CurrentValue = $this->vitriFertilisationDate->FormValue;
+		$this->vitriFertilisationDate->CurrentValue = UnFormatDateTime($this->vitriFertilisationDate->CurrentValue, 0);
+		$this->vitriDay->CurrentValue = $this->vitriDay->FormValue;
+		$this->vitriStage->CurrentValue = $this->vitriStage->FormValue;
+		$this->vitriGrade->CurrentValue = $this->vitriGrade->FormValue;
+		$this->vitriIncubator->CurrentValue = $this->vitriIncubator->FormValue;
+		$this->vitriTank->CurrentValue = $this->vitriTank->FormValue;
+		$this->vitriCanister->CurrentValue = $this->vitriCanister->FormValue;
+		$this->vitriGobiet->CurrentValue = $this->vitriGobiet->FormValue;
+		$this->vitriViscotube->CurrentValue = $this->vitriViscotube->FormValue;
+		$this->vitriCryolockNo->CurrentValue = $this->vitriCryolockNo->FormValue;
+		$this->vitriCryolockColour->CurrentValue = $this->vitriCryolockColour->FormValue;
+		$this->thawDate->CurrentValue = $this->thawDate->FormValue;
+		$this->thawDate->CurrentValue = UnFormatDateTime($this->thawDate->CurrentValue, 0);
+		$this->thawPrimaryEmbryologist->CurrentValue = $this->thawPrimaryEmbryologist->FormValue;
+		$this->thawSecondaryEmbryologist->CurrentValue = $this->thawSecondaryEmbryologist->FormValue;
+		$this->thawET->CurrentValue = $this->thawET->FormValue;
+		$this->thawAbserve->CurrentValue = $this->thawAbserve->FormValue;
+		$this->thawDiscard->CurrentValue = $this->thawDiscard->FormValue;
+		$this->ETCatheter->CurrentValue = $this->ETCatheter->FormValue;
+		$this->ETDifficulty->CurrentValue = $this->ETDifficulty->FormValue;
+		$this->ETEasy->CurrentValue = $this->ETEasy->FormValue;
+		$this->ETComments->CurrentValue = $this->ETComments->FormValue;
+		$this->ETDoctor->CurrentValue = $this->ETDoctor->FormValue;
+		$this->ETEmbryologist->CurrentValue = $this->ETEmbryologist->FormValue;
+		$this->ETDate->CurrentValue = $this->ETDate->FormValue;
+		$this->ETDate->CurrentValue = UnFormatDateTime($this->ETDate->CurrentValue, 0);
+		$this->Day1End->CurrentValue = $this->Day1End->FormValue;
+	}
+
+	// Load recordset
+	public function loadRecordset($offset = -1, $rowcnt = -1)
+	{
+
+		// Load List page SQL
+		$sql = $this->getListSql();
+		$conn = &$this->getConnection();
+
+		// Load recordset
+		$dbtype = GetConnectionType($this->Dbid);
+		if ($this->UseSelectLimit) {
+			$conn->raiseErrorFn = $GLOBALS["ERROR_FUNC"];
+			if ($dbtype == "MSSQL") {
+				$rs = $conn->selectLimit($sql, $rowcnt, $offset, ["_hasOrderBy" => trim($this->getOrderBy()) || trim($this->getSessionOrderBy())]);
+			} else {
+				$rs = $conn->selectLimit($sql, $rowcnt, $offset);
+			}
+			$conn->raiseErrorFn = '';
+		} else {
+			$rs = LoadRecordset($sql, $conn);
+		}
+
+		// Call Recordset Selected event
+		$this->Recordset_Selected($rs);
+		return $rs;
+	}
+
+	// Load row based on key values
+	public function loadRow()
+	{
+		global $Security, $Language;
+		$filter = $this->getRecordFilter();
+
+		// Call Row Selecting event
+		$this->Row_Selecting($filter);
+
+		// Load SQL based on filter
+		$this->CurrentFilter = $filter;
+		$sql = $this->getCurrentSql();
+		$conn = &$this->getConnection();
+		$res = FALSE;
+		$rs = LoadRecordset($sql, $conn);
+		if ($rs && !$rs->EOF) {
+			$res = TRUE;
+			$this->loadRowValues($rs); // Load row values
+			if (!$this->EventCancelled)
+				$this->HashValue = $this->getRowHash($rs); // Get hash value for record
+			$rs->close();
+		}
+		return $res;
+	}
+
+	// Load row values from recordset
+	public function loadRowValues($rs = NULL)
+	{
+		if ($rs && !$rs->EOF)
+			$row = $rs->fields;
+		else
+			$row = $this->newRow();
+
+		// Call Row Selected event
+		$this->Row_Selected($row);
+		if (!$rs || $rs->EOF)
+			return;
+		$this->id->setDbValue($row['id']);
+		$this->RIDNo->setDbValue($row['RIDNo']);
+		$this->Name->setDbValue($row['Name']);
+		$this->ARTCycle->setDbValue($row['ARTCycle']);
+		$this->SpermOrigin->setDbValue($row['SpermOrigin']);
+		$this->InseminatinTechnique->setDbValue($row['InseminatinTechnique']);
+		$this->IndicationForART->setDbValue($row['IndicationForART']);
+		$this->Day0sino->setDbValue($row['Day0sino']);
+		$this->Day0OocyteStage->setDbValue($row['Day0OocyteStage']);
+		$this->Day0PolarBodyPosition->setDbValue($row['Day0PolarBodyPosition']);
+		$this->Day0Breakage->setDbValue($row['Day0Breakage']);
+		$this->Day0Attempts->setDbValue($row['Day0Attempts']);
+		$this->Day0SPZMorpho->setDbValue($row['Day0SPZMorpho']);
+		$this->Day0SPZLocation->setDbValue($row['Day0SPZLocation']);
+		$this->Day0SpOrgin->setDbValue($row['Day0SpOrgin']);
+		$this->Day5Cryoptop->setDbValue($row['Day5Cryoptop']);
+		$this->Day1Sperm->setDbValue($row['Day1Sperm']);
+		$this->Day1PN->setDbValue($row['Day1PN']);
+		$this->Day1PB->setDbValue($row['Day1PB']);
+		$this->Day1Pronucleus->setDbValue($row['Day1Pronucleus']);
+		$this->Day1Nucleolus->setDbValue($row['Day1Nucleolus']);
+		$this->Day1Halo->setDbValue($row['Day1Halo']);
+		$this->Day2SiNo->setDbValue($row['Day2SiNo']);
+		$this->Day2CellNo->setDbValue($row['Day2CellNo']);
+		$this->Day2Frag->setDbValue($row['Day2Frag']);
+		$this->Day2Symmetry->setDbValue($row['Day2Symmetry']);
+		$this->Day2Cryoptop->setDbValue($row['Day2Cryoptop']);
+		$this->Day2Grade->setDbValue($row['Day2Grade']);
+		$this->Day2End->setDbValue($row['Day2End']);
+		$this->Day3Sino->setDbValue($row['Day3Sino']);
+		$this->Day3CellNo->setDbValue($row['Day3CellNo']);
+		$this->Day3Frag->setDbValue($row['Day3Frag']);
+		$this->Day3Symmetry->setDbValue($row['Day3Symmetry']);
+		$this->Day3ZP->setDbValue($row['Day3ZP']);
+		$this->Day3Vacoules->setDbValue($row['Day3Vacoules']);
+		$this->Day3Grade->setDbValue($row['Day3Grade']);
+		$this->Day3Cryoptop->setDbValue($row['Day3Cryoptop']);
+		$this->Day3End->setDbValue($row['Day3End']);
+		$this->Day4SiNo->setDbValue($row['Day4SiNo']);
+		$this->Day4CellNo->setDbValue($row['Day4CellNo']);
+		$this->Day4Frag->setDbValue($row['Day4Frag']);
+		$this->Day4Symmetry->setDbValue($row['Day4Symmetry']);
+		$this->Day4Grade->setDbValue($row['Day4Grade']);
+		$this->Day4Cryoptop->setDbValue($row['Day4Cryoptop']);
+		$this->Day4End->setDbValue($row['Day4End']);
+		$this->Day5CellNo->setDbValue($row['Day5CellNo']);
+		$this->Day5ICM->setDbValue($row['Day5ICM']);
+		$this->Day5TE->setDbValue($row['Day5TE']);
+		$this->Day5Observation->setDbValue($row['Day5Observation']);
+		$this->Day5Collapsed->setDbValue($row['Day5Collapsed']);
+		$this->Day5Vacoulles->setDbValue($row['Day5Vacoulles']);
+		$this->Day5Grade->setDbValue($row['Day5Grade']);
+		$this->Day6CellNo->setDbValue($row['Day6CellNo']);
+		$this->Day6ICM->setDbValue($row['Day6ICM']);
+		$this->Day6TE->setDbValue($row['Day6TE']);
+		$this->Day6Observation->setDbValue($row['Day6Observation']);
+		$this->Day6Collapsed->setDbValue($row['Day6Collapsed']);
+		$this->Day6Vacoulles->setDbValue($row['Day6Vacoulles']);
+		$this->Day6Grade->setDbValue($row['Day6Grade']);
+		$this->Day6Cryoptop->setDbValue($row['Day6Cryoptop']);
+		$this->EndSiNo->setDbValue($row['EndSiNo']);
+		$this->EndingDay->setDbValue($row['EndingDay']);
+		$this->EndingCellStage->setDbValue($row['EndingCellStage']);
+		$this->EndingGrade->setDbValue($row['EndingGrade']);
+		$this->EndingState->setDbValue($row['EndingState']);
+		$this->TidNo->setDbValue($row['TidNo']);
+		$this->DidNO->setDbValue($row['DidNO']);
+		$this->ICSiIVFDateTime->setDbValue($row['ICSiIVFDateTime']);
+		$this->PrimaryEmbrologist->setDbValue($row['PrimaryEmbrologist']);
+		$this->SecondaryEmbrologist->setDbValue($row['SecondaryEmbrologist']);
+		$this->Incubator->setDbValue($row['Incubator']);
+		$this->location->setDbValue($row['location']);
+		$this->OocyteNo->setDbValue($row['OocyteNo']);
+		$this->Stage->setDbValue($row['Stage']);
+		$this->Remarks->setDbValue($row['Remarks']);
+		$this->vitrificationDate->setDbValue($row['vitrificationDate']);
+		$this->vitriPrimaryEmbryologist->setDbValue($row['vitriPrimaryEmbryologist']);
+		$this->vitriSecondaryEmbryologist->setDbValue($row['vitriSecondaryEmbryologist']);
+		$this->vitriEmbryoNo->setDbValue($row['vitriEmbryoNo']);
+		$this->thawReFrozen->setDbValue($row['thawReFrozen']);
+		$this->vitriFertilisationDate->setDbValue($row['vitriFertilisationDate']);
+		$this->vitriDay->setDbValue($row['vitriDay']);
+		$this->vitriStage->setDbValue($row['vitriStage']);
+		$this->vitriGrade->setDbValue($row['vitriGrade']);
+		$this->vitriIncubator->setDbValue($row['vitriIncubator']);
+		$this->vitriTank->setDbValue($row['vitriTank']);
+		$this->vitriCanister->setDbValue($row['vitriCanister']);
+		$this->vitriGobiet->setDbValue($row['vitriGobiet']);
+		$this->vitriViscotube->setDbValue($row['vitriViscotube']);
+		$this->vitriCryolockNo->setDbValue($row['vitriCryolockNo']);
+		$this->vitriCryolockColour->setDbValue($row['vitriCryolockColour']);
+		$this->thawDate->setDbValue($row['thawDate']);
+		$this->thawPrimaryEmbryologist->setDbValue($row['thawPrimaryEmbryologist']);
+		$this->thawSecondaryEmbryologist->setDbValue($row['thawSecondaryEmbryologist']);
+		$this->thawET->setDbValue($row['thawET']);
+		$this->thawAbserve->setDbValue($row['thawAbserve']);
+		$this->thawDiscard->setDbValue($row['thawDiscard']);
+		$this->ETCatheter->setDbValue($row['ETCatheter']);
+		$this->ETDifficulty->setDbValue($row['ETDifficulty']);
+		$this->ETEasy->setDbValue($row['ETEasy']);
+		$this->ETComments->setDbValue($row['ETComments']);
+		$this->ETDoctor->setDbValue($row['ETDoctor']);
+		$this->ETEmbryologist->setDbValue($row['ETEmbryologist']);
+		$this->ETDate->setDbValue($row['ETDate']);
+		$this->Day1End->setDbValue($row['Day1End']);
+	}
+
+	// Return a row with default values
+	protected function newRow()
+	{
+		$this->loadDefaultValues();
+		$row = [];
+		$row['id'] = $this->id->CurrentValue;
+		$row['RIDNo'] = $this->RIDNo->CurrentValue;
+		$row['Name'] = $this->Name->CurrentValue;
+		$row['ARTCycle'] = $this->ARTCycle->CurrentValue;
+		$row['SpermOrigin'] = $this->SpermOrigin->CurrentValue;
+		$row['InseminatinTechnique'] = $this->InseminatinTechnique->CurrentValue;
+		$row['IndicationForART'] = $this->IndicationForART->CurrentValue;
+		$row['Day0sino'] = $this->Day0sino->CurrentValue;
+		$row['Day0OocyteStage'] = $this->Day0OocyteStage->CurrentValue;
+		$row['Day0PolarBodyPosition'] = $this->Day0PolarBodyPosition->CurrentValue;
+		$row['Day0Breakage'] = $this->Day0Breakage->CurrentValue;
+		$row['Day0Attempts'] = $this->Day0Attempts->CurrentValue;
+		$row['Day0SPZMorpho'] = $this->Day0SPZMorpho->CurrentValue;
+		$row['Day0SPZLocation'] = $this->Day0SPZLocation->CurrentValue;
+		$row['Day0SpOrgin'] = $this->Day0SpOrgin->CurrentValue;
+		$row['Day5Cryoptop'] = $this->Day5Cryoptop->CurrentValue;
+		$row['Day1Sperm'] = $this->Day1Sperm->CurrentValue;
+		$row['Day1PN'] = $this->Day1PN->CurrentValue;
+		$row['Day1PB'] = $this->Day1PB->CurrentValue;
+		$row['Day1Pronucleus'] = $this->Day1Pronucleus->CurrentValue;
+		$row['Day1Nucleolus'] = $this->Day1Nucleolus->CurrentValue;
+		$row['Day1Halo'] = $this->Day1Halo->CurrentValue;
+		$row['Day2SiNo'] = $this->Day2SiNo->CurrentValue;
+		$row['Day2CellNo'] = $this->Day2CellNo->CurrentValue;
+		$row['Day2Frag'] = $this->Day2Frag->CurrentValue;
+		$row['Day2Symmetry'] = $this->Day2Symmetry->CurrentValue;
+		$row['Day2Cryoptop'] = $this->Day2Cryoptop->CurrentValue;
+		$row['Day2Grade'] = $this->Day2Grade->CurrentValue;
+		$row['Day2End'] = $this->Day2End->CurrentValue;
+		$row['Day3Sino'] = $this->Day3Sino->CurrentValue;
+		$row['Day3CellNo'] = $this->Day3CellNo->CurrentValue;
+		$row['Day3Frag'] = $this->Day3Frag->CurrentValue;
+		$row['Day3Symmetry'] = $this->Day3Symmetry->CurrentValue;
+		$row['Day3ZP'] = $this->Day3ZP->CurrentValue;
+		$row['Day3Vacoules'] = $this->Day3Vacoules->CurrentValue;
+		$row['Day3Grade'] = $this->Day3Grade->CurrentValue;
+		$row['Day3Cryoptop'] = $this->Day3Cryoptop->CurrentValue;
+		$row['Day3End'] = $this->Day3End->CurrentValue;
+		$row['Day4SiNo'] = $this->Day4SiNo->CurrentValue;
+		$row['Day4CellNo'] = $this->Day4CellNo->CurrentValue;
+		$row['Day4Frag'] = $this->Day4Frag->CurrentValue;
+		$row['Day4Symmetry'] = $this->Day4Symmetry->CurrentValue;
+		$row['Day4Grade'] = $this->Day4Grade->CurrentValue;
+		$row['Day4Cryoptop'] = $this->Day4Cryoptop->CurrentValue;
+		$row['Day4End'] = $this->Day4End->CurrentValue;
+		$row['Day5CellNo'] = $this->Day5CellNo->CurrentValue;
+		$row['Day5ICM'] = $this->Day5ICM->CurrentValue;
+		$row['Day5TE'] = $this->Day5TE->CurrentValue;
+		$row['Day5Observation'] = $this->Day5Observation->CurrentValue;
+		$row['Day5Collapsed'] = $this->Day5Collapsed->CurrentValue;
+		$row['Day5Vacoulles'] = $this->Day5Vacoulles->CurrentValue;
+		$row['Day5Grade'] = $this->Day5Grade->CurrentValue;
+		$row['Day6CellNo'] = $this->Day6CellNo->CurrentValue;
+		$row['Day6ICM'] = $this->Day6ICM->CurrentValue;
+		$row['Day6TE'] = $this->Day6TE->CurrentValue;
+		$row['Day6Observation'] = $this->Day6Observation->CurrentValue;
+		$row['Day6Collapsed'] = $this->Day6Collapsed->CurrentValue;
+		$row['Day6Vacoulles'] = $this->Day6Vacoulles->CurrentValue;
+		$row['Day6Grade'] = $this->Day6Grade->CurrentValue;
+		$row['Day6Cryoptop'] = $this->Day6Cryoptop->CurrentValue;
+		$row['EndSiNo'] = $this->EndSiNo->CurrentValue;
+		$row['EndingDay'] = $this->EndingDay->CurrentValue;
+		$row['EndingCellStage'] = $this->EndingCellStage->CurrentValue;
+		$row['EndingGrade'] = $this->EndingGrade->CurrentValue;
+		$row['EndingState'] = $this->EndingState->CurrentValue;
+		$row['TidNo'] = $this->TidNo->CurrentValue;
+		$row['DidNO'] = $this->DidNO->CurrentValue;
+		$row['ICSiIVFDateTime'] = $this->ICSiIVFDateTime->CurrentValue;
+		$row['PrimaryEmbrologist'] = $this->PrimaryEmbrologist->CurrentValue;
+		$row['SecondaryEmbrologist'] = $this->SecondaryEmbrologist->CurrentValue;
+		$row['Incubator'] = $this->Incubator->CurrentValue;
+		$row['location'] = $this->location->CurrentValue;
+		$row['OocyteNo'] = $this->OocyteNo->CurrentValue;
+		$row['Stage'] = $this->Stage->CurrentValue;
+		$row['Remarks'] = $this->Remarks->CurrentValue;
+		$row['vitrificationDate'] = $this->vitrificationDate->CurrentValue;
+		$row['vitriPrimaryEmbryologist'] = $this->vitriPrimaryEmbryologist->CurrentValue;
+		$row['vitriSecondaryEmbryologist'] = $this->vitriSecondaryEmbryologist->CurrentValue;
+		$row['vitriEmbryoNo'] = $this->vitriEmbryoNo->CurrentValue;
+		$row['thawReFrozen'] = $this->thawReFrozen->CurrentValue;
+		$row['vitriFertilisationDate'] = $this->vitriFertilisationDate->CurrentValue;
+		$row['vitriDay'] = $this->vitriDay->CurrentValue;
+		$row['vitriStage'] = $this->vitriStage->CurrentValue;
+		$row['vitriGrade'] = $this->vitriGrade->CurrentValue;
+		$row['vitriIncubator'] = $this->vitriIncubator->CurrentValue;
+		$row['vitriTank'] = $this->vitriTank->CurrentValue;
+		$row['vitriCanister'] = $this->vitriCanister->CurrentValue;
+		$row['vitriGobiet'] = $this->vitriGobiet->CurrentValue;
+		$row['vitriViscotube'] = $this->vitriViscotube->CurrentValue;
+		$row['vitriCryolockNo'] = $this->vitriCryolockNo->CurrentValue;
+		$row['vitriCryolockColour'] = $this->vitriCryolockColour->CurrentValue;
+		$row['thawDate'] = $this->thawDate->CurrentValue;
+		$row['thawPrimaryEmbryologist'] = $this->thawPrimaryEmbryologist->CurrentValue;
+		$row['thawSecondaryEmbryologist'] = $this->thawSecondaryEmbryologist->CurrentValue;
+		$row['thawET'] = $this->thawET->CurrentValue;
+		$row['thawAbserve'] = $this->thawAbserve->CurrentValue;
+		$row['thawDiscard'] = $this->thawDiscard->CurrentValue;
+		$row['ETCatheter'] = $this->ETCatheter->CurrentValue;
+		$row['ETDifficulty'] = $this->ETDifficulty->CurrentValue;
+		$row['ETEasy'] = $this->ETEasy->CurrentValue;
+		$row['ETComments'] = $this->ETComments->CurrentValue;
+		$row['ETDoctor'] = $this->ETDoctor->CurrentValue;
+		$row['ETEmbryologist'] = $this->ETEmbryologist->CurrentValue;
+		$row['ETDate'] = $this->ETDate->CurrentValue;
+		$row['Day1End'] = $this->Day1End->CurrentValue;
+		return $row;
+	}
+
+	// Load old record
+	protected function loadOldRecord()
+	{
+
+		// Load key values from Session
+		$validKey = TRUE;
+		if (strval($this->getKey("id")) <> "")
+			$this->id->CurrentValue = $this->getKey("id"); // id
+		else
+			$validKey = FALSE;
+
+		// Load old record
+		$this->OldRecordset = NULL;
+		if ($validKey) {
+			$this->CurrentFilter = $this->getRecordFilter();
+			$sql = $this->getCurrentSql();
+			$conn = &$this->getConnection();
+			$this->OldRecordset = LoadRecordset($sql, $conn);
+		}
+		$this->loadRowValues($this->OldRecordset); // Load row values
+		return $validKey;
+	}
+
+	// Render row values based on field settings
+	public function renderRow()
+	{
+		global $Security, $Language, $CurrentLanguage;
+
+		// Initialize URLs
+		$this->ViewUrl = $this->getViewUrl();
+		$this->EditUrl = $this->getEditUrl();
+		$this->InlineEditUrl = $this->getInlineEditUrl();
+		$this->CopyUrl = $this->getCopyUrl();
+		$this->InlineCopyUrl = $this->getInlineCopyUrl();
+		$this->DeleteUrl = $this->getDeleteUrl();
+
+		// Call Row_Rendering event
+		$this->Row_Rendering();
+
+		// Common render codes for all row types
+		// id
+		// RIDNo
+		// Name
+		// ARTCycle
+		// SpermOrigin
+		// InseminatinTechnique
+		// IndicationForART
+		// Day0sino
+		// Day0OocyteStage
+		// Day0PolarBodyPosition
+		// Day0Breakage
+		// Day0Attempts
+		// Day0SPZMorpho
+		// Day0SPZLocation
+		// Day0SpOrgin
+		// Day5Cryoptop
+		// Day1Sperm
+		// Day1PN
+		// Day1PB
+		// Day1Pronucleus
+		// Day1Nucleolus
+		// Day1Halo
+		// Day2SiNo
+		// Day2CellNo
+		// Day2Frag
+		// Day2Symmetry
+		// Day2Cryoptop
+		// Day2Grade
+		// Day2End
+		// Day3Sino
+		// Day3CellNo
+		// Day3Frag
+		// Day3Symmetry
+		// Day3ZP
+		// Day3Vacoules
+		// Day3Grade
+		// Day3Cryoptop
+		// Day3End
+		// Day4SiNo
+		// Day4CellNo
+		// Day4Frag
+		// Day4Symmetry
+		// Day4Grade
+		// Day4Cryoptop
+		// Day4End
+		// Day5CellNo
+		// Day5ICM
+		// Day5TE
+		// Day5Observation
+		// Day5Collapsed
+		// Day5Vacoulles
+		// Day5Grade
+		// Day6CellNo
+		// Day6ICM
+		// Day6TE
+		// Day6Observation
+		// Day6Collapsed
+		// Day6Vacoulles
+		// Day6Grade
+		// Day6Cryoptop
+		// EndSiNo
+		// EndingDay
+		// EndingCellStage
+		// EndingGrade
+		// EndingState
+		// TidNo
+		// DidNO
+		// ICSiIVFDateTime
+		// PrimaryEmbrologist
+		// SecondaryEmbrologist
+		// Incubator
+		// location
+		// OocyteNo
+		// Stage
+		// Remarks
+		// vitrificationDate
+		// vitriPrimaryEmbryologist
+		// vitriSecondaryEmbryologist
+		// vitriEmbryoNo
+		// thawReFrozen
+		// vitriFertilisationDate
+		// vitriDay
+		// vitriStage
+		// vitriGrade
+		// vitriIncubator
+		// vitriTank
+		// vitriCanister
+		// vitriGobiet
+		// vitriViscotube
+		// vitriCryolockNo
+		// vitriCryolockColour
+		// thawDate
+		// thawPrimaryEmbryologist
+		// thawSecondaryEmbryologist
+		// thawET
+		// thawAbserve
+		// thawDiscard
+		// ETCatheter
+		// ETDifficulty
+		// ETEasy
+		// ETComments
+		// ETDoctor
+		// ETEmbryologist
+		// ETDate
+		// Day1End
+
+		if ($this->RowType == ROWTYPE_VIEW) { // View row
+
+			// id
+			$this->id->ViewValue = $this->id->CurrentValue;
+			$this->id->ViewCustomAttributes = "";
+
+			// RIDNo
+			$this->RIDNo->ViewValue = $this->RIDNo->CurrentValue;
+			$this->RIDNo->ViewValue = FormatNumber($this->RIDNo->ViewValue, 0, -2, -2, -2);
+			$this->RIDNo->ViewCustomAttributes = "";
+
+			// Name
+			$this->Name->ViewValue = $this->Name->CurrentValue;
+			$this->Name->ViewCustomAttributes = "";
+
+			// ARTCycle
+			$this->ARTCycle->ViewValue = $this->ARTCycle->CurrentValue;
+			$this->ARTCycle->ViewCustomAttributes = "";
+
+			// SpermOrigin
+			$this->SpermOrigin->ViewValue = $this->SpermOrigin->CurrentValue;
+			$this->SpermOrigin->ViewCustomAttributes = "";
+
+			// InseminatinTechnique
+			$this->InseminatinTechnique->ViewValue = $this->InseminatinTechnique->CurrentValue;
+			$this->InseminatinTechnique->ViewCustomAttributes = "";
+
+			// IndicationForART
+			$this->IndicationForART->ViewValue = $this->IndicationForART->CurrentValue;
+			$this->IndicationForART->ViewCustomAttributes = "";
+
+			// Day0sino
+			$this->Day0sino->ViewValue = $this->Day0sino->CurrentValue;
+			$this->Day0sino->ViewCustomAttributes = "";
+
+			// Day0OocyteStage
+			$this->Day0OocyteStage->ViewValue = $this->Day0OocyteStage->CurrentValue;
+			$this->Day0OocyteStage->ViewCustomAttributes = "";
+
+			// Day0PolarBodyPosition
+			if (strval($this->Day0PolarBodyPosition->CurrentValue) <> "") {
+				$this->Day0PolarBodyPosition->ViewValue = $this->Day0PolarBodyPosition->optionCaption($this->Day0PolarBodyPosition->CurrentValue);
+			} else {
+				$this->Day0PolarBodyPosition->ViewValue = NULL;
+			}
+			$this->Day0PolarBodyPosition->ViewCustomAttributes = "";
+
+			// Day0Breakage
+			if (strval($this->Day0Breakage->CurrentValue) <> "") {
+				$this->Day0Breakage->ViewValue = $this->Day0Breakage->optionCaption($this->Day0Breakage->CurrentValue);
+			} else {
+				$this->Day0Breakage->ViewValue = NULL;
+			}
+			$this->Day0Breakage->ViewCustomAttributes = "";
+
+			// Day0Attempts
+			if (strval($this->Day0Attempts->CurrentValue) <> "") {
+				$this->Day0Attempts->ViewValue = $this->Day0Attempts->optionCaption($this->Day0Attempts->CurrentValue);
+			} else {
+				$this->Day0Attempts->ViewValue = NULL;
+			}
+			$this->Day0Attempts->ViewCustomAttributes = "";
+
+			// Day0SPZMorpho
+			if (strval($this->Day0SPZMorpho->CurrentValue) <> "") {
+				$this->Day0SPZMorpho->ViewValue = $this->Day0SPZMorpho->optionCaption($this->Day0SPZMorpho->CurrentValue);
+			} else {
+				$this->Day0SPZMorpho->ViewValue = NULL;
+			}
+			$this->Day0SPZMorpho->ViewCustomAttributes = "";
+
+			// Day0SPZLocation
+			if (strval($this->Day0SPZLocation->CurrentValue) <> "") {
+				$this->Day0SPZLocation->ViewValue = $this->Day0SPZLocation->optionCaption($this->Day0SPZLocation->CurrentValue);
+			} else {
+				$this->Day0SPZLocation->ViewValue = NULL;
+			}
+			$this->Day0SPZLocation->ViewCustomAttributes = "";
+
+			// Day0SpOrgin
+			if (strval($this->Day0SpOrgin->CurrentValue) <> "") {
+				$this->Day0SpOrgin->ViewValue = $this->Day0SpOrgin->optionCaption($this->Day0SpOrgin->CurrentValue);
+			} else {
+				$this->Day0SpOrgin->ViewValue = NULL;
+			}
+			$this->Day0SpOrgin->ViewCustomAttributes = "";
+
+			// Day5Cryoptop
+			if (strval($this->Day5Cryoptop->CurrentValue) <> "") {
+				$this->Day5Cryoptop->ViewValue = $this->Day5Cryoptop->optionCaption($this->Day5Cryoptop->CurrentValue);
+			} else {
+				$this->Day5Cryoptop->ViewValue = NULL;
+			}
+			$this->Day5Cryoptop->ViewCustomAttributes = "";
+
+			// Day1Sperm
+			$this->Day1Sperm->ViewValue = $this->Day1Sperm->CurrentValue;
+			$this->Day1Sperm->ViewCustomAttributes = "";
+
+			// Day1PN
+			if (strval($this->Day1PN->CurrentValue) <> "") {
+				$this->Day1PN->ViewValue = $this->Day1PN->optionCaption($this->Day1PN->CurrentValue);
+			} else {
+				$this->Day1PN->ViewValue = NULL;
+			}
+			$this->Day1PN->ViewCustomAttributes = "";
+
+			// Day1PB
+			if (strval($this->Day1PB->CurrentValue) <> "") {
+				$this->Day1PB->ViewValue = $this->Day1PB->optionCaption($this->Day1PB->CurrentValue);
+			} else {
+				$this->Day1PB->ViewValue = NULL;
+			}
+			$this->Day1PB->ViewCustomAttributes = "";
+
+			// Day1Pronucleus
+			if (strval($this->Day1Pronucleus->CurrentValue) <> "") {
+				$this->Day1Pronucleus->ViewValue = $this->Day1Pronucleus->optionCaption($this->Day1Pronucleus->CurrentValue);
+			} else {
+				$this->Day1Pronucleus->ViewValue = NULL;
+			}
+			$this->Day1Pronucleus->ViewCustomAttributes = "";
+
+			// Day1Nucleolus
+			if (strval($this->Day1Nucleolus->CurrentValue) <> "") {
+				$this->Day1Nucleolus->ViewValue = $this->Day1Nucleolus->optionCaption($this->Day1Nucleolus->CurrentValue);
+			} else {
+				$this->Day1Nucleolus->ViewValue = NULL;
+			}
+			$this->Day1Nucleolus->ViewCustomAttributes = "";
+
+			// Day1Halo
+			if (strval($this->Day1Halo->CurrentValue) <> "") {
+				$this->Day1Halo->ViewValue = $this->Day1Halo->optionCaption($this->Day1Halo->CurrentValue);
+			} else {
+				$this->Day1Halo->ViewValue = NULL;
+			}
+			$this->Day1Halo->ViewCustomAttributes = "";
+
+			// Day2SiNo
+			$this->Day2SiNo->ViewValue = $this->Day2SiNo->CurrentValue;
+			$this->Day2SiNo->ViewCustomAttributes = "";
+
+			// Day2CellNo
+			$this->Day2CellNo->ViewValue = $this->Day2CellNo->CurrentValue;
+			$this->Day2CellNo->ViewCustomAttributes = "";
+
+			// Day2Frag
+			$this->Day2Frag->ViewValue = $this->Day2Frag->CurrentValue;
+			$this->Day2Frag->ViewCustomAttributes = "";
+
+			// Day2Symmetry
+			$this->Day2Symmetry->ViewValue = $this->Day2Symmetry->CurrentValue;
+			$this->Day2Symmetry->ViewCustomAttributes = "";
+
+			// Day2Cryoptop
+			$this->Day2Cryoptop->ViewValue = $this->Day2Cryoptop->CurrentValue;
+			$this->Day2Cryoptop->ViewCustomAttributes = "";
+
+			// Day2Grade
+			$this->Day2Grade->ViewValue = $this->Day2Grade->CurrentValue;
+			$this->Day2Grade->ViewCustomAttributes = "";
+
+			// Day2End
+			if (strval($this->Day2End->CurrentValue) <> "") {
+				$this->Day2End->ViewValue = $this->Day2End->optionCaption($this->Day2End->CurrentValue);
+			} else {
+				$this->Day2End->ViewValue = NULL;
+			}
+			$this->Day2End->ViewCustomAttributes = "";
+
+			// Day3Sino
+			$this->Day3Sino->ViewValue = $this->Day3Sino->CurrentValue;
+			$this->Day3Sino->ViewCustomAttributes = "";
+
+			// Day3CellNo
+			$this->Day3CellNo->ViewValue = $this->Day3CellNo->CurrentValue;
+			$this->Day3CellNo->ViewCustomAttributes = "";
+
+			// Day3Frag
+			if (strval($this->Day3Frag->CurrentValue) <> "") {
+				$this->Day3Frag->ViewValue = $this->Day3Frag->optionCaption($this->Day3Frag->CurrentValue);
+			} else {
+				$this->Day3Frag->ViewValue = NULL;
+			}
+			$this->Day3Frag->ViewCustomAttributes = "";
+
+			// Day3Symmetry
+			if (strval($this->Day3Symmetry->CurrentValue) <> "") {
+				$this->Day3Symmetry->ViewValue = $this->Day3Symmetry->optionCaption($this->Day3Symmetry->CurrentValue);
+			} else {
+				$this->Day3Symmetry->ViewValue = NULL;
+			}
+			$this->Day3Symmetry->ViewCustomAttributes = "";
+
+			// Day3ZP
+			if (strval($this->Day3ZP->CurrentValue) <> "") {
+				$this->Day3ZP->ViewValue = $this->Day3ZP->optionCaption($this->Day3ZP->CurrentValue);
+			} else {
+				$this->Day3ZP->ViewValue = NULL;
+			}
+			$this->Day3ZP->ViewCustomAttributes = "";
+
+			// Day3Vacoules
+			if (strval($this->Day3Vacoules->CurrentValue) <> "") {
+				$this->Day3Vacoules->ViewValue = $this->Day3Vacoules->optionCaption($this->Day3Vacoules->CurrentValue);
+			} else {
+				$this->Day3Vacoules->ViewValue = NULL;
+			}
+			$this->Day3Vacoules->ViewCustomAttributes = "";
+
+			// Day3Grade
+			if (strval($this->Day3Grade->CurrentValue) <> "") {
+				$this->Day3Grade->ViewValue = $this->Day3Grade->optionCaption($this->Day3Grade->CurrentValue);
+			} else {
+				$this->Day3Grade->ViewValue = NULL;
+			}
+			$this->Day3Grade->ViewCustomAttributes = "";
+
+			// Day3Cryoptop
+			if (strval($this->Day3Cryoptop->CurrentValue) <> "") {
+				$this->Day3Cryoptop->ViewValue = $this->Day3Cryoptop->optionCaption($this->Day3Cryoptop->CurrentValue);
+			} else {
+				$this->Day3Cryoptop->ViewValue = NULL;
+			}
+			$this->Day3Cryoptop->ViewCustomAttributes = "";
+
+			// Day3End
+			if (strval($this->Day3End->CurrentValue) <> "") {
+				$this->Day3End->ViewValue = $this->Day3End->optionCaption($this->Day3End->CurrentValue);
+			} else {
+				$this->Day3End->ViewValue = NULL;
+			}
+			$this->Day3End->ViewCustomAttributes = "";
+
+			// Day4SiNo
+			$this->Day4SiNo->ViewValue = $this->Day4SiNo->CurrentValue;
+			$this->Day4SiNo->ViewCustomAttributes = "";
+
+			// Day4CellNo
+			$this->Day4CellNo->ViewValue = $this->Day4CellNo->CurrentValue;
+			$this->Day4CellNo->ViewCustomAttributes = "";
+
+			// Day4Frag
+			$this->Day4Frag->ViewValue = $this->Day4Frag->CurrentValue;
+			$this->Day4Frag->ViewCustomAttributes = "";
+
+			// Day4Symmetry
+			$this->Day4Symmetry->ViewValue = $this->Day4Symmetry->CurrentValue;
+			$this->Day4Symmetry->ViewCustomAttributes = "";
+
+			// Day4Grade
+			$this->Day4Grade->ViewValue = $this->Day4Grade->CurrentValue;
+			$this->Day4Grade->ViewCustomAttributes = "";
+
+			// Day4Cryoptop
+			if (strval($this->Day4Cryoptop->CurrentValue) <> "") {
+				$this->Day4Cryoptop->ViewValue = $this->Day4Cryoptop->optionCaption($this->Day4Cryoptop->CurrentValue);
+			} else {
+				$this->Day4Cryoptop->ViewValue = NULL;
+			}
+			$this->Day4Cryoptop->ViewCustomAttributes = "";
+
+			// Day4End
+			if (strval($this->Day4End->CurrentValue) <> "") {
+				$this->Day4End->ViewValue = $this->Day4End->optionCaption($this->Day4End->CurrentValue);
+			} else {
+				$this->Day4End->ViewValue = NULL;
+			}
+			$this->Day4End->ViewCustomAttributes = "";
+
+			// Day5CellNo
+			$this->Day5CellNo->ViewValue = $this->Day5CellNo->CurrentValue;
+			$this->Day5CellNo->ViewCustomAttributes = "";
+
+			// Day5ICM
+			if (strval($this->Day5ICM->CurrentValue) <> "") {
+				$this->Day5ICM->ViewValue = $this->Day5ICM->optionCaption($this->Day5ICM->CurrentValue);
+			} else {
+				$this->Day5ICM->ViewValue = NULL;
+			}
+			$this->Day5ICM->ViewCustomAttributes = "";
+
+			// Day5TE
+			if (strval($this->Day5TE->CurrentValue) <> "") {
+				$this->Day5TE->ViewValue = $this->Day5TE->optionCaption($this->Day5TE->CurrentValue);
+			} else {
+				$this->Day5TE->ViewValue = NULL;
+			}
+			$this->Day5TE->ViewCustomAttributes = "";
+
+			// Day5Observation
+			if (strval($this->Day5Observation->CurrentValue) <> "") {
+				$this->Day5Observation->ViewValue = $this->Day5Observation->optionCaption($this->Day5Observation->CurrentValue);
+			} else {
+				$this->Day5Observation->ViewValue = NULL;
+			}
+			$this->Day5Observation->ViewCustomAttributes = "";
+
+			// Day5Collapsed
+			if (strval($this->Day5Collapsed->CurrentValue) <> "") {
+				$this->Day5Collapsed->ViewValue = $this->Day5Collapsed->optionCaption($this->Day5Collapsed->CurrentValue);
+			} else {
+				$this->Day5Collapsed->ViewValue = NULL;
+			}
+			$this->Day5Collapsed->ViewCustomAttributes = "";
+
+			// Day5Vacoulles
+			if (strval($this->Day5Vacoulles->CurrentValue) <> "") {
+				$this->Day5Vacoulles->ViewValue = $this->Day5Vacoulles->optionCaption($this->Day5Vacoulles->CurrentValue);
+			} else {
+				$this->Day5Vacoulles->ViewValue = NULL;
+			}
+			$this->Day5Vacoulles->ViewCustomAttributes = "";
+
+			// Day5Grade
+			if (strval($this->Day5Grade->CurrentValue) <> "") {
+				$this->Day5Grade->ViewValue = $this->Day5Grade->optionCaption($this->Day5Grade->CurrentValue);
+			} else {
+				$this->Day5Grade->ViewValue = NULL;
+			}
+			$this->Day5Grade->ViewCustomAttributes = "";
+
+			// Day6CellNo
+			$this->Day6CellNo->ViewValue = $this->Day6CellNo->CurrentValue;
+			$this->Day6CellNo->ViewCustomAttributes = "";
+
+			// Day6ICM
+			if (strval($this->Day6ICM->CurrentValue) <> "") {
+				$this->Day6ICM->ViewValue = $this->Day6ICM->optionCaption($this->Day6ICM->CurrentValue);
+			} else {
+				$this->Day6ICM->ViewValue = NULL;
+			}
+			$this->Day6ICM->ViewCustomAttributes = "";
+
+			// Day6TE
+			if (strval($this->Day6TE->CurrentValue) <> "") {
+				$this->Day6TE->ViewValue = $this->Day6TE->optionCaption($this->Day6TE->CurrentValue);
+			} else {
+				$this->Day6TE->ViewValue = NULL;
+			}
+			$this->Day6TE->ViewCustomAttributes = "";
+
+			// Day6Observation
+			if (strval($this->Day6Observation->CurrentValue) <> "") {
+				$this->Day6Observation->ViewValue = $this->Day6Observation->optionCaption($this->Day6Observation->CurrentValue);
+			} else {
+				$this->Day6Observation->ViewValue = NULL;
+			}
+			$this->Day6Observation->ViewCustomAttributes = "";
+
+			// Day6Collapsed
+			if (strval($this->Day6Collapsed->CurrentValue) <> "") {
+				$this->Day6Collapsed->ViewValue = $this->Day6Collapsed->optionCaption($this->Day6Collapsed->CurrentValue);
+			} else {
+				$this->Day6Collapsed->ViewValue = NULL;
+			}
+			$this->Day6Collapsed->ViewCustomAttributes = "";
+
+			// Day6Vacoulles
+			if (strval($this->Day6Vacoulles->CurrentValue) <> "") {
+				$this->Day6Vacoulles->ViewValue = $this->Day6Vacoulles->optionCaption($this->Day6Vacoulles->CurrentValue);
+			} else {
+				$this->Day6Vacoulles->ViewValue = NULL;
+			}
+			$this->Day6Vacoulles->ViewCustomAttributes = "";
+
+			// Day6Grade
+			if (strval($this->Day6Grade->CurrentValue) <> "") {
+				$this->Day6Grade->ViewValue = $this->Day6Grade->optionCaption($this->Day6Grade->CurrentValue);
+			} else {
+				$this->Day6Grade->ViewValue = NULL;
+			}
+			$this->Day6Grade->ViewCustomAttributes = "";
+
+			// Day6Cryoptop
+			$this->Day6Cryoptop->ViewValue = $this->Day6Cryoptop->CurrentValue;
+			$this->Day6Cryoptop->ViewCustomAttributes = "";
+
+			// EndSiNo
+			$this->EndSiNo->ViewValue = $this->EndSiNo->CurrentValue;
+			$this->EndSiNo->ViewCustomAttributes = "";
+
+			// EndingDay
+			if (strval($this->EndingDay->CurrentValue) <> "") {
+				$this->EndingDay->ViewValue = $this->EndingDay->optionCaption($this->EndingDay->CurrentValue);
+			} else {
+				$this->EndingDay->ViewValue = NULL;
+			}
+			$this->EndingDay->ViewCustomAttributes = "";
+
+			// EndingCellStage
+			$this->EndingCellStage->ViewValue = $this->EndingCellStage->CurrentValue;
+			$this->EndingCellStage->ViewCustomAttributes = "";
+
+			// EndingGrade
+			if (strval($this->EndingGrade->CurrentValue) <> "") {
+				$this->EndingGrade->ViewValue = $this->EndingGrade->optionCaption($this->EndingGrade->CurrentValue);
+			} else {
+				$this->EndingGrade->ViewValue = NULL;
+			}
+			$this->EndingGrade->ViewCustomAttributes = "";
+
+			// EndingState
+			if (strval($this->EndingState->CurrentValue) <> "") {
+				$this->EndingState->ViewValue = $this->EndingState->optionCaption($this->EndingState->CurrentValue);
+			} else {
+				$this->EndingState->ViewValue = NULL;
+			}
+			$this->EndingState->ViewCustomAttributes = "";
+
+			// TidNo
+			$this->TidNo->ViewValue = $this->TidNo->CurrentValue;
+			$this->TidNo->ViewValue = FormatNumber($this->TidNo->ViewValue, 0, -2, -2, -2);
+			$this->TidNo->ViewCustomAttributes = "";
+
+			// DidNO
+			$this->DidNO->ViewValue = $this->DidNO->CurrentValue;
+			$this->DidNO->ViewCustomAttributes = "";
+
+			// ICSiIVFDateTime
+			$this->ICSiIVFDateTime->ViewValue = $this->ICSiIVFDateTime->CurrentValue;
+			$this->ICSiIVFDateTime->ViewValue = FormatDateTime($this->ICSiIVFDateTime->ViewValue, 0);
+			$this->ICSiIVFDateTime->ViewCustomAttributes = "";
+
+			// PrimaryEmbrologist
+			$this->PrimaryEmbrologist->ViewValue = $this->PrimaryEmbrologist->CurrentValue;
+			$this->PrimaryEmbrologist->ViewCustomAttributes = "";
+
+			// SecondaryEmbrologist
+			$this->SecondaryEmbrologist->ViewValue = $this->SecondaryEmbrologist->CurrentValue;
+			$this->SecondaryEmbrologist->ViewCustomAttributes = "";
+
+			// Incubator
+			$this->Incubator->ViewValue = $this->Incubator->CurrentValue;
+			$this->Incubator->ViewCustomAttributes = "";
+
+			// location
+			$this->location->ViewValue = $this->location->CurrentValue;
+			$this->location->ViewCustomAttributes = "";
+
+			// OocyteNo
+			$this->OocyteNo->ViewValue = $this->OocyteNo->CurrentValue;
+			$this->OocyteNo->ViewCustomAttributes = "";
+
+			// Stage
+			if (strval($this->Stage->CurrentValue) <> "") {
+				$this->Stage->ViewValue = $this->Stage->optionCaption($this->Stage->CurrentValue);
+			} else {
+				$this->Stage->ViewValue = NULL;
+			}
+			$this->Stage->ViewCustomAttributes = "";
+
+			// Remarks
+			$this->Remarks->ViewValue = $this->Remarks->CurrentValue;
+			$this->Remarks->ViewCustomAttributes = "";
+
+			// vitrificationDate
+			$this->vitrificationDate->ViewValue = $this->vitrificationDate->CurrentValue;
+			$this->vitrificationDate->ViewValue = FormatDateTime($this->vitrificationDate->ViewValue, 0);
+			$this->vitrificationDate->ViewCustomAttributes = "";
+
+			// vitriPrimaryEmbryologist
+			$this->vitriPrimaryEmbryologist->ViewValue = $this->vitriPrimaryEmbryologist->CurrentValue;
+			$this->vitriPrimaryEmbryologist->ViewCustomAttributes = "";
+
+			// vitriSecondaryEmbryologist
+			$this->vitriSecondaryEmbryologist->ViewValue = $this->vitriSecondaryEmbryologist->CurrentValue;
+			$this->vitriSecondaryEmbryologist->ViewCustomAttributes = "";
+
+			// vitriEmbryoNo
+			$this->vitriEmbryoNo->ViewValue = $this->vitriEmbryoNo->CurrentValue;
+			$this->vitriEmbryoNo->ViewCustomAttributes = "";
+
+			// thawReFrozen
+			if (strval($this->thawReFrozen->CurrentValue) <> "") {
+				$this->thawReFrozen->ViewValue = new OptionValues();
+				$arwrk = explode(",", strval($this->thawReFrozen->CurrentValue));
+				$cnt = count($arwrk);
+				for ($ari = 0; $ari < $cnt; $ari++)
+					$this->thawReFrozen->ViewValue->add($this->thawReFrozen->optionCaption(trim($arwrk[$ari])));
+			} else {
+				$this->thawReFrozen->ViewValue = NULL;
+			}
+			$this->thawReFrozen->ViewCustomAttributes = "";
+
+			// vitriFertilisationDate
+			$this->vitriFertilisationDate->ViewValue = $this->vitriFertilisationDate->CurrentValue;
+			$this->vitriFertilisationDate->ViewValue = FormatDateTime($this->vitriFertilisationDate->ViewValue, 0);
+			$this->vitriFertilisationDate->ViewCustomAttributes = "";
+
+			// vitriDay
+			if (strval($this->vitriDay->CurrentValue) <> "") {
+				$this->vitriDay->ViewValue = $this->vitriDay->optionCaption($this->vitriDay->CurrentValue);
+			} else {
+				$this->vitriDay->ViewValue = NULL;
+			}
+			$this->vitriDay->ViewCustomAttributes = "";
+
+			// vitriStage
+			$this->vitriStage->ViewValue = $this->vitriStage->CurrentValue;
+			$this->vitriStage->ViewCustomAttributes = "";
+
+			// vitriGrade
+			if (strval($this->vitriGrade->CurrentValue) <> "") {
+				$this->vitriGrade->ViewValue = $this->vitriGrade->optionCaption($this->vitriGrade->CurrentValue);
+			} else {
+				$this->vitriGrade->ViewValue = NULL;
+			}
+			$this->vitriGrade->ViewCustomAttributes = "";
+
+			// vitriIncubator
+			$this->vitriIncubator->ViewValue = $this->vitriIncubator->CurrentValue;
+			$this->vitriIncubator->ViewCustomAttributes = "";
+
+			// vitriTank
+			$this->vitriTank->ViewValue = $this->vitriTank->CurrentValue;
+			$this->vitriTank->ViewCustomAttributes = "";
+
+			// vitriCanister
+			$this->vitriCanister->ViewValue = $this->vitriCanister->CurrentValue;
+			$this->vitriCanister->ViewCustomAttributes = "";
+
+			// vitriGobiet
+			$this->vitriGobiet->ViewValue = $this->vitriGobiet->CurrentValue;
+			$this->vitriGobiet->ViewCustomAttributes = "";
+
+			// vitriViscotube
+			$this->vitriViscotube->ViewValue = $this->vitriViscotube->CurrentValue;
+			$this->vitriViscotube->ViewCustomAttributes = "";
+
+			// vitriCryolockNo
+			$this->vitriCryolockNo->ViewValue = $this->vitriCryolockNo->CurrentValue;
+			$this->vitriCryolockNo->ViewCustomAttributes = "";
+
+			// vitriCryolockColour
+			$this->vitriCryolockColour->ViewValue = $this->vitriCryolockColour->CurrentValue;
+			$this->vitriCryolockColour->ViewCustomAttributes = "";
+
+			// thawDate
+			$this->thawDate->ViewValue = $this->thawDate->CurrentValue;
+			$this->thawDate->ViewValue = FormatDateTime($this->thawDate->ViewValue, 0);
+			$this->thawDate->ViewCustomAttributes = "";
+
+			// thawPrimaryEmbryologist
+			$this->thawPrimaryEmbryologist->ViewValue = $this->thawPrimaryEmbryologist->CurrentValue;
+			$this->thawPrimaryEmbryologist->ViewCustomAttributes = "";
+
+			// thawSecondaryEmbryologist
+			$this->thawSecondaryEmbryologist->ViewValue = $this->thawSecondaryEmbryologist->CurrentValue;
+			$this->thawSecondaryEmbryologist->ViewCustomAttributes = "";
+
+			// thawET
+			if (strval($this->thawET->CurrentValue) <> "") {
+				$this->thawET->ViewValue = $this->thawET->optionCaption($this->thawET->CurrentValue);
+			} else {
+				$this->thawET->ViewValue = NULL;
+			}
+			$this->thawET->ViewCustomAttributes = "";
+
+			// thawAbserve
+			$this->thawAbserve->ViewValue = $this->thawAbserve->CurrentValue;
+			$this->thawAbserve->ViewCustomAttributes = "";
+
+			// thawDiscard
+			$this->thawDiscard->ViewValue = $this->thawDiscard->CurrentValue;
+			$this->thawDiscard->ViewCustomAttributes = "";
+
+			// ETCatheter
+			$this->ETCatheter->ViewValue = $this->ETCatheter->CurrentValue;
+			$this->ETCatheter->ViewCustomAttributes = "";
+
+			// ETDifficulty
+			if (strval($this->ETDifficulty->CurrentValue) <> "") {
+				$this->ETDifficulty->ViewValue = $this->ETDifficulty->optionCaption($this->ETDifficulty->CurrentValue);
+			} else {
+				$this->ETDifficulty->ViewValue = NULL;
+			}
+			$this->ETDifficulty->ViewCustomAttributes = "";
+
+			// ETEasy
+			if (strval($this->ETEasy->CurrentValue) <> "") {
+				$this->ETEasy->ViewValue = new OptionValues();
+				$arwrk = explode(",", strval($this->ETEasy->CurrentValue));
+				$cnt = count($arwrk);
+				for ($ari = 0; $ari < $cnt; $ari++)
+					$this->ETEasy->ViewValue->add($this->ETEasy->optionCaption(trim($arwrk[$ari])));
+			} else {
+				$this->ETEasy->ViewValue = NULL;
+			}
+			$this->ETEasy->ViewCustomAttributes = "";
+
+			// ETComments
+			$this->ETComments->ViewValue = $this->ETComments->CurrentValue;
+			$this->ETComments->ViewCustomAttributes = "";
+
+			// ETDoctor
+			$this->ETDoctor->ViewValue = $this->ETDoctor->CurrentValue;
+			$this->ETDoctor->ViewCustomAttributes = "";
+
+			// ETEmbryologist
+			$this->ETEmbryologist->ViewValue = $this->ETEmbryologist->CurrentValue;
+			$this->ETEmbryologist->ViewCustomAttributes = "";
+
+			// ETDate
+			$this->ETDate->ViewValue = $this->ETDate->CurrentValue;
+			$this->ETDate->ViewValue = FormatDateTime($this->ETDate->ViewValue, 0);
+			$this->ETDate->ViewCustomAttributes = "";
+
+			// Day1End
+			if (strval($this->Day1End->CurrentValue) <> "") {
+				$this->Day1End->ViewValue = $this->Day1End->optionCaption($this->Day1End->CurrentValue);
+			} else {
+				$this->Day1End->ViewValue = NULL;
+			}
+			$this->Day1End->ViewCustomAttributes = "";
+
+			// id
+			$this->id->LinkCustomAttributes = "";
+			$this->id->HrefValue = "";
+			$this->id->TooltipValue = "";
+
+			// RIDNo
+			$this->RIDNo->LinkCustomAttributes = "";
+			$this->RIDNo->HrefValue = "";
+			$this->RIDNo->TooltipValue = "";
+
+			// Name
+			$this->Name->LinkCustomAttributes = "";
+			$this->Name->HrefValue = "";
+			$this->Name->TooltipValue = "";
+
+			// ARTCycle
+			$this->ARTCycle->LinkCustomAttributes = "";
+			$this->ARTCycle->HrefValue = "";
+			$this->ARTCycle->TooltipValue = "";
+
+			// SpermOrigin
+			$this->SpermOrigin->LinkCustomAttributes = "";
+			$this->SpermOrigin->HrefValue = "";
+			$this->SpermOrigin->TooltipValue = "";
+
+			// InseminatinTechnique
+			$this->InseminatinTechnique->LinkCustomAttributes = "";
+			$this->InseminatinTechnique->HrefValue = "";
+			$this->InseminatinTechnique->TooltipValue = "";
+
+			// IndicationForART
+			$this->IndicationForART->LinkCustomAttributes = "";
+			$this->IndicationForART->HrefValue = "";
+			$this->IndicationForART->TooltipValue = "";
+
+			// Day0sino
+			$this->Day0sino->LinkCustomAttributes = "";
+			$this->Day0sino->HrefValue = "";
+			$this->Day0sino->TooltipValue = "";
+
+			// Day0OocyteStage
+			$this->Day0OocyteStage->LinkCustomAttributes = "";
+			$this->Day0OocyteStage->HrefValue = "";
+			$this->Day0OocyteStage->TooltipValue = "";
+
+			// Day0PolarBodyPosition
+			$this->Day0PolarBodyPosition->LinkCustomAttributes = "";
+			$this->Day0PolarBodyPosition->HrefValue = "";
+			$this->Day0PolarBodyPosition->TooltipValue = "";
+
+			// Day0Breakage
+			$this->Day0Breakage->LinkCustomAttributes = "";
+			$this->Day0Breakage->HrefValue = "";
+			$this->Day0Breakage->TooltipValue = "";
+
+			// Day0Attempts
+			$this->Day0Attempts->LinkCustomAttributes = "";
+			$this->Day0Attempts->HrefValue = "";
+			$this->Day0Attempts->TooltipValue = "";
+
+			// Day0SPZMorpho
+			$this->Day0SPZMorpho->LinkCustomAttributes = "";
+			$this->Day0SPZMorpho->HrefValue = "";
+			$this->Day0SPZMorpho->TooltipValue = "";
+
+			// Day0SPZLocation
+			$this->Day0SPZLocation->LinkCustomAttributes = "";
+			$this->Day0SPZLocation->HrefValue = "";
+			$this->Day0SPZLocation->TooltipValue = "";
+
+			// Day0SpOrgin
+			$this->Day0SpOrgin->LinkCustomAttributes = "";
+			$this->Day0SpOrgin->HrefValue = "";
+			$this->Day0SpOrgin->TooltipValue = "";
+
+			// Day5Cryoptop
+			$this->Day5Cryoptop->LinkCustomAttributes = "";
+			$this->Day5Cryoptop->HrefValue = "";
+			$this->Day5Cryoptop->TooltipValue = "";
+
+			// Day1Sperm
+			$this->Day1Sperm->LinkCustomAttributes = "";
+			$this->Day1Sperm->HrefValue = "";
+			$this->Day1Sperm->TooltipValue = "";
+
+			// Day1PN
+			$this->Day1PN->LinkCustomAttributes = "";
+			$this->Day1PN->HrefValue = "";
+			$this->Day1PN->TooltipValue = "";
+
+			// Day1PB
+			$this->Day1PB->LinkCustomAttributes = "";
+			$this->Day1PB->HrefValue = "";
+			$this->Day1PB->TooltipValue = "";
+
+			// Day1Pronucleus
+			$this->Day1Pronucleus->LinkCustomAttributes = "";
+			$this->Day1Pronucleus->HrefValue = "";
+			$this->Day1Pronucleus->TooltipValue = "";
+
+			// Day1Nucleolus
+			$this->Day1Nucleolus->LinkCustomAttributes = "";
+			$this->Day1Nucleolus->HrefValue = "";
+			$this->Day1Nucleolus->TooltipValue = "";
+
+			// Day1Halo
+			$this->Day1Halo->LinkCustomAttributes = "";
+			$this->Day1Halo->HrefValue = "";
+			$this->Day1Halo->TooltipValue = "";
+
+			// Day2SiNo
+			$this->Day2SiNo->LinkCustomAttributes = "";
+			$this->Day2SiNo->HrefValue = "";
+			$this->Day2SiNo->TooltipValue = "";
+
+			// Day2CellNo
+			$this->Day2CellNo->LinkCustomAttributes = "";
+			$this->Day2CellNo->HrefValue = "";
+			$this->Day2CellNo->TooltipValue = "";
+
+			// Day2Frag
+			$this->Day2Frag->LinkCustomAttributes = "";
+			$this->Day2Frag->HrefValue = "";
+			$this->Day2Frag->TooltipValue = "";
+
+			// Day2Symmetry
+			$this->Day2Symmetry->LinkCustomAttributes = "";
+			$this->Day2Symmetry->HrefValue = "";
+			$this->Day2Symmetry->TooltipValue = "";
+
+			// Day2Cryoptop
+			$this->Day2Cryoptop->LinkCustomAttributes = "";
+			$this->Day2Cryoptop->HrefValue = "";
+			$this->Day2Cryoptop->TooltipValue = "";
+
+			// Day2Grade
+			$this->Day2Grade->LinkCustomAttributes = "";
+			$this->Day2Grade->HrefValue = "";
+			$this->Day2Grade->TooltipValue = "";
+
+			// Day2End
+			$this->Day2End->LinkCustomAttributes = "";
+			$this->Day2End->HrefValue = "";
+			$this->Day2End->TooltipValue = "";
+
+			// Day3Sino
+			$this->Day3Sino->LinkCustomAttributes = "";
+			$this->Day3Sino->HrefValue = "";
+			$this->Day3Sino->TooltipValue = "";
+
+			// Day3CellNo
+			$this->Day3CellNo->LinkCustomAttributes = "";
+			$this->Day3CellNo->HrefValue = "";
+			$this->Day3CellNo->TooltipValue = "";
+
+			// Day3Frag
+			$this->Day3Frag->LinkCustomAttributes = "";
+			$this->Day3Frag->HrefValue = "";
+			$this->Day3Frag->TooltipValue = "";
+
+			// Day3Symmetry
+			$this->Day3Symmetry->LinkCustomAttributes = "";
+			$this->Day3Symmetry->HrefValue = "";
+			$this->Day3Symmetry->TooltipValue = "";
+
+			// Day3ZP
+			$this->Day3ZP->LinkCustomAttributes = "";
+			$this->Day3ZP->HrefValue = "";
+			$this->Day3ZP->TooltipValue = "";
+
+			// Day3Vacoules
+			$this->Day3Vacoules->LinkCustomAttributes = "";
+			$this->Day3Vacoules->HrefValue = "";
+			$this->Day3Vacoules->TooltipValue = "";
+
+			// Day3Grade
+			$this->Day3Grade->LinkCustomAttributes = "";
+			$this->Day3Grade->HrefValue = "";
+			$this->Day3Grade->TooltipValue = "";
+
+			// Day3Cryoptop
+			$this->Day3Cryoptop->LinkCustomAttributes = "";
+			$this->Day3Cryoptop->HrefValue = "";
+			$this->Day3Cryoptop->TooltipValue = "";
+
+			// Day3End
+			$this->Day3End->LinkCustomAttributes = "";
+			$this->Day3End->HrefValue = "";
+			$this->Day3End->TooltipValue = "";
+
+			// Day4SiNo
+			$this->Day4SiNo->LinkCustomAttributes = "";
+			$this->Day4SiNo->HrefValue = "";
+			$this->Day4SiNo->TooltipValue = "";
+
+			// Day4CellNo
+			$this->Day4CellNo->LinkCustomAttributes = "";
+			$this->Day4CellNo->HrefValue = "";
+			$this->Day4CellNo->TooltipValue = "";
+
+			// Day4Frag
+			$this->Day4Frag->LinkCustomAttributes = "";
+			$this->Day4Frag->HrefValue = "";
+			$this->Day4Frag->TooltipValue = "";
+
+			// Day4Symmetry
+			$this->Day4Symmetry->LinkCustomAttributes = "";
+			$this->Day4Symmetry->HrefValue = "";
+			$this->Day4Symmetry->TooltipValue = "";
+
+			// Day4Grade
+			$this->Day4Grade->LinkCustomAttributes = "";
+			$this->Day4Grade->HrefValue = "";
+			$this->Day4Grade->TooltipValue = "";
+
+			// Day4Cryoptop
+			$this->Day4Cryoptop->LinkCustomAttributes = "";
+			$this->Day4Cryoptop->HrefValue = "";
+			$this->Day4Cryoptop->TooltipValue = "";
+
+			// Day4End
+			$this->Day4End->LinkCustomAttributes = "";
+			$this->Day4End->HrefValue = "";
+			$this->Day4End->TooltipValue = "";
+
+			// Day5CellNo
+			$this->Day5CellNo->LinkCustomAttributes = "";
+			$this->Day5CellNo->HrefValue = "";
+			$this->Day5CellNo->TooltipValue = "";
+
+			// Day5ICM
+			$this->Day5ICM->LinkCustomAttributes = "";
+			$this->Day5ICM->HrefValue = "";
+			$this->Day5ICM->TooltipValue = "";
+
+			// Day5TE
+			$this->Day5TE->LinkCustomAttributes = "";
+			$this->Day5TE->HrefValue = "";
+			$this->Day5TE->TooltipValue = "";
+
+			// Day5Observation
+			$this->Day5Observation->LinkCustomAttributes = "";
+			$this->Day5Observation->HrefValue = "";
+			$this->Day5Observation->TooltipValue = "";
+
+			// Day5Collapsed
+			$this->Day5Collapsed->LinkCustomAttributes = "";
+			$this->Day5Collapsed->HrefValue = "";
+			$this->Day5Collapsed->TooltipValue = "";
+
+			// Day5Vacoulles
+			$this->Day5Vacoulles->LinkCustomAttributes = "";
+			$this->Day5Vacoulles->HrefValue = "";
+			$this->Day5Vacoulles->TooltipValue = "";
+
+			// Day5Grade
+			$this->Day5Grade->LinkCustomAttributes = "";
+			$this->Day5Grade->HrefValue = "";
+			$this->Day5Grade->TooltipValue = "";
+
+			// Day6CellNo
+			$this->Day6CellNo->LinkCustomAttributes = "";
+			$this->Day6CellNo->HrefValue = "";
+			$this->Day6CellNo->TooltipValue = "";
+
+			// Day6ICM
+			$this->Day6ICM->LinkCustomAttributes = "";
+			$this->Day6ICM->HrefValue = "";
+			$this->Day6ICM->TooltipValue = "";
+
+			// Day6TE
+			$this->Day6TE->LinkCustomAttributes = "";
+			$this->Day6TE->HrefValue = "";
+			$this->Day6TE->TooltipValue = "";
+
+			// Day6Observation
+			$this->Day6Observation->LinkCustomAttributes = "";
+			$this->Day6Observation->HrefValue = "";
+			$this->Day6Observation->TooltipValue = "";
+
+			// Day6Collapsed
+			$this->Day6Collapsed->LinkCustomAttributes = "";
+			$this->Day6Collapsed->HrefValue = "";
+			$this->Day6Collapsed->TooltipValue = "";
+
+			// Day6Vacoulles
+			$this->Day6Vacoulles->LinkCustomAttributes = "";
+			$this->Day6Vacoulles->HrefValue = "";
+			$this->Day6Vacoulles->TooltipValue = "";
+
+			// Day6Grade
+			$this->Day6Grade->LinkCustomAttributes = "";
+			$this->Day6Grade->HrefValue = "";
+			$this->Day6Grade->TooltipValue = "";
+
+			// Day6Cryoptop
+			$this->Day6Cryoptop->LinkCustomAttributes = "";
+			$this->Day6Cryoptop->HrefValue = "";
+			$this->Day6Cryoptop->TooltipValue = "";
+
+			// EndSiNo
+			$this->EndSiNo->LinkCustomAttributes = "";
+			$this->EndSiNo->HrefValue = "";
+			$this->EndSiNo->TooltipValue = "";
+
+			// EndingDay
+			$this->EndingDay->LinkCustomAttributes = "";
+			$this->EndingDay->HrefValue = "";
+			$this->EndingDay->TooltipValue = "";
+
+			// EndingCellStage
+			$this->EndingCellStage->LinkCustomAttributes = "";
+			$this->EndingCellStage->HrefValue = "";
+			$this->EndingCellStage->TooltipValue = "";
+
+			// EndingGrade
+			$this->EndingGrade->LinkCustomAttributes = "";
+			$this->EndingGrade->HrefValue = "";
+			$this->EndingGrade->TooltipValue = "";
+
+			// EndingState
+			$this->EndingState->LinkCustomAttributes = "";
+			$this->EndingState->HrefValue = "";
+			$this->EndingState->TooltipValue = "";
+
+			// TidNo
+			$this->TidNo->LinkCustomAttributes = "";
+			$this->TidNo->HrefValue = "";
+			$this->TidNo->TooltipValue = "";
+
+			// DidNO
+			$this->DidNO->LinkCustomAttributes = "";
+			$this->DidNO->HrefValue = "";
+			$this->DidNO->TooltipValue = "";
+
+			// ICSiIVFDateTime
+			$this->ICSiIVFDateTime->LinkCustomAttributes = "";
+			$this->ICSiIVFDateTime->HrefValue = "";
+			$this->ICSiIVFDateTime->TooltipValue = "";
+
+			// PrimaryEmbrologist
+			$this->PrimaryEmbrologist->LinkCustomAttributes = "";
+			$this->PrimaryEmbrologist->HrefValue = "";
+			$this->PrimaryEmbrologist->TooltipValue = "";
+
+			// SecondaryEmbrologist
+			$this->SecondaryEmbrologist->LinkCustomAttributes = "";
+			$this->SecondaryEmbrologist->HrefValue = "";
+			$this->SecondaryEmbrologist->TooltipValue = "";
+
+			// Incubator
+			$this->Incubator->LinkCustomAttributes = "";
+			$this->Incubator->HrefValue = "";
+			$this->Incubator->TooltipValue = "";
+
+			// location
+			$this->location->LinkCustomAttributes = "";
+			$this->location->HrefValue = "";
+			$this->location->TooltipValue = "";
+
+			// OocyteNo
+			$this->OocyteNo->LinkCustomAttributes = "";
+			$this->OocyteNo->HrefValue = "";
+			$this->OocyteNo->TooltipValue = "";
+
+			// Stage
+			$this->Stage->LinkCustomAttributes = "";
+			$this->Stage->HrefValue = "";
+			$this->Stage->TooltipValue = "";
+
+			// Remarks
+			$this->Remarks->LinkCustomAttributes = "";
+			$this->Remarks->HrefValue = "";
+			$this->Remarks->TooltipValue = "";
+
+			// vitrificationDate
+			$this->vitrificationDate->LinkCustomAttributes = "";
+			$this->vitrificationDate->HrefValue = "";
+			$this->vitrificationDate->TooltipValue = "";
+
+			// vitriPrimaryEmbryologist
+			$this->vitriPrimaryEmbryologist->LinkCustomAttributes = "";
+			$this->vitriPrimaryEmbryologist->HrefValue = "";
+			$this->vitriPrimaryEmbryologist->TooltipValue = "";
+
+			// vitriSecondaryEmbryologist
+			$this->vitriSecondaryEmbryologist->LinkCustomAttributes = "";
+			$this->vitriSecondaryEmbryologist->HrefValue = "";
+			$this->vitriSecondaryEmbryologist->TooltipValue = "";
+
+			// vitriEmbryoNo
+			$this->vitriEmbryoNo->LinkCustomAttributes = "";
+			$this->vitriEmbryoNo->HrefValue = "";
+			$this->vitriEmbryoNo->TooltipValue = "";
+
+			// thawReFrozen
+			$this->thawReFrozen->LinkCustomAttributes = "";
+			$this->thawReFrozen->HrefValue = "";
+			$this->thawReFrozen->TooltipValue = "";
+
+			// vitriFertilisationDate
+			$this->vitriFertilisationDate->LinkCustomAttributes = "";
+			$this->vitriFertilisationDate->HrefValue = "";
+			$this->vitriFertilisationDate->TooltipValue = "";
+
+			// vitriDay
+			$this->vitriDay->LinkCustomAttributes = "";
+			$this->vitriDay->HrefValue = "";
+			$this->vitriDay->TooltipValue = "";
+
+			// vitriStage
+			$this->vitriStage->LinkCustomAttributes = "";
+			$this->vitriStage->HrefValue = "";
+			$this->vitriStage->TooltipValue = "";
+
+			// vitriGrade
+			$this->vitriGrade->LinkCustomAttributes = "";
+			$this->vitriGrade->HrefValue = "";
+			$this->vitriGrade->TooltipValue = "";
+
+			// vitriIncubator
+			$this->vitriIncubator->LinkCustomAttributes = "";
+			$this->vitriIncubator->HrefValue = "";
+			$this->vitriIncubator->TooltipValue = "";
+
+			// vitriTank
+			$this->vitriTank->LinkCustomAttributes = "";
+			$this->vitriTank->HrefValue = "";
+			$this->vitriTank->TooltipValue = "";
+
+			// vitriCanister
+			$this->vitriCanister->LinkCustomAttributes = "";
+			$this->vitriCanister->HrefValue = "";
+			$this->vitriCanister->TooltipValue = "";
+
+			// vitriGobiet
+			$this->vitriGobiet->LinkCustomAttributes = "";
+			$this->vitriGobiet->HrefValue = "";
+			$this->vitriGobiet->TooltipValue = "";
+
+			// vitriViscotube
+			$this->vitriViscotube->LinkCustomAttributes = "";
+			$this->vitriViscotube->HrefValue = "";
+			$this->vitriViscotube->TooltipValue = "";
+
+			// vitriCryolockNo
+			$this->vitriCryolockNo->LinkCustomAttributes = "";
+			$this->vitriCryolockNo->HrefValue = "";
+			$this->vitriCryolockNo->TooltipValue = "";
+
+			// vitriCryolockColour
+			$this->vitriCryolockColour->LinkCustomAttributes = "";
+			$this->vitriCryolockColour->HrefValue = "";
+			$this->vitriCryolockColour->TooltipValue = "";
+
+			// thawDate
+			$this->thawDate->LinkCustomAttributes = "";
+			$this->thawDate->HrefValue = "";
+			$this->thawDate->TooltipValue = "";
+
+			// thawPrimaryEmbryologist
+			$this->thawPrimaryEmbryologist->LinkCustomAttributes = "";
+			$this->thawPrimaryEmbryologist->HrefValue = "";
+			$this->thawPrimaryEmbryologist->TooltipValue = "";
+
+			// thawSecondaryEmbryologist
+			$this->thawSecondaryEmbryologist->LinkCustomAttributes = "";
+			$this->thawSecondaryEmbryologist->HrefValue = "";
+			$this->thawSecondaryEmbryologist->TooltipValue = "";
+
+			// thawET
+			$this->thawET->LinkCustomAttributes = "";
+			$this->thawET->HrefValue = "";
+			$this->thawET->TooltipValue = "";
+
+			// thawAbserve
+			$this->thawAbserve->LinkCustomAttributes = "";
+			$this->thawAbserve->HrefValue = "";
+			$this->thawAbserve->TooltipValue = "";
+
+			// thawDiscard
+			$this->thawDiscard->LinkCustomAttributes = "";
+			$this->thawDiscard->HrefValue = "";
+			$this->thawDiscard->TooltipValue = "";
+
+			// ETCatheter
+			$this->ETCatheter->LinkCustomAttributes = "";
+			$this->ETCatheter->HrefValue = "";
+			$this->ETCatheter->TooltipValue = "";
+
+			// ETDifficulty
+			$this->ETDifficulty->LinkCustomAttributes = "";
+			$this->ETDifficulty->HrefValue = "";
+			$this->ETDifficulty->TooltipValue = "";
+
+			// ETEasy
+			$this->ETEasy->LinkCustomAttributes = "";
+			$this->ETEasy->HrefValue = "";
+			$this->ETEasy->TooltipValue = "";
+
+			// ETComments
+			$this->ETComments->LinkCustomAttributes = "";
+			$this->ETComments->HrefValue = "";
+			$this->ETComments->TooltipValue = "";
+
+			// ETDoctor
+			$this->ETDoctor->LinkCustomAttributes = "";
+			$this->ETDoctor->HrefValue = "";
+			$this->ETDoctor->TooltipValue = "";
+
+			// ETEmbryologist
+			$this->ETEmbryologist->LinkCustomAttributes = "";
+			$this->ETEmbryologist->HrefValue = "";
+			$this->ETEmbryologist->TooltipValue = "";
+
+			// ETDate
+			$this->ETDate->LinkCustomAttributes = "";
+			$this->ETDate->HrefValue = "";
+			$this->ETDate->TooltipValue = "";
+
+			// Day1End
+			$this->Day1End->LinkCustomAttributes = "";
+			$this->Day1End->HrefValue = "";
+			$this->Day1End->TooltipValue = "";
+		} elseif ($this->RowType == ROWTYPE_ADD) { // Add row
+
+			// id
+			// RIDNo
+
+			$this->RIDNo->EditAttrs["class"] = "form-control";
+			$this->RIDNo->EditCustomAttributes = "";
+			if ($this->RIDNo->getSessionValue() <> "") {
+				$this->RIDNo->CurrentValue = $this->RIDNo->getSessionValue();
+				$this->RIDNo->OldValue = $this->RIDNo->CurrentValue;
+			$this->RIDNo->ViewValue = $this->RIDNo->CurrentValue;
+			$this->RIDNo->ViewValue = FormatNumber($this->RIDNo->ViewValue, 0, -2, -2, -2);
+			$this->RIDNo->ViewCustomAttributes = "";
+			} else {
+			$this->RIDNo->EditValue = HtmlEncode($this->RIDNo->CurrentValue);
+			$this->RIDNo->PlaceHolder = RemoveHtml($this->RIDNo->caption());
+			}
+
+			// Name
+			$this->Name->EditAttrs["class"] = "form-control";
+			$this->Name->EditCustomAttributes = "";
+			if ($this->Name->getSessionValue() <> "") {
+				$this->Name->CurrentValue = $this->Name->getSessionValue();
+				$this->Name->OldValue = $this->Name->CurrentValue;
+			$this->Name->ViewValue = $this->Name->CurrentValue;
+			$this->Name->ViewCustomAttributes = "";
+			} else {
+			if (REMOVE_XSS)
+				$this->Name->CurrentValue = HtmlDecode($this->Name->CurrentValue);
+			$this->Name->EditValue = HtmlEncode($this->Name->CurrentValue);
+			$this->Name->PlaceHolder = RemoveHtml($this->Name->caption());
+			}
+
+			// ARTCycle
+			$this->ARTCycle->EditAttrs["class"] = "form-control";
+			$this->ARTCycle->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->ARTCycle->CurrentValue = HtmlDecode($this->ARTCycle->CurrentValue);
+			$this->ARTCycle->EditValue = HtmlEncode($this->ARTCycle->CurrentValue);
+			$this->ARTCycle->PlaceHolder = RemoveHtml($this->ARTCycle->caption());
+
+			// SpermOrigin
+			$this->SpermOrigin->EditAttrs["class"] = "form-control";
+			$this->SpermOrigin->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->SpermOrigin->CurrentValue = HtmlDecode($this->SpermOrigin->CurrentValue);
+			$this->SpermOrigin->EditValue = HtmlEncode($this->SpermOrigin->CurrentValue);
+			$this->SpermOrigin->PlaceHolder = RemoveHtml($this->SpermOrigin->caption());
+
+			// InseminatinTechnique
+			$this->InseminatinTechnique->EditAttrs["class"] = "form-control";
+			$this->InseminatinTechnique->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->InseminatinTechnique->CurrentValue = HtmlDecode($this->InseminatinTechnique->CurrentValue);
+			$this->InseminatinTechnique->EditValue = HtmlEncode($this->InseminatinTechnique->CurrentValue);
+			$this->InseminatinTechnique->PlaceHolder = RemoveHtml($this->InseminatinTechnique->caption());
+
+			// IndicationForART
+			$this->IndicationForART->EditAttrs["class"] = "form-control";
+			$this->IndicationForART->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->IndicationForART->CurrentValue = HtmlDecode($this->IndicationForART->CurrentValue);
+			$this->IndicationForART->EditValue = HtmlEncode($this->IndicationForART->CurrentValue);
+			$this->IndicationForART->PlaceHolder = RemoveHtml($this->IndicationForART->caption());
+
+			// Day0sino
+			$this->Day0sino->EditAttrs["class"] = "form-control";
+			$this->Day0sino->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day0sino->CurrentValue = HtmlDecode($this->Day0sino->CurrentValue);
+			$this->Day0sino->EditValue = HtmlEncode($this->Day0sino->CurrentValue);
+			$this->Day0sino->PlaceHolder = RemoveHtml($this->Day0sino->caption());
+
+			// Day0OocyteStage
+			$this->Day0OocyteStage->EditAttrs["class"] = "form-control";
+			$this->Day0OocyteStage->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day0OocyteStage->CurrentValue = HtmlDecode($this->Day0OocyteStage->CurrentValue);
+			$this->Day0OocyteStage->EditValue = HtmlEncode($this->Day0OocyteStage->CurrentValue);
+			$this->Day0OocyteStage->PlaceHolder = RemoveHtml($this->Day0OocyteStage->caption());
+
+			// Day0PolarBodyPosition
+			$this->Day0PolarBodyPosition->EditAttrs["class"] = "form-control";
+			$this->Day0PolarBodyPosition->EditCustomAttributes = "";
+			$this->Day0PolarBodyPosition->EditValue = $this->Day0PolarBodyPosition->options(TRUE);
+
+			// Day0Breakage
+			$this->Day0Breakage->EditAttrs["class"] = "form-control";
+			$this->Day0Breakage->EditCustomAttributes = "";
+			$this->Day0Breakage->EditValue = $this->Day0Breakage->options(TRUE);
+
+			// Day0Attempts
+			$this->Day0Attempts->EditAttrs["class"] = "form-control";
+			$this->Day0Attempts->EditCustomAttributes = "";
+			$this->Day0Attempts->EditValue = $this->Day0Attempts->options(TRUE);
+
+			// Day0SPZMorpho
+			$this->Day0SPZMorpho->EditAttrs["class"] = "form-control";
+			$this->Day0SPZMorpho->EditCustomAttributes = "";
+			$this->Day0SPZMorpho->EditValue = $this->Day0SPZMorpho->options(TRUE);
+
+			// Day0SPZLocation
+			$this->Day0SPZLocation->EditAttrs["class"] = "form-control";
+			$this->Day0SPZLocation->EditCustomAttributes = "";
+			$this->Day0SPZLocation->EditValue = $this->Day0SPZLocation->options(TRUE);
+
+			// Day0SpOrgin
+			$this->Day0SpOrgin->EditAttrs["class"] = "form-control";
+			$this->Day0SpOrgin->EditCustomAttributes = "";
+			$this->Day0SpOrgin->EditValue = $this->Day0SpOrgin->options(TRUE);
+
+			// Day5Cryoptop
+			$this->Day5Cryoptop->EditAttrs["class"] = "form-control";
+			$this->Day5Cryoptop->EditCustomAttributes = "";
+			$this->Day5Cryoptop->EditValue = $this->Day5Cryoptop->options(TRUE);
+
+			// Day1Sperm
+			$this->Day1Sperm->EditAttrs["class"] = "form-control";
+			$this->Day1Sperm->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day1Sperm->CurrentValue = HtmlDecode($this->Day1Sperm->CurrentValue);
+			$this->Day1Sperm->EditValue = HtmlEncode($this->Day1Sperm->CurrentValue);
+			$this->Day1Sperm->PlaceHolder = RemoveHtml($this->Day1Sperm->caption());
+
+			// Day1PN
+			$this->Day1PN->EditAttrs["class"] = "form-control";
+			$this->Day1PN->EditCustomAttributes = "";
+			$this->Day1PN->EditValue = $this->Day1PN->options(TRUE);
+
+			// Day1PB
+			$this->Day1PB->EditAttrs["class"] = "form-control";
+			$this->Day1PB->EditCustomAttributes = "";
+			$this->Day1PB->EditValue = $this->Day1PB->options(TRUE);
+
+			// Day1Pronucleus
+			$this->Day1Pronucleus->EditAttrs["class"] = "form-control";
+			$this->Day1Pronucleus->EditCustomAttributes = "";
+			$this->Day1Pronucleus->EditValue = $this->Day1Pronucleus->options(TRUE);
+
+			// Day1Nucleolus
+			$this->Day1Nucleolus->EditAttrs["class"] = "form-control";
+			$this->Day1Nucleolus->EditCustomAttributes = "";
+			$this->Day1Nucleolus->EditValue = $this->Day1Nucleolus->options(TRUE);
+
+			// Day1Halo
+			$this->Day1Halo->EditAttrs["class"] = "form-control";
+			$this->Day1Halo->EditCustomAttributes = "";
+			$this->Day1Halo->EditValue = $this->Day1Halo->options(TRUE);
+
+			// Day2SiNo
+			$this->Day2SiNo->EditAttrs["class"] = "form-control";
+			$this->Day2SiNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day2SiNo->CurrentValue = HtmlDecode($this->Day2SiNo->CurrentValue);
+			$this->Day2SiNo->EditValue = HtmlEncode($this->Day2SiNo->CurrentValue);
+			$this->Day2SiNo->PlaceHolder = RemoveHtml($this->Day2SiNo->caption());
+
+			// Day2CellNo
+			$this->Day2CellNo->EditAttrs["class"] = "form-control";
+			$this->Day2CellNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day2CellNo->CurrentValue = HtmlDecode($this->Day2CellNo->CurrentValue);
+			$this->Day2CellNo->EditValue = HtmlEncode($this->Day2CellNo->CurrentValue);
+			$this->Day2CellNo->PlaceHolder = RemoveHtml($this->Day2CellNo->caption());
+
+			// Day2Frag
+			$this->Day2Frag->EditAttrs["class"] = "form-control";
+			$this->Day2Frag->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day2Frag->CurrentValue = HtmlDecode($this->Day2Frag->CurrentValue);
+			$this->Day2Frag->EditValue = HtmlEncode($this->Day2Frag->CurrentValue);
+			$this->Day2Frag->PlaceHolder = RemoveHtml($this->Day2Frag->caption());
+
+			// Day2Symmetry
+			$this->Day2Symmetry->EditAttrs["class"] = "form-control";
+			$this->Day2Symmetry->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day2Symmetry->CurrentValue = HtmlDecode($this->Day2Symmetry->CurrentValue);
+			$this->Day2Symmetry->EditValue = HtmlEncode($this->Day2Symmetry->CurrentValue);
+			$this->Day2Symmetry->PlaceHolder = RemoveHtml($this->Day2Symmetry->caption());
+
+			// Day2Cryoptop
+			$this->Day2Cryoptop->EditAttrs["class"] = "form-control";
+			$this->Day2Cryoptop->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day2Cryoptop->CurrentValue = HtmlDecode($this->Day2Cryoptop->CurrentValue);
+			$this->Day2Cryoptop->EditValue = HtmlEncode($this->Day2Cryoptop->CurrentValue);
+			$this->Day2Cryoptop->PlaceHolder = RemoveHtml($this->Day2Cryoptop->caption());
+
+			// Day2Grade
+			$this->Day2Grade->EditAttrs["class"] = "form-control";
+			$this->Day2Grade->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day2Grade->CurrentValue = HtmlDecode($this->Day2Grade->CurrentValue);
+			$this->Day2Grade->EditValue = HtmlEncode($this->Day2Grade->CurrentValue);
+			$this->Day2Grade->PlaceHolder = RemoveHtml($this->Day2Grade->caption());
+
+			// Day2End
+			$this->Day2End->EditAttrs["class"] = "form-control";
+			$this->Day2End->EditCustomAttributes = "";
+			$this->Day2End->EditValue = $this->Day2End->options(TRUE);
+
+			// Day3Sino
+			$this->Day3Sino->EditAttrs["class"] = "form-control";
+			$this->Day3Sino->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day3Sino->CurrentValue = HtmlDecode($this->Day3Sino->CurrentValue);
+			$this->Day3Sino->EditValue = HtmlEncode($this->Day3Sino->CurrentValue);
+			$this->Day3Sino->PlaceHolder = RemoveHtml($this->Day3Sino->caption());
+
+			// Day3CellNo
+			$this->Day3CellNo->EditAttrs["class"] = "form-control";
+			$this->Day3CellNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day3CellNo->CurrentValue = HtmlDecode($this->Day3CellNo->CurrentValue);
+			$this->Day3CellNo->EditValue = HtmlEncode($this->Day3CellNo->CurrentValue);
+			$this->Day3CellNo->PlaceHolder = RemoveHtml($this->Day3CellNo->caption());
+
+			// Day3Frag
+			$this->Day3Frag->EditAttrs["class"] = "form-control";
+			$this->Day3Frag->EditCustomAttributes = "";
+			$this->Day3Frag->EditValue = $this->Day3Frag->options(TRUE);
+
+			// Day3Symmetry
+			$this->Day3Symmetry->EditAttrs["class"] = "form-control";
+			$this->Day3Symmetry->EditCustomAttributes = "";
+			$this->Day3Symmetry->EditValue = $this->Day3Symmetry->options(TRUE);
+
+			// Day3ZP
+			$this->Day3ZP->EditAttrs["class"] = "form-control";
+			$this->Day3ZP->EditCustomAttributes = "";
+			$this->Day3ZP->EditValue = $this->Day3ZP->options(TRUE);
+
+			// Day3Vacoules
+			$this->Day3Vacoules->EditAttrs["class"] = "form-control";
+			$this->Day3Vacoules->EditCustomAttributes = "";
+			$this->Day3Vacoules->EditValue = $this->Day3Vacoules->options(TRUE);
+
+			// Day3Grade
+			$this->Day3Grade->EditAttrs["class"] = "form-control";
+			$this->Day3Grade->EditCustomAttributes = "";
+			$this->Day3Grade->EditValue = $this->Day3Grade->options(TRUE);
+
+			// Day3Cryoptop
+			$this->Day3Cryoptop->EditAttrs["class"] = "form-control";
+			$this->Day3Cryoptop->EditCustomAttributes = "";
+			$this->Day3Cryoptop->EditValue = $this->Day3Cryoptop->options(TRUE);
+
+			// Day3End
+			$this->Day3End->EditAttrs["class"] = "form-control";
+			$this->Day3End->EditCustomAttributes = "";
+			$this->Day3End->EditValue = $this->Day3End->options(TRUE);
+
+			// Day4SiNo
+			$this->Day4SiNo->EditAttrs["class"] = "form-control";
+			$this->Day4SiNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day4SiNo->CurrentValue = HtmlDecode($this->Day4SiNo->CurrentValue);
+			$this->Day4SiNo->EditValue = HtmlEncode($this->Day4SiNo->CurrentValue);
+			$this->Day4SiNo->PlaceHolder = RemoveHtml($this->Day4SiNo->caption());
+
+			// Day4CellNo
+			$this->Day4CellNo->EditAttrs["class"] = "form-control";
+			$this->Day4CellNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day4CellNo->CurrentValue = HtmlDecode($this->Day4CellNo->CurrentValue);
+			$this->Day4CellNo->EditValue = HtmlEncode($this->Day4CellNo->CurrentValue);
+			$this->Day4CellNo->PlaceHolder = RemoveHtml($this->Day4CellNo->caption());
+
+			// Day4Frag
+			$this->Day4Frag->EditAttrs["class"] = "form-control";
+			$this->Day4Frag->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day4Frag->CurrentValue = HtmlDecode($this->Day4Frag->CurrentValue);
+			$this->Day4Frag->EditValue = HtmlEncode($this->Day4Frag->CurrentValue);
+			$this->Day4Frag->PlaceHolder = RemoveHtml($this->Day4Frag->caption());
+
+			// Day4Symmetry
+			$this->Day4Symmetry->EditAttrs["class"] = "form-control";
+			$this->Day4Symmetry->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day4Symmetry->CurrentValue = HtmlDecode($this->Day4Symmetry->CurrentValue);
+			$this->Day4Symmetry->EditValue = HtmlEncode($this->Day4Symmetry->CurrentValue);
+			$this->Day4Symmetry->PlaceHolder = RemoveHtml($this->Day4Symmetry->caption());
+
+			// Day4Grade
+			$this->Day4Grade->EditAttrs["class"] = "form-control";
+			$this->Day4Grade->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day4Grade->CurrentValue = HtmlDecode($this->Day4Grade->CurrentValue);
+			$this->Day4Grade->EditValue = HtmlEncode($this->Day4Grade->CurrentValue);
+			$this->Day4Grade->PlaceHolder = RemoveHtml($this->Day4Grade->caption());
+
+			// Day4Cryoptop
+			$this->Day4Cryoptop->EditAttrs["class"] = "form-control";
+			$this->Day4Cryoptop->EditCustomAttributes = "";
+			$this->Day4Cryoptop->EditValue = $this->Day4Cryoptop->options(TRUE);
+
+			// Day4End
+			$this->Day4End->EditAttrs["class"] = "form-control";
+			$this->Day4End->EditCustomAttributes = "";
+			$this->Day4End->EditValue = $this->Day4End->options(TRUE);
+
+			// Day5CellNo
+			$this->Day5CellNo->EditAttrs["class"] = "form-control";
+			$this->Day5CellNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day5CellNo->CurrentValue = HtmlDecode($this->Day5CellNo->CurrentValue);
+			$this->Day5CellNo->EditValue = HtmlEncode($this->Day5CellNo->CurrentValue);
+			$this->Day5CellNo->PlaceHolder = RemoveHtml($this->Day5CellNo->caption());
+
+			// Day5ICM
+			$this->Day5ICM->EditAttrs["class"] = "form-control";
+			$this->Day5ICM->EditCustomAttributes = "";
+			$this->Day5ICM->EditValue = $this->Day5ICM->options(TRUE);
+
+			// Day5TE
+			$this->Day5TE->EditAttrs["class"] = "form-control";
+			$this->Day5TE->EditCustomAttributes = "";
+			$this->Day5TE->EditValue = $this->Day5TE->options(TRUE);
+
+			// Day5Observation
+			$this->Day5Observation->EditAttrs["class"] = "form-control";
+			$this->Day5Observation->EditCustomAttributes = "";
+			$this->Day5Observation->EditValue = $this->Day5Observation->options(TRUE);
+
+			// Day5Collapsed
+			$this->Day5Collapsed->EditAttrs["class"] = "form-control";
+			$this->Day5Collapsed->EditCustomAttributes = "";
+			$this->Day5Collapsed->EditValue = $this->Day5Collapsed->options(TRUE);
+
+			// Day5Vacoulles
+			$this->Day5Vacoulles->EditAttrs["class"] = "form-control";
+			$this->Day5Vacoulles->EditCustomAttributes = "";
+			$this->Day5Vacoulles->EditValue = $this->Day5Vacoulles->options(TRUE);
+
+			// Day5Grade
+			$this->Day5Grade->EditAttrs["class"] = "form-control";
+			$this->Day5Grade->EditCustomAttributes = "";
+			$this->Day5Grade->EditValue = $this->Day5Grade->options(TRUE);
+
+			// Day6CellNo
+			$this->Day6CellNo->EditAttrs["class"] = "form-control";
+			$this->Day6CellNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day6CellNo->CurrentValue = HtmlDecode($this->Day6CellNo->CurrentValue);
+			$this->Day6CellNo->EditValue = HtmlEncode($this->Day6CellNo->CurrentValue);
+			$this->Day6CellNo->PlaceHolder = RemoveHtml($this->Day6CellNo->caption());
+
+			// Day6ICM
+			$this->Day6ICM->EditAttrs["class"] = "form-control";
+			$this->Day6ICM->EditCustomAttributes = "";
+			$this->Day6ICM->EditValue = $this->Day6ICM->options(TRUE);
+
+			// Day6TE
+			$this->Day6TE->EditAttrs["class"] = "form-control";
+			$this->Day6TE->EditCustomAttributes = "";
+			$this->Day6TE->EditValue = $this->Day6TE->options(TRUE);
+
+			// Day6Observation
+			$this->Day6Observation->EditAttrs["class"] = "form-control";
+			$this->Day6Observation->EditCustomAttributes = "";
+			$this->Day6Observation->EditValue = $this->Day6Observation->options(TRUE);
+
+			// Day6Collapsed
+			$this->Day6Collapsed->EditAttrs["class"] = "form-control";
+			$this->Day6Collapsed->EditCustomAttributes = "";
+			$this->Day6Collapsed->EditValue = $this->Day6Collapsed->options(TRUE);
+
+			// Day6Vacoulles
+			$this->Day6Vacoulles->EditAttrs["class"] = "form-control";
+			$this->Day6Vacoulles->EditCustomAttributes = "";
+			$this->Day6Vacoulles->EditValue = $this->Day6Vacoulles->options(TRUE);
+
+			// Day6Grade
+			$this->Day6Grade->EditAttrs["class"] = "form-control";
+			$this->Day6Grade->EditCustomAttributes = "";
+			$this->Day6Grade->EditValue = $this->Day6Grade->options(TRUE);
+
+			// Day6Cryoptop
+			$this->Day6Cryoptop->EditAttrs["class"] = "form-control";
+			$this->Day6Cryoptop->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day6Cryoptop->CurrentValue = HtmlDecode($this->Day6Cryoptop->CurrentValue);
+			$this->Day6Cryoptop->EditValue = HtmlEncode($this->Day6Cryoptop->CurrentValue);
+			$this->Day6Cryoptop->PlaceHolder = RemoveHtml($this->Day6Cryoptop->caption());
+
+			// EndSiNo
+			$this->EndSiNo->EditAttrs["class"] = "form-control";
+			$this->EndSiNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->EndSiNo->CurrentValue = HtmlDecode($this->EndSiNo->CurrentValue);
+			$this->EndSiNo->EditValue = HtmlEncode($this->EndSiNo->CurrentValue);
+			$this->EndSiNo->PlaceHolder = RemoveHtml($this->EndSiNo->caption());
+
+			// EndingDay
+			$this->EndingDay->EditAttrs["class"] = "form-control";
+			$this->EndingDay->EditCustomAttributes = "";
+			$this->EndingDay->EditValue = $this->EndingDay->options(TRUE);
+
+			// EndingCellStage
+			$this->EndingCellStage->EditAttrs["class"] = "form-control";
+			$this->EndingCellStage->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->EndingCellStage->CurrentValue = HtmlDecode($this->EndingCellStage->CurrentValue);
+			$this->EndingCellStage->EditValue = HtmlEncode($this->EndingCellStage->CurrentValue);
+			$this->EndingCellStage->PlaceHolder = RemoveHtml($this->EndingCellStage->caption());
+
+			// EndingGrade
+			$this->EndingGrade->EditAttrs["class"] = "form-control";
+			$this->EndingGrade->EditCustomAttributes = "";
+			$this->EndingGrade->EditValue = $this->EndingGrade->options(TRUE);
+
+			// EndingState
+			$this->EndingState->EditAttrs["class"] = "form-control";
+			$this->EndingState->EditCustomAttributes = "";
+			$this->EndingState->EditValue = $this->EndingState->options(TRUE);
+
+			// TidNo
+			$this->TidNo->EditAttrs["class"] = "form-control";
+			$this->TidNo->EditCustomAttributes = "";
+			if ($this->TidNo->getSessionValue() <> "") {
+				$this->TidNo->CurrentValue = $this->TidNo->getSessionValue();
+				$this->TidNo->OldValue = $this->TidNo->CurrentValue;
+			$this->TidNo->ViewValue = $this->TidNo->CurrentValue;
+			$this->TidNo->ViewValue = FormatNumber($this->TidNo->ViewValue, 0, -2, -2, -2);
+			$this->TidNo->ViewCustomAttributes = "";
+			} else {
+			$this->TidNo->EditValue = HtmlEncode($this->TidNo->CurrentValue);
+			$this->TidNo->PlaceHolder = RemoveHtml($this->TidNo->caption());
+			}
+
+			// DidNO
+			$this->DidNO->EditAttrs["class"] = "form-control";
+			$this->DidNO->EditCustomAttributes = "";
+			if ($this->DidNO->getSessionValue() <> "") {
+				$this->DidNO->CurrentValue = $this->DidNO->getSessionValue();
+				$this->DidNO->OldValue = $this->DidNO->CurrentValue;
+			$this->DidNO->ViewValue = $this->DidNO->CurrentValue;
+			$this->DidNO->ViewCustomAttributes = "";
+			} else {
+			if (REMOVE_XSS)
+				$this->DidNO->CurrentValue = HtmlDecode($this->DidNO->CurrentValue);
+			$this->DidNO->EditValue = HtmlEncode($this->DidNO->CurrentValue);
+			$this->DidNO->PlaceHolder = RemoveHtml($this->DidNO->caption());
+			}
+
+			// ICSiIVFDateTime
+			$this->ICSiIVFDateTime->EditAttrs["class"] = "form-control";
+			$this->ICSiIVFDateTime->EditCustomAttributes = "";
+			$this->ICSiIVFDateTime->EditValue = HtmlEncode(FormatDateTime($this->ICSiIVFDateTime->CurrentValue, 8));
+			$this->ICSiIVFDateTime->PlaceHolder = RemoveHtml($this->ICSiIVFDateTime->caption());
+
+			// PrimaryEmbrologist
+			$this->PrimaryEmbrologist->EditAttrs["class"] = "form-control";
+			$this->PrimaryEmbrologist->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->PrimaryEmbrologist->CurrentValue = HtmlDecode($this->PrimaryEmbrologist->CurrentValue);
+			$this->PrimaryEmbrologist->EditValue = HtmlEncode($this->PrimaryEmbrologist->CurrentValue);
+			$this->PrimaryEmbrologist->PlaceHolder = RemoveHtml($this->PrimaryEmbrologist->caption());
+
+			// SecondaryEmbrologist
+			$this->SecondaryEmbrologist->EditAttrs["class"] = "form-control";
+			$this->SecondaryEmbrologist->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->SecondaryEmbrologist->CurrentValue = HtmlDecode($this->SecondaryEmbrologist->CurrentValue);
+			$this->SecondaryEmbrologist->EditValue = HtmlEncode($this->SecondaryEmbrologist->CurrentValue);
+			$this->SecondaryEmbrologist->PlaceHolder = RemoveHtml($this->SecondaryEmbrologist->caption());
+
+			// Incubator
+			$this->Incubator->EditAttrs["class"] = "form-control";
+			$this->Incubator->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Incubator->CurrentValue = HtmlDecode($this->Incubator->CurrentValue);
+			$this->Incubator->EditValue = HtmlEncode($this->Incubator->CurrentValue);
+			$this->Incubator->PlaceHolder = RemoveHtml($this->Incubator->caption());
+
+			// location
+			$this->location->EditAttrs["class"] = "form-control";
+			$this->location->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->location->CurrentValue = HtmlDecode($this->location->CurrentValue);
+			$this->location->EditValue = HtmlEncode($this->location->CurrentValue);
+			$this->location->PlaceHolder = RemoveHtml($this->location->caption());
+
+			// OocyteNo
+			$this->OocyteNo->EditAttrs["class"] = "form-control";
+			$this->OocyteNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->OocyteNo->CurrentValue = HtmlDecode($this->OocyteNo->CurrentValue);
+			$this->OocyteNo->EditValue = HtmlEncode($this->OocyteNo->CurrentValue);
+			$this->OocyteNo->PlaceHolder = RemoveHtml($this->OocyteNo->caption());
+
+			// Stage
+			$this->Stage->EditAttrs["class"] = "form-control";
+			$this->Stage->EditCustomAttributes = "";
+			$this->Stage->EditValue = $this->Stage->options(TRUE);
+
+			// Remarks
+			$this->Remarks->EditAttrs["class"] = "form-control";
+			$this->Remarks->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Remarks->CurrentValue = HtmlDecode($this->Remarks->CurrentValue);
+			$this->Remarks->EditValue = HtmlEncode($this->Remarks->CurrentValue);
+			$this->Remarks->PlaceHolder = RemoveHtml($this->Remarks->caption());
+
+			// vitrificationDate
+			$this->vitrificationDate->EditAttrs["class"] = "form-control";
+			$this->vitrificationDate->EditCustomAttributes = "";
+			$this->vitrificationDate->EditValue = HtmlEncode(FormatDateTime($this->vitrificationDate->CurrentValue, 8));
+			$this->vitrificationDate->PlaceHolder = RemoveHtml($this->vitrificationDate->caption());
+
+			// vitriPrimaryEmbryologist
+			$this->vitriPrimaryEmbryologist->EditAttrs["class"] = "form-control";
+			$this->vitriPrimaryEmbryologist->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriPrimaryEmbryologist->CurrentValue = HtmlDecode($this->vitriPrimaryEmbryologist->CurrentValue);
+			$this->vitriPrimaryEmbryologist->EditValue = HtmlEncode($this->vitriPrimaryEmbryologist->CurrentValue);
+			$this->vitriPrimaryEmbryologist->PlaceHolder = RemoveHtml($this->vitriPrimaryEmbryologist->caption());
+
+			// vitriSecondaryEmbryologist
+			$this->vitriSecondaryEmbryologist->EditAttrs["class"] = "form-control";
+			$this->vitriSecondaryEmbryologist->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriSecondaryEmbryologist->CurrentValue = HtmlDecode($this->vitriSecondaryEmbryologist->CurrentValue);
+			$this->vitriSecondaryEmbryologist->EditValue = HtmlEncode($this->vitriSecondaryEmbryologist->CurrentValue);
+			$this->vitriSecondaryEmbryologist->PlaceHolder = RemoveHtml($this->vitriSecondaryEmbryologist->caption());
+
+			// vitriEmbryoNo
+			$this->vitriEmbryoNo->EditAttrs["class"] = "form-control";
+			$this->vitriEmbryoNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriEmbryoNo->CurrentValue = HtmlDecode($this->vitriEmbryoNo->CurrentValue);
+			$this->vitriEmbryoNo->EditValue = HtmlEncode($this->vitriEmbryoNo->CurrentValue);
+			$this->vitriEmbryoNo->PlaceHolder = RemoveHtml($this->vitriEmbryoNo->caption());
+
+			// thawReFrozen
+			$this->thawReFrozen->EditCustomAttributes = "";
+			$this->thawReFrozen->EditValue = $this->thawReFrozen->options(FALSE);
+
+			// vitriFertilisationDate
+			$this->vitriFertilisationDate->EditAttrs["class"] = "form-control";
+			$this->vitriFertilisationDate->EditCustomAttributes = "";
+			$this->vitriFertilisationDate->EditValue = HtmlEncode(FormatDateTime($this->vitriFertilisationDate->CurrentValue, 8));
+			$this->vitriFertilisationDate->PlaceHolder = RemoveHtml($this->vitriFertilisationDate->caption());
+
+			// vitriDay
+			$this->vitriDay->EditAttrs["class"] = "form-control";
+			$this->vitriDay->EditCustomAttributes = "";
+			$this->vitriDay->EditValue = $this->vitriDay->options(TRUE);
+
+			// vitriStage
+			$this->vitriStage->EditAttrs["class"] = "form-control";
+			$this->vitriStage->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriStage->CurrentValue = HtmlDecode($this->vitriStage->CurrentValue);
+			$this->vitriStage->EditValue = HtmlEncode($this->vitriStage->CurrentValue);
+			$this->vitriStage->PlaceHolder = RemoveHtml($this->vitriStage->caption());
+
+			// vitriGrade
+			$this->vitriGrade->EditAttrs["class"] = "form-control";
+			$this->vitriGrade->EditCustomAttributes = "";
+			$this->vitriGrade->EditValue = $this->vitriGrade->options(TRUE);
+
+			// vitriIncubator
+			$this->vitriIncubator->EditAttrs["class"] = "form-control";
+			$this->vitriIncubator->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriIncubator->CurrentValue = HtmlDecode($this->vitriIncubator->CurrentValue);
+			$this->vitriIncubator->EditValue = HtmlEncode($this->vitriIncubator->CurrentValue);
+			$this->vitriIncubator->PlaceHolder = RemoveHtml($this->vitriIncubator->caption());
+
+			// vitriTank
+			$this->vitriTank->EditAttrs["class"] = "form-control";
+			$this->vitriTank->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriTank->CurrentValue = HtmlDecode($this->vitriTank->CurrentValue);
+			$this->vitriTank->EditValue = HtmlEncode($this->vitriTank->CurrentValue);
+			$this->vitriTank->PlaceHolder = RemoveHtml($this->vitriTank->caption());
+
+			// vitriCanister
+			$this->vitriCanister->EditAttrs["class"] = "form-control";
+			$this->vitriCanister->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriCanister->CurrentValue = HtmlDecode($this->vitriCanister->CurrentValue);
+			$this->vitriCanister->EditValue = HtmlEncode($this->vitriCanister->CurrentValue);
+			$this->vitriCanister->PlaceHolder = RemoveHtml($this->vitriCanister->caption());
+
+			// vitriGobiet
+			$this->vitriGobiet->EditAttrs["class"] = "form-control";
+			$this->vitriGobiet->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriGobiet->CurrentValue = HtmlDecode($this->vitriGobiet->CurrentValue);
+			$this->vitriGobiet->EditValue = HtmlEncode($this->vitriGobiet->CurrentValue);
+			$this->vitriGobiet->PlaceHolder = RemoveHtml($this->vitriGobiet->caption());
+
+			// vitriViscotube
+			$this->vitriViscotube->EditAttrs["class"] = "form-control";
+			$this->vitriViscotube->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriViscotube->CurrentValue = HtmlDecode($this->vitriViscotube->CurrentValue);
+			$this->vitriViscotube->EditValue = HtmlEncode($this->vitriViscotube->CurrentValue);
+			$this->vitriViscotube->PlaceHolder = RemoveHtml($this->vitriViscotube->caption());
+
+			// vitriCryolockNo
+			$this->vitriCryolockNo->EditAttrs["class"] = "form-control";
+			$this->vitriCryolockNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriCryolockNo->CurrentValue = HtmlDecode($this->vitriCryolockNo->CurrentValue);
+			$this->vitriCryolockNo->EditValue = HtmlEncode($this->vitriCryolockNo->CurrentValue);
+			$this->vitriCryolockNo->PlaceHolder = RemoveHtml($this->vitriCryolockNo->caption());
+
+			// vitriCryolockColour
+			$this->vitriCryolockColour->EditAttrs["class"] = "form-control";
+			$this->vitriCryolockColour->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriCryolockColour->CurrentValue = HtmlDecode($this->vitriCryolockColour->CurrentValue);
+			$this->vitriCryolockColour->EditValue = HtmlEncode($this->vitriCryolockColour->CurrentValue);
+			$this->vitriCryolockColour->PlaceHolder = RemoveHtml($this->vitriCryolockColour->caption());
+
+			// thawDate
+			$this->thawDate->EditAttrs["class"] = "form-control";
+			$this->thawDate->EditCustomAttributes = "";
+			$this->thawDate->EditValue = HtmlEncode(FormatDateTime($this->thawDate->CurrentValue, 8));
+			$this->thawDate->PlaceHolder = RemoveHtml($this->thawDate->caption());
+
+			// thawPrimaryEmbryologist
+			$this->thawPrimaryEmbryologist->EditAttrs["class"] = "form-control";
+			$this->thawPrimaryEmbryologist->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->thawPrimaryEmbryologist->CurrentValue = HtmlDecode($this->thawPrimaryEmbryologist->CurrentValue);
+			$this->thawPrimaryEmbryologist->EditValue = HtmlEncode($this->thawPrimaryEmbryologist->CurrentValue);
+			$this->thawPrimaryEmbryologist->PlaceHolder = RemoveHtml($this->thawPrimaryEmbryologist->caption());
+
+			// thawSecondaryEmbryologist
+			$this->thawSecondaryEmbryologist->EditAttrs["class"] = "form-control";
+			$this->thawSecondaryEmbryologist->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->thawSecondaryEmbryologist->CurrentValue = HtmlDecode($this->thawSecondaryEmbryologist->CurrentValue);
+			$this->thawSecondaryEmbryologist->EditValue = HtmlEncode($this->thawSecondaryEmbryologist->CurrentValue);
+			$this->thawSecondaryEmbryologist->PlaceHolder = RemoveHtml($this->thawSecondaryEmbryologist->caption());
+
+			// thawET
+			$this->thawET->EditAttrs["class"] = "form-control";
+			$this->thawET->EditCustomAttributes = "";
+			$this->thawET->EditValue = $this->thawET->options(TRUE);
+
+			// thawAbserve
+			$this->thawAbserve->EditAttrs["class"] = "form-control";
+			$this->thawAbserve->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->thawAbserve->CurrentValue = HtmlDecode($this->thawAbserve->CurrentValue);
+			$this->thawAbserve->EditValue = HtmlEncode($this->thawAbserve->CurrentValue);
+			$this->thawAbserve->PlaceHolder = RemoveHtml($this->thawAbserve->caption());
+
+			// thawDiscard
+			$this->thawDiscard->EditAttrs["class"] = "form-control";
+			$this->thawDiscard->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->thawDiscard->CurrentValue = HtmlDecode($this->thawDiscard->CurrentValue);
+			$this->thawDiscard->EditValue = HtmlEncode($this->thawDiscard->CurrentValue);
+			$this->thawDiscard->PlaceHolder = RemoveHtml($this->thawDiscard->caption());
+
+			// ETCatheter
+			$this->ETCatheter->EditAttrs["class"] = "form-control";
+			$this->ETCatheter->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->ETCatheter->CurrentValue = HtmlDecode($this->ETCatheter->CurrentValue);
+			$this->ETCatheter->EditValue = HtmlEncode($this->ETCatheter->CurrentValue);
+			$this->ETCatheter->PlaceHolder = RemoveHtml($this->ETCatheter->caption());
+
+			// ETDifficulty
+			$this->ETDifficulty->EditAttrs["class"] = "form-control";
+			$this->ETDifficulty->EditCustomAttributes = "";
+			$this->ETDifficulty->EditValue = $this->ETDifficulty->options(TRUE);
+
+			// ETEasy
+			$this->ETEasy->EditCustomAttributes = "";
+			$this->ETEasy->EditValue = $this->ETEasy->options(FALSE);
+
+			// ETComments
+			$this->ETComments->EditAttrs["class"] = "form-control";
+			$this->ETComments->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->ETComments->CurrentValue = HtmlDecode($this->ETComments->CurrentValue);
+			$this->ETComments->EditValue = HtmlEncode($this->ETComments->CurrentValue);
+			$this->ETComments->PlaceHolder = RemoveHtml($this->ETComments->caption());
+
+			// ETDoctor
+			$this->ETDoctor->EditAttrs["class"] = "form-control";
+			$this->ETDoctor->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->ETDoctor->CurrentValue = HtmlDecode($this->ETDoctor->CurrentValue);
+			$this->ETDoctor->EditValue = HtmlEncode($this->ETDoctor->CurrentValue);
+			$this->ETDoctor->PlaceHolder = RemoveHtml($this->ETDoctor->caption());
+
+			// ETEmbryologist
+			$this->ETEmbryologist->EditAttrs["class"] = "form-control";
+			$this->ETEmbryologist->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->ETEmbryologist->CurrentValue = HtmlDecode($this->ETEmbryologist->CurrentValue);
+			$this->ETEmbryologist->EditValue = HtmlEncode($this->ETEmbryologist->CurrentValue);
+			$this->ETEmbryologist->PlaceHolder = RemoveHtml($this->ETEmbryologist->caption());
+
+			// ETDate
+			$this->ETDate->EditAttrs["class"] = "form-control";
+			$this->ETDate->EditCustomAttributes = "";
+			$this->ETDate->EditValue = HtmlEncode(FormatDateTime($this->ETDate->CurrentValue, 8));
+			$this->ETDate->PlaceHolder = RemoveHtml($this->ETDate->caption());
+
+			// Day1End
+			$this->Day1End->EditAttrs["class"] = "form-control";
+			$this->Day1End->EditCustomAttributes = "";
+			$this->Day1End->EditValue = $this->Day1End->options(TRUE);
+
+			// Add refer script
+			// id
+
+			$this->id->LinkCustomAttributes = "";
+			$this->id->HrefValue = "";
+
+			// RIDNo
+			$this->RIDNo->LinkCustomAttributes = "";
+			$this->RIDNo->HrefValue = "";
+
+			// Name
+			$this->Name->LinkCustomAttributes = "";
+			$this->Name->HrefValue = "";
+
+			// ARTCycle
+			$this->ARTCycle->LinkCustomAttributes = "";
+			$this->ARTCycle->HrefValue = "";
+
+			// SpermOrigin
+			$this->SpermOrigin->LinkCustomAttributes = "";
+			$this->SpermOrigin->HrefValue = "";
+
+			// InseminatinTechnique
+			$this->InseminatinTechnique->LinkCustomAttributes = "";
+			$this->InseminatinTechnique->HrefValue = "";
+
+			// IndicationForART
+			$this->IndicationForART->LinkCustomAttributes = "";
+			$this->IndicationForART->HrefValue = "";
+
+			// Day0sino
+			$this->Day0sino->LinkCustomAttributes = "";
+			$this->Day0sino->HrefValue = "";
+
+			// Day0OocyteStage
+			$this->Day0OocyteStage->LinkCustomAttributes = "";
+			$this->Day0OocyteStage->HrefValue = "";
+
+			// Day0PolarBodyPosition
+			$this->Day0PolarBodyPosition->LinkCustomAttributes = "";
+			$this->Day0PolarBodyPosition->HrefValue = "";
+
+			// Day0Breakage
+			$this->Day0Breakage->LinkCustomAttributes = "";
+			$this->Day0Breakage->HrefValue = "";
+
+			// Day0Attempts
+			$this->Day0Attempts->LinkCustomAttributes = "";
+			$this->Day0Attempts->HrefValue = "";
+
+			// Day0SPZMorpho
+			$this->Day0SPZMorpho->LinkCustomAttributes = "";
+			$this->Day0SPZMorpho->HrefValue = "";
+
+			// Day0SPZLocation
+			$this->Day0SPZLocation->LinkCustomAttributes = "";
+			$this->Day0SPZLocation->HrefValue = "";
+
+			// Day0SpOrgin
+			$this->Day0SpOrgin->LinkCustomAttributes = "";
+			$this->Day0SpOrgin->HrefValue = "";
+
+			// Day5Cryoptop
+			$this->Day5Cryoptop->LinkCustomAttributes = "";
+			$this->Day5Cryoptop->HrefValue = "";
+
+			// Day1Sperm
+			$this->Day1Sperm->LinkCustomAttributes = "";
+			$this->Day1Sperm->HrefValue = "";
+
+			// Day1PN
+			$this->Day1PN->LinkCustomAttributes = "";
+			$this->Day1PN->HrefValue = "";
+
+			// Day1PB
+			$this->Day1PB->LinkCustomAttributes = "";
+			$this->Day1PB->HrefValue = "";
+
+			// Day1Pronucleus
+			$this->Day1Pronucleus->LinkCustomAttributes = "";
+			$this->Day1Pronucleus->HrefValue = "";
+
+			// Day1Nucleolus
+			$this->Day1Nucleolus->LinkCustomAttributes = "";
+			$this->Day1Nucleolus->HrefValue = "";
+
+			// Day1Halo
+			$this->Day1Halo->LinkCustomAttributes = "";
+			$this->Day1Halo->HrefValue = "";
+
+			// Day2SiNo
+			$this->Day2SiNo->LinkCustomAttributes = "";
+			$this->Day2SiNo->HrefValue = "";
+
+			// Day2CellNo
+			$this->Day2CellNo->LinkCustomAttributes = "";
+			$this->Day2CellNo->HrefValue = "";
+
+			// Day2Frag
+			$this->Day2Frag->LinkCustomAttributes = "";
+			$this->Day2Frag->HrefValue = "";
+
+			// Day2Symmetry
+			$this->Day2Symmetry->LinkCustomAttributes = "";
+			$this->Day2Symmetry->HrefValue = "";
+
+			// Day2Cryoptop
+			$this->Day2Cryoptop->LinkCustomAttributes = "";
+			$this->Day2Cryoptop->HrefValue = "";
+
+			// Day2Grade
+			$this->Day2Grade->LinkCustomAttributes = "";
+			$this->Day2Grade->HrefValue = "";
+
+			// Day2End
+			$this->Day2End->LinkCustomAttributes = "";
+			$this->Day2End->HrefValue = "";
+
+			// Day3Sino
+			$this->Day3Sino->LinkCustomAttributes = "";
+			$this->Day3Sino->HrefValue = "";
+
+			// Day3CellNo
+			$this->Day3CellNo->LinkCustomAttributes = "";
+			$this->Day3CellNo->HrefValue = "";
+
+			// Day3Frag
+			$this->Day3Frag->LinkCustomAttributes = "";
+			$this->Day3Frag->HrefValue = "";
+
+			// Day3Symmetry
+			$this->Day3Symmetry->LinkCustomAttributes = "";
+			$this->Day3Symmetry->HrefValue = "";
+
+			// Day3ZP
+			$this->Day3ZP->LinkCustomAttributes = "";
+			$this->Day3ZP->HrefValue = "";
+
+			// Day3Vacoules
+			$this->Day3Vacoules->LinkCustomAttributes = "";
+			$this->Day3Vacoules->HrefValue = "";
+
+			// Day3Grade
+			$this->Day3Grade->LinkCustomAttributes = "";
+			$this->Day3Grade->HrefValue = "";
+
+			// Day3Cryoptop
+			$this->Day3Cryoptop->LinkCustomAttributes = "";
+			$this->Day3Cryoptop->HrefValue = "";
+
+			// Day3End
+			$this->Day3End->LinkCustomAttributes = "";
+			$this->Day3End->HrefValue = "";
+
+			// Day4SiNo
+			$this->Day4SiNo->LinkCustomAttributes = "";
+			$this->Day4SiNo->HrefValue = "";
+
+			// Day4CellNo
+			$this->Day4CellNo->LinkCustomAttributes = "";
+			$this->Day4CellNo->HrefValue = "";
+
+			// Day4Frag
+			$this->Day4Frag->LinkCustomAttributes = "";
+			$this->Day4Frag->HrefValue = "";
+
+			// Day4Symmetry
+			$this->Day4Symmetry->LinkCustomAttributes = "";
+			$this->Day4Symmetry->HrefValue = "";
+
+			// Day4Grade
+			$this->Day4Grade->LinkCustomAttributes = "";
+			$this->Day4Grade->HrefValue = "";
+
+			// Day4Cryoptop
+			$this->Day4Cryoptop->LinkCustomAttributes = "";
+			$this->Day4Cryoptop->HrefValue = "";
+
+			// Day4End
+			$this->Day4End->LinkCustomAttributes = "";
+			$this->Day4End->HrefValue = "";
+
+			// Day5CellNo
+			$this->Day5CellNo->LinkCustomAttributes = "";
+			$this->Day5CellNo->HrefValue = "";
+
+			// Day5ICM
+			$this->Day5ICM->LinkCustomAttributes = "";
+			$this->Day5ICM->HrefValue = "";
+
+			// Day5TE
+			$this->Day5TE->LinkCustomAttributes = "";
+			$this->Day5TE->HrefValue = "";
+
+			// Day5Observation
+			$this->Day5Observation->LinkCustomAttributes = "";
+			$this->Day5Observation->HrefValue = "";
+
+			// Day5Collapsed
+			$this->Day5Collapsed->LinkCustomAttributes = "";
+			$this->Day5Collapsed->HrefValue = "";
+
+			// Day5Vacoulles
+			$this->Day5Vacoulles->LinkCustomAttributes = "";
+			$this->Day5Vacoulles->HrefValue = "";
+
+			// Day5Grade
+			$this->Day5Grade->LinkCustomAttributes = "";
+			$this->Day5Grade->HrefValue = "";
+
+			// Day6CellNo
+			$this->Day6CellNo->LinkCustomAttributes = "";
+			$this->Day6CellNo->HrefValue = "";
+
+			// Day6ICM
+			$this->Day6ICM->LinkCustomAttributes = "";
+			$this->Day6ICM->HrefValue = "";
+
+			// Day6TE
+			$this->Day6TE->LinkCustomAttributes = "";
+			$this->Day6TE->HrefValue = "";
+
+			// Day6Observation
+			$this->Day6Observation->LinkCustomAttributes = "";
+			$this->Day6Observation->HrefValue = "";
+
+			// Day6Collapsed
+			$this->Day6Collapsed->LinkCustomAttributes = "";
+			$this->Day6Collapsed->HrefValue = "";
+
+			// Day6Vacoulles
+			$this->Day6Vacoulles->LinkCustomAttributes = "";
+			$this->Day6Vacoulles->HrefValue = "";
+
+			// Day6Grade
+			$this->Day6Grade->LinkCustomAttributes = "";
+			$this->Day6Grade->HrefValue = "";
+
+			// Day6Cryoptop
+			$this->Day6Cryoptop->LinkCustomAttributes = "";
+			$this->Day6Cryoptop->HrefValue = "";
+
+			// EndSiNo
+			$this->EndSiNo->LinkCustomAttributes = "";
+			$this->EndSiNo->HrefValue = "";
+
+			// EndingDay
+			$this->EndingDay->LinkCustomAttributes = "";
+			$this->EndingDay->HrefValue = "";
+
+			// EndingCellStage
+			$this->EndingCellStage->LinkCustomAttributes = "";
+			$this->EndingCellStage->HrefValue = "";
+
+			// EndingGrade
+			$this->EndingGrade->LinkCustomAttributes = "";
+			$this->EndingGrade->HrefValue = "";
+
+			// EndingState
+			$this->EndingState->LinkCustomAttributes = "";
+			$this->EndingState->HrefValue = "";
+
+			// TidNo
+			$this->TidNo->LinkCustomAttributes = "";
+			$this->TidNo->HrefValue = "";
+
+			// DidNO
+			$this->DidNO->LinkCustomAttributes = "";
+			$this->DidNO->HrefValue = "";
+
+			// ICSiIVFDateTime
+			$this->ICSiIVFDateTime->LinkCustomAttributes = "";
+			$this->ICSiIVFDateTime->HrefValue = "";
+
+			// PrimaryEmbrologist
+			$this->PrimaryEmbrologist->LinkCustomAttributes = "";
+			$this->PrimaryEmbrologist->HrefValue = "";
+
+			// SecondaryEmbrologist
+			$this->SecondaryEmbrologist->LinkCustomAttributes = "";
+			$this->SecondaryEmbrologist->HrefValue = "";
+
+			// Incubator
+			$this->Incubator->LinkCustomAttributes = "";
+			$this->Incubator->HrefValue = "";
+
+			// location
+			$this->location->LinkCustomAttributes = "";
+			$this->location->HrefValue = "";
+
+			// OocyteNo
+			$this->OocyteNo->LinkCustomAttributes = "";
+			$this->OocyteNo->HrefValue = "";
+
+			// Stage
+			$this->Stage->LinkCustomAttributes = "";
+			$this->Stage->HrefValue = "";
+
+			// Remarks
+			$this->Remarks->LinkCustomAttributes = "";
+			$this->Remarks->HrefValue = "";
+
+			// vitrificationDate
+			$this->vitrificationDate->LinkCustomAttributes = "";
+			$this->vitrificationDate->HrefValue = "";
+
+			// vitriPrimaryEmbryologist
+			$this->vitriPrimaryEmbryologist->LinkCustomAttributes = "";
+			$this->vitriPrimaryEmbryologist->HrefValue = "";
+
+			// vitriSecondaryEmbryologist
+			$this->vitriSecondaryEmbryologist->LinkCustomAttributes = "";
+			$this->vitriSecondaryEmbryologist->HrefValue = "";
+
+			// vitriEmbryoNo
+			$this->vitriEmbryoNo->LinkCustomAttributes = "";
+			$this->vitriEmbryoNo->HrefValue = "";
+
+			// thawReFrozen
+			$this->thawReFrozen->LinkCustomAttributes = "";
+			$this->thawReFrozen->HrefValue = "";
+
+			// vitriFertilisationDate
+			$this->vitriFertilisationDate->LinkCustomAttributes = "";
+			$this->vitriFertilisationDate->HrefValue = "";
+
+			// vitriDay
+			$this->vitriDay->LinkCustomAttributes = "";
+			$this->vitriDay->HrefValue = "";
+
+			// vitriStage
+			$this->vitriStage->LinkCustomAttributes = "";
+			$this->vitriStage->HrefValue = "";
+
+			// vitriGrade
+			$this->vitriGrade->LinkCustomAttributes = "";
+			$this->vitriGrade->HrefValue = "";
+
+			// vitriIncubator
+			$this->vitriIncubator->LinkCustomAttributes = "";
+			$this->vitriIncubator->HrefValue = "";
+
+			// vitriTank
+			$this->vitriTank->LinkCustomAttributes = "";
+			$this->vitriTank->HrefValue = "";
+
+			// vitriCanister
+			$this->vitriCanister->LinkCustomAttributes = "";
+			$this->vitriCanister->HrefValue = "";
+
+			// vitriGobiet
+			$this->vitriGobiet->LinkCustomAttributes = "";
+			$this->vitriGobiet->HrefValue = "";
+
+			// vitriViscotube
+			$this->vitriViscotube->LinkCustomAttributes = "";
+			$this->vitriViscotube->HrefValue = "";
+
+			// vitriCryolockNo
+			$this->vitriCryolockNo->LinkCustomAttributes = "";
+			$this->vitriCryolockNo->HrefValue = "";
+
+			// vitriCryolockColour
+			$this->vitriCryolockColour->LinkCustomAttributes = "";
+			$this->vitriCryolockColour->HrefValue = "";
+
+			// thawDate
+			$this->thawDate->LinkCustomAttributes = "";
+			$this->thawDate->HrefValue = "";
+
+			// thawPrimaryEmbryologist
+			$this->thawPrimaryEmbryologist->LinkCustomAttributes = "";
+			$this->thawPrimaryEmbryologist->HrefValue = "";
+
+			// thawSecondaryEmbryologist
+			$this->thawSecondaryEmbryologist->LinkCustomAttributes = "";
+			$this->thawSecondaryEmbryologist->HrefValue = "";
+
+			// thawET
+			$this->thawET->LinkCustomAttributes = "";
+			$this->thawET->HrefValue = "";
+
+			// thawAbserve
+			$this->thawAbserve->LinkCustomAttributes = "";
+			$this->thawAbserve->HrefValue = "";
+
+			// thawDiscard
+			$this->thawDiscard->LinkCustomAttributes = "";
+			$this->thawDiscard->HrefValue = "";
+
+			// ETCatheter
+			$this->ETCatheter->LinkCustomAttributes = "";
+			$this->ETCatheter->HrefValue = "";
+
+			// ETDifficulty
+			$this->ETDifficulty->LinkCustomAttributes = "";
+			$this->ETDifficulty->HrefValue = "";
+
+			// ETEasy
+			$this->ETEasy->LinkCustomAttributes = "";
+			$this->ETEasy->HrefValue = "";
+
+			// ETComments
+			$this->ETComments->LinkCustomAttributes = "";
+			$this->ETComments->HrefValue = "";
+
+			// ETDoctor
+			$this->ETDoctor->LinkCustomAttributes = "";
+			$this->ETDoctor->HrefValue = "";
+
+			// ETEmbryologist
+			$this->ETEmbryologist->LinkCustomAttributes = "";
+			$this->ETEmbryologist->HrefValue = "";
+
+			// ETDate
+			$this->ETDate->LinkCustomAttributes = "";
+			$this->ETDate->HrefValue = "";
+
+			// Day1End
+			$this->Day1End->LinkCustomAttributes = "";
+			$this->Day1End->HrefValue = "";
+		} elseif ($this->RowType == ROWTYPE_EDIT) { // Edit row
+
+			// id
+			$this->id->EditAttrs["class"] = "form-control";
+			$this->id->EditCustomAttributes = "";
+			$this->id->EditValue = $this->id->CurrentValue;
+			$this->id->ViewCustomAttributes = "";
+
+			// RIDNo
+			$this->RIDNo->EditAttrs["class"] = "form-control";
+			$this->RIDNo->EditCustomAttributes = "";
+			$this->RIDNo->EditValue = $this->RIDNo->CurrentValue;
+			$this->RIDNo->EditValue = FormatNumber($this->RIDNo->EditValue, 0, -2, -2, -2);
+			$this->RIDNo->ViewCustomAttributes = "";
+
+			// Name
+			$this->Name->EditAttrs["class"] = "form-control";
+			$this->Name->EditCustomAttributes = "";
+			$this->Name->EditValue = $this->Name->CurrentValue;
+			$this->Name->ViewCustomAttributes = "";
+
+			// ARTCycle
+			$this->ARTCycle->EditAttrs["class"] = "form-control";
+			$this->ARTCycle->EditCustomAttributes = "";
+			$this->ARTCycle->EditValue = $this->ARTCycle->CurrentValue;
+			$this->ARTCycle->ViewCustomAttributes = "";
+
+			// SpermOrigin
+			$this->SpermOrigin->EditAttrs["class"] = "form-control";
+			$this->SpermOrigin->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->SpermOrigin->CurrentValue = HtmlDecode($this->SpermOrigin->CurrentValue);
+			$this->SpermOrigin->EditValue = HtmlEncode($this->SpermOrigin->CurrentValue);
+			$this->SpermOrigin->PlaceHolder = RemoveHtml($this->SpermOrigin->caption());
+
+			// InseminatinTechnique
+			$this->InseminatinTechnique->EditAttrs["class"] = "form-control";
+			$this->InseminatinTechnique->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->InseminatinTechnique->CurrentValue = HtmlDecode($this->InseminatinTechnique->CurrentValue);
+			$this->InseminatinTechnique->EditValue = HtmlEncode($this->InseminatinTechnique->CurrentValue);
+			$this->InseminatinTechnique->PlaceHolder = RemoveHtml($this->InseminatinTechnique->caption());
+
+			// IndicationForART
+			$this->IndicationForART->EditAttrs["class"] = "form-control";
+			$this->IndicationForART->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->IndicationForART->CurrentValue = HtmlDecode($this->IndicationForART->CurrentValue);
+			$this->IndicationForART->EditValue = HtmlEncode($this->IndicationForART->CurrentValue);
+			$this->IndicationForART->PlaceHolder = RemoveHtml($this->IndicationForART->caption());
+
+			// Day0sino
+			$this->Day0sino->EditAttrs["class"] = "form-control";
+			$this->Day0sino->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day0sino->CurrentValue = HtmlDecode($this->Day0sino->CurrentValue);
+			$this->Day0sino->EditValue = HtmlEncode($this->Day0sino->CurrentValue);
+			$this->Day0sino->PlaceHolder = RemoveHtml($this->Day0sino->caption());
+
+			// Day0OocyteStage
+			$this->Day0OocyteStage->EditAttrs["class"] = "form-control";
+			$this->Day0OocyteStage->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day0OocyteStage->CurrentValue = HtmlDecode($this->Day0OocyteStage->CurrentValue);
+			$this->Day0OocyteStage->EditValue = HtmlEncode($this->Day0OocyteStage->CurrentValue);
+			$this->Day0OocyteStage->PlaceHolder = RemoveHtml($this->Day0OocyteStage->caption());
+
+			// Day0PolarBodyPosition
+			$this->Day0PolarBodyPosition->EditAttrs["class"] = "form-control";
+			$this->Day0PolarBodyPosition->EditCustomAttributes = "";
+			$this->Day0PolarBodyPosition->EditValue = $this->Day0PolarBodyPosition->options(TRUE);
+
+			// Day0Breakage
+			$this->Day0Breakage->EditAttrs["class"] = "form-control";
+			$this->Day0Breakage->EditCustomAttributes = "";
+			$this->Day0Breakage->EditValue = $this->Day0Breakage->options(TRUE);
+
+			// Day0Attempts
+			$this->Day0Attempts->EditAttrs["class"] = "form-control";
+			$this->Day0Attempts->EditCustomAttributes = "";
+			$this->Day0Attempts->EditValue = $this->Day0Attempts->options(TRUE);
+
+			// Day0SPZMorpho
+			$this->Day0SPZMorpho->EditAttrs["class"] = "form-control";
+			$this->Day0SPZMorpho->EditCustomAttributes = "";
+			$this->Day0SPZMorpho->EditValue = $this->Day0SPZMorpho->options(TRUE);
+
+			// Day0SPZLocation
+			$this->Day0SPZLocation->EditAttrs["class"] = "form-control";
+			$this->Day0SPZLocation->EditCustomAttributes = "";
+			$this->Day0SPZLocation->EditValue = $this->Day0SPZLocation->options(TRUE);
+
+			// Day0SpOrgin
+			$this->Day0SpOrgin->EditAttrs["class"] = "form-control";
+			$this->Day0SpOrgin->EditCustomAttributes = "";
+			$this->Day0SpOrgin->EditValue = $this->Day0SpOrgin->options(TRUE);
+
+			// Day5Cryoptop
+			$this->Day5Cryoptop->EditAttrs["class"] = "form-control";
+			$this->Day5Cryoptop->EditCustomAttributes = "";
+			$this->Day5Cryoptop->EditValue = $this->Day5Cryoptop->options(TRUE);
+
+			// Day1Sperm
+			$this->Day1Sperm->EditAttrs["class"] = "form-control";
+			$this->Day1Sperm->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day1Sperm->CurrentValue = HtmlDecode($this->Day1Sperm->CurrentValue);
+			$this->Day1Sperm->EditValue = HtmlEncode($this->Day1Sperm->CurrentValue);
+			$this->Day1Sperm->PlaceHolder = RemoveHtml($this->Day1Sperm->caption());
+
+			// Day1PN
+			$this->Day1PN->EditAttrs["class"] = "form-control";
+			$this->Day1PN->EditCustomAttributes = "";
+			$this->Day1PN->EditValue = $this->Day1PN->options(TRUE);
+
+			// Day1PB
+			$this->Day1PB->EditAttrs["class"] = "form-control";
+			$this->Day1PB->EditCustomAttributes = "";
+			$this->Day1PB->EditValue = $this->Day1PB->options(TRUE);
+
+			// Day1Pronucleus
+			$this->Day1Pronucleus->EditAttrs["class"] = "form-control";
+			$this->Day1Pronucleus->EditCustomAttributes = "";
+			$this->Day1Pronucleus->EditValue = $this->Day1Pronucleus->options(TRUE);
+
+			// Day1Nucleolus
+			$this->Day1Nucleolus->EditAttrs["class"] = "form-control";
+			$this->Day1Nucleolus->EditCustomAttributes = "";
+			$this->Day1Nucleolus->EditValue = $this->Day1Nucleolus->options(TRUE);
+
+			// Day1Halo
+			$this->Day1Halo->EditAttrs["class"] = "form-control";
+			$this->Day1Halo->EditCustomAttributes = "";
+			$this->Day1Halo->EditValue = $this->Day1Halo->options(TRUE);
+
+			// Day2SiNo
+			$this->Day2SiNo->EditAttrs["class"] = "form-control";
+			$this->Day2SiNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day2SiNo->CurrentValue = HtmlDecode($this->Day2SiNo->CurrentValue);
+			$this->Day2SiNo->EditValue = HtmlEncode($this->Day2SiNo->CurrentValue);
+			$this->Day2SiNo->PlaceHolder = RemoveHtml($this->Day2SiNo->caption());
+
+			// Day2CellNo
+			$this->Day2CellNo->EditAttrs["class"] = "form-control";
+			$this->Day2CellNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day2CellNo->CurrentValue = HtmlDecode($this->Day2CellNo->CurrentValue);
+			$this->Day2CellNo->EditValue = HtmlEncode($this->Day2CellNo->CurrentValue);
+			$this->Day2CellNo->PlaceHolder = RemoveHtml($this->Day2CellNo->caption());
+
+			// Day2Frag
+			$this->Day2Frag->EditAttrs["class"] = "form-control";
+			$this->Day2Frag->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day2Frag->CurrentValue = HtmlDecode($this->Day2Frag->CurrentValue);
+			$this->Day2Frag->EditValue = HtmlEncode($this->Day2Frag->CurrentValue);
+			$this->Day2Frag->PlaceHolder = RemoveHtml($this->Day2Frag->caption());
+
+			// Day2Symmetry
+			$this->Day2Symmetry->EditAttrs["class"] = "form-control";
+			$this->Day2Symmetry->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day2Symmetry->CurrentValue = HtmlDecode($this->Day2Symmetry->CurrentValue);
+			$this->Day2Symmetry->EditValue = HtmlEncode($this->Day2Symmetry->CurrentValue);
+			$this->Day2Symmetry->PlaceHolder = RemoveHtml($this->Day2Symmetry->caption());
+
+			// Day2Cryoptop
+			$this->Day2Cryoptop->EditAttrs["class"] = "form-control";
+			$this->Day2Cryoptop->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day2Cryoptop->CurrentValue = HtmlDecode($this->Day2Cryoptop->CurrentValue);
+			$this->Day2Cryoptop->EditValue = HtmlEncode($this->Day2Cryoptop->CurrentValue);
+			$this->Day2Cryoptop->PlaceHolder = RemoveHtml($this->Day2Cryoptop->caption());
+
+			// Day2Grade
+			$this->Day2Grade->EditAttrs["class"] = "form-control";
+			$this->Day2Grade->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day2Grade->CurrentValue = HtmlDecode($this->Day2Grade->CurrentValue);
+			$this->Day2Grade->EditValue = HtmlEncode($this->Day2Grade->CurrentValue);
+			$this->Day2Grade->PlaceHolder = RemoveHtml($this->Day2Grade->caption());
+
+			// Day2End
+			$this->Day2End->EditAttrs["class"] = "form-control";
+			$this->Day2End->EditCustomAttributes = "";
+			$this->Day2End->EditValue = $this->Day2End->options(TRUE);
+
+			// Day3Sino
+			$this->Day3Sino->EditAttrs["class"] = "form-control";
+			$this->Day3Sino->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day3Sino->CurrentValue = HtmlDecode($this->Day3Sino->CurrentValue);
+			$this->Day3Sino->EditValue = HtmlEncode($this->Day3Sino->CurrentValue);
+			$this->Day3Sino->PlaceHolder = RemoveHtml($this->Day3Sino->caption());
+
+			// Day3CellNo
+			$this->Day3CellNo->EditAttrs["class"] = "form-control";
+			$this->Day3CellNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day3CellNo->CurrentValue = HtmlDecode($this->Day3CellNo->CurrentValue);
+			$this->Day3CellNo->EditValue = HtmlEncode($this->Day3CellNo->CurrentValue);
+			$this->Day3CellNo->PlaceHolder = RemoveHtml($this->Day3CellNo->caption());
+
+			// Day3Frag
+			$this->Day3Frag->EditAttrs["class"] = "form-control";
+			$this->Day3Frag->EditCustomAttributes = "";
+			$this->Day3Frag->EditValue = $this->Day3Frag->options(TRUE);
+
+			// Day3Symmetry
+			$this->Day3Symmetry->EditAttrs["class"] = "form-control";
+			$this->Day3Symmetry->EditCustomAttributes = "";
+			$this->Day3Symmetry->EditValue = $this->Day3Symmetry->options(TRUE);
+
+			// Day3ZP
+			$this->Day3ZP->EditAttrs["class"] = "form-control";
+			$this->Day3ZP->EditCustomAttributes = "";
+			$this->Day3ZP->EditValue = $this->Day3ZP->options(TRUE);
+
+			// Day3Vacoules
+			$this->Day3Vacoules->EditAttrs["class"] = "form-control";
+			$this->Day3Vacoules->EditCustomAttributes = "";
+			$this->Day3Vacoules->EditValue = $this->Day3Vacoules->options(TRUE);
+
+			// Day3Grade
+			$this->Day3Grade->EditAttrs["class"] = "form-control";
+			$this->Day3Grade->EditCustomAttributes = "";
+			$this->Day3Grade->EditValue = $this->Day3Grade->options(TRUE);
+
+			// Day3Cryoptop
+			$this->Day3Cryoptop->EditAttrs["class"] = "form-control";
+			$this->Day3Cryoptop->EditCustomAttributes = "";
+			$this->Day3Cryoptop->EditValue = $this->Day3Cryoptop->options(TRUE);
+
+			// Day3End
+			$this->Day3End->EditAttrs["class"] = "form-control";
+			$this->Day3End->EditCustomAttributes = "";
+			$this->Day3End->EditValue = $this->Day3End->options(TRUE);
+
+			// Day4SiNo
+			$this->Day4SiNo->EditAttrs["class"] = "form-control";
+			$this->Day4SiNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day4SiNo->CurrentValue = HtmlDecode($this->Day4SiNo->CurrentValue);
+			$this->Day4SiNo->EditValue = HtmlEncode($this->Day4SiNo->CurrentValue);
+			$this->Day4SiNo->PlaceHolder = RemoveHtml($this->Day4SiNo->caption());
+
+			// Day4CellNo
+			$this->Day4CellNo->EditAttrs["class"] = "form-control";
+			$this->Day4CellNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day4CellNo->CurrentValue = HtmlDecode($this->Day4CellNo->CurrentValue);
+			$this->Day4CellNo->EditValue = HtmlEncode($this->Day4CellNo->CurrentValue);
+			$this->Day4CellNo->PlaceHolder = RemoveHtml($this->Day4CellNo->caption());
+
+			// Day4Frag
+			$this->Day4Frag->EditAttrs["class"] = "form-control";
+			$this->Day4Frag->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day4Frag->CurrentValue = HtmlDecode($this->Day4Frag->CurrentValue);
+			$this->Day4Frag->EditValue = HtmlEncode($this->Day4Frag->CurrentValue);
+			$this->Day4Frag->PlaceHolder = RemoveHtml($this->Day4Frag->caption());
+
+			// Day4Symmetry
+			$this->Day4Symmetry->EditAttrs["class"] = "form-control";
+			$this->Day4Symmetry->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day4Symmetry->CurrentValue = HtmlDecode($this->Day4Symmetry->CurrentValue);
+			$this->Day4Symmetry->EditValue = HtmlEncode($this->Day4Symmetry->CurrentValue);
+			$this->Day4Symmetry->PlaceHolder = RemoveHtml($this->Day4Symmetry->caption());
+
+			// Day4Grade
+			$this->Day4Grade->EditAttrs["class"] = "form-control";
+			$this->Day4Grade->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day4Grade->CurrentValue = HtmlDecode($this->Day4Grade->CurrentValue);
+			$this->Day4Grade->EditValue = HtmlEncode($this->Day4Grade->CurrentValue);
+			$this->Day4Grade->PlaceHolder = RemoveHtml($this->Day4Grade->caption());
+
+			// Day4Cryoptop
+			$this->Day4Cryoptop->EditAttrs["class"] = "form-control";
+			$this->Day4Cryoptop->EditCustomAttributes = "";
+			$this->Day4Cryoptop->EditValue = $this->Day4Cryoptop->options(TRUE);
+
+			// Day4End
+			$this->Day4End->EditAttrs["class"] = "form-control";
+			$this->Day4End->EditCustomAttributes = "";
+			$this->Day4End->EditValue = $this->Day4End->options(TRUE);
+
+			// Day5CellNo
+			$this->Day5CellNo->EditAttrs["class"] = "form-control";
+			$this->Day5CellNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day5CellNo->CurrentValue = HtmlDecode($this->Day5CellNo->CurrentValue);
+			$this->Day5CellNo->EditValue = HtmlEncode($this->Day5CellNo->CurrentValue);
+			$this->Day5CellNo->PlaceHolder = RemoveHtml($this->Day5CellNo->caption());
+
+			// Day5ICM
+			$this->Day5ICM->EditAttrs["class"] = "form-control";
+			$this->Day5ICM->EditCustomAttributes = "";
+			$this->Day5ICM->EditValue = $this->Day5ICM->options(TRUE);
+
+			// Day5TE
+			$this->Day5TE->EditAttrs["class"] = "form-control";
+			$this->Day5TE->EditCustomAttributes = "";
+			$this->Day5TE->EditValue = $this->Day5TE->options(TRUE);
+
+			// Day5Observation
+			$this->Day5Observation->EditAttrs["class"] = "form-control";
+			$this->Day5Observation->EditCustomAttributes = "";
+			$this->Day5Observation->EditValue = $this->Day5Observation->options(TRUE);
+
+			// Day5Collapsed
+			$this->Day5Collapsed->EditAttrs["class"] = "form-control";
+			$this->Day5Collapsed->EditCustomAttributes = "";
+			$this->Day5Collapsed->EditValue = $this->Day5Collapsed->options(TRUE);
+
+			// Day5Vacoulles
+			$this->Day5Vacoulles->EditAttrs["class"] = "form-control";
+			$this->Day5Vacoulles->EditCustomAttributes = "";
+			$this->Day5Vacoulles->EditValue = $this->Day5Vacoulles->options(TRUE);
+
+			// Day5Grade
+			$this->Day5Grade->EditAttrs["class"] = "form-control";
+			$this->Day5Grade->EditCustomAttributes = "";
+			$this->Day5Grade->EditValue = $this->Day5Grade->options(TRUE);
+
+			// Day6CellNo
+			$this->Day6CellNo->EditAttrs["class"] = "form-control";
+			$this->Day6CellNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day6CellNo->CurrentValue = HtmlDecode($this->Day6CellNo->CurrentValue);
+			$this->Day6CellNo->EditValue = HtmlEncode($this->Day6CellNo->CurrentValue);
+			$this->Day6CellNo->PlaceHolder = RemoveHtml($this->Day6CellNo->caption());
+
+			// Day6ICM
+			$this->Day6ICM->EditAttrs["class"] = "form-control";
+			$this->Day6ICM->EditCustomAttributes = "";
+			$this->Day6ICM->EditValue = $this->Day6ICM->options(TRUE);
+
+			// Day6TE
+			$this->Day6TE->EditAttrs["class"] = "form-control";
+			$this->Day6TE->EditCustomAttributes = "";
+			$this->Day6TE->EditValue = $this->Day6TE->options(TRUE);
+
+			// Day6Observation
+			$this->Day6Observation->EditAttrs["class"] = "form-control";
+			$this->Day6Observation->EditCustomAttributes = "";
+			$this->Day6Observation->EditValue = $this->Day6Observation->options(TRUE);
+
+			// Day6Collapsed
+			$this->Day6Collapsed->EditAttrs["class"] = "form-control";
+			$this->Day6Collapsed->EditCustomAttributes = "";
+			$this->Day6Collapsed->EditValue = $this->Day6Collapsed->options(TRUE);
+
+			// Day6Vacoulles
+			$this->Day6Vacoulles->EditAttrs["class"] = "form-control";
+			$this->Day6Vacoulles->EditCustomAttributes = "";
+			$this->Day6Vacoulles->EditValue = $this->Day6Vacoulles->options(TRUE);
+
+			// Day6Grade
+			$this->Day6Grade->EditAttrs["class"] = "form-control";
+			$this->Day6Grade->EditCustomAttributes = "";
+			$this->Day6Grade->EditValue = $this->Day6Grade->options(TRUE);
+
+			// Day6Cryoptop
+			$this->Day6Cryoptop->EditAttrs["class"] = "form-control";
+			$this->Day6Cryoptop->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Day6Cryoptop->CurrentValue = HtmlDecode($this->Day6Cryoptop->CurrentValue);
+			$this->Day6Cryoptop->EditValue = HtmlEncode($this->Day6Cryoptop->CurrentValue);
+			$this->Day6Cryoptop->PlaceHolder = RemoveHtml($this->Day6Cryoptop->caption());
+
+			// EndSiNo
+			$this->EndSiNo->EditAttrs["class"] = "form-control";
+			$this->EndSiNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->EndSiNo->CurrentValue = HtmlDecode($this->EndSiNo->CurrentValue);
+			$this->EndSiNo->EditValue = HtmlEncode($this->EndSiNo->CurrentValue);
+			$this->EndSiNo->PlaceHolder = RemoveHtml($this->EndSiNo->caption());
+
+			// EndingDay
+			$this->EndingDay->EditAttrs["class"] = "form-control";
+			$this->EndingDay->EditCustomAttributes = "";
+			$this->EndingDay->EditValue = $this->EndingDay->options(TRUE);
+
+			// EndingCellStage
+			$this->EndingCellStage->EditAttrs["class"] = "form-control";
+			$this->EndingCellStage->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->EndingCellStage->CurrentValue = HtmlDecode($this->EndingCellStage->CurrentValue);
+			$this->EndingCellStage->EditValue = HtmlEncode($this->EndingCellStage->CurrentValue);
+			$this->EndingCellStage->PlaceHolder = RemoveHtml($this->EndingCellStage->caption());
+
+			// EndingGrade
+			$this->EndingGrade->EditAttrs["class"] = "form-control";
+			$this->EndingGrade->EditCustomAttributes = "";
+			$this->EndingGrade->EditValue = $this->EndingGrade->options(TRUE);
+
+			// EndingState
+			$this->EndingState->EditAttrs["class"] = "form-control";
+			$this->EndingState->EditCustomAttributes = "";
+			$this->EndingState->EditValue = $this->EndingState->options(TRUE);
+
+			// TidNo
+			$this->TidNo->EditAttrs["class"] = "form-control";
+			$this->TidNo->EditCustomAttributes = "";
+			$this->TidNo->EditValue = $this->TidNo->CurrentValue;
+			$this->TidNo->EditValue = FormatNumber($this->TidNo->EditValue, 0, -2, -2, -2);
+			$this->TidNo->ViewCustomAttributes = "";
+
+			// DidNO
+			$this->DidNO->EditAttrs["class"] = "form-control";
+			$this->DidNO->EditCustomAttributes = "";
+			$this->DidNO->EditValue = $this->DidNO->CurrentValue;
+			$this->DidNO->ViewCustomAttributes = "";
+
+			// ICSiIVFDateTime
+			$this->ICSiIVFDateTime->EditAttrs["class"] = "form-control";
+			$this->ICSiIVFDateTime->EditCustomAttributes = "";
+			$this->ICSiIVFDateTime->EditValue = HtmlEncode(FormatDateTime($this->ICSiIVFDateTime->CurrentValue, 8));
+			$this->ICSiIVFDateTime->PlaceHolder = RemoveHtml($this->ICSiIVFDateTime->caption());
+
+			// PrimaryEmbrologist
+			$this->PrimaryEmbrologist->EditAttrs["class"] = "form-control";
+			$this->PrimaryEmbrologist->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->PrimaryEmbrologist->CurrentValue = HtmlDecode($this->PrimaryEmbrologist->CurrentValue);
+			$this->PrimaryEmbrologist->EditValue = HtmlEncode($this->PrimaryEmbrologist->CurrentValue);
+			$this->PrimaryEmbrologist->PlaceHolder = RemoveHtml($this->PrimaryEmbrologist->caption());
+
+			// SecondaryEmbrologist
+			$this->SecondaryEmbrologist->EditAttrs["class"] = "form-control";
+			$this->SecondaryEmbrologist->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->SecondaryEmbrologist->CurrentValue = HtmlDecode($this->SecondaryEmbrologist->CurrentValue);
+			$this->SecondaryEmbrologist->EditValue = HtmlEncode($this->SecondaryEmbrologist->CurrentValue);
+			$this->SecondaryEmbrologist->PlaceHolder = RemoveHtml($this->SecondaryEmbrologist->caption());
+
+			// Incubator
+			$this->Incubator->EditAttrs["class"] = "form-control";
+			$this->Incubator->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Incubator->CurrentValue = HtmlDecode($this->Incubator->CurrentValue);
+			$this->Incubator->EditValue = HtmlEncode($this->Incubator->CurrentValue);
+			$this->Incubator->PlaceHolder = RemoveHtml($this->Incubator->caption());
+
+			// location
+			$this->location->EditAttrs["class"] = "form-control";
+			$this->location->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->location->CurrentValue = HtmlDecode($this->location->CurrentValue);
+			$this->location->EditValue = HtmlEncode($this->location->CurrentValue);
+			$this->location->PlaceHolder = RemoveHtml($this->location->caption());
+
+			// OocyteNo
+			$this->OocyteNo->EditAttrs["class"] = "form-control";
+			$this->OocyteNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->OocyteNo->CurrentValue = HtmlDecode($this->OocyteNo->CurrentValue);
+			$this->OocyteNo->EditValue = HtmlEncode($this->OocyteNo->CurrentValue);
+			$this->OocyteNo->PlaceHolder = RemoveHtml($this->OocyteNo->caption());
+
+			// Stage
+			$this->Stage->EditAttrs["class"] = "form-control";
+			$this->Stage->EditCustomAttributes = "";
+			$this->Stage->EditValue = $this->Stage->options(TRUE);
+
+			// Remarks
+			$this->Remarks->EditAttrs["class"] = "form-control";
+			$this->Remarks->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->Remarks->CurrentValue = HtmlDecode($this->Remarks->CurrentValue);
+			$this->Remarks->EditValue = HtmlEncode($this->Remarks->CurrentValue);
+			$this->Remarks->PlaceHolder = RemoveHtml($this->Remarks->caption());
+
+			// vitrificationDate
+			$this->vitrificationDate->EditAttrs["class"] = "form-control";
+			$this->vitrificationDate->EditCustomAttributes = "";
+			$this->vitrificationDate->EditValue = HtmlEncode(FormatDateTime($this->vitrificationDate->CurrentValue, 8));
+			$this->vitrificationDate->PlaceHolder = RemoveHtml($this->vitrificationDate->caption());
+
+			// vitriPrimaryEmbryologist
+			$this->vitriPrimaryEmbryologist->EditAttrs["class"] = "form-control";
+			$this->vitriPrimaryEmbryologist->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriPrimaryEmbryologist->CurrentValue = HtmlDecode($this->vitriPrimaryEmbryologist->CurrentValue);
+			$this->vitriPrimaryEmbryologist->EditValue = HtmlEncode($this->vitriPrimaryEmbryologist->CurrentValue);
+			$this->vitriPrimaryEmbryologist->PlaceHolder = RemoveHtml($this->vitriPrimaryEmbryologist->caption());
+
+			// vitriSecondaryEmbryologist
+			$this->vitriSecondaryEmbryologist->EditAttrs["class"] = "form-control";
+			$this->vitriSecondaryEmbryologist->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriSecondaryEmbryologist->CurrentValue = HtmlDecode($this->vitriSecondaryEmbryologist->CurrentValue);
+			$this->vitriSecondaryEmbryologist->EditValue = HtmlEncode($this->vitriSecondaryEmbryologist->CurrentValue);
+			$this->vitriSecondaryEmbryologist->PlaceHolder = RemoveHtml($this->vitriSecondaryEmbryologist->caption());
+
+			// vitriEmbryoNo
+			$this->vitriEmbryoNo->EditAttrs["class"] = "form-control";
+			$this->vitriEmbryoNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriEmbryoNo->CurrentValue = HtmlDecode($this->vitriEmbryoNo->CurrentValue);
+			$this->vitriEmbryoNo->EditValue = HtmlEncode($this->vitriEmbryoNo->CurrentValue);
+			$this->vitriEmbryoNo->PlaceHolder = RemoveHtml($this->vitriEmbryoNo->caption());
+
+			// thawReFrozen
+			$this->thawReFrozen->EditCustomAttributes = "";
+			$this->thawReFrozen->EditValue = $this->thawReFrozen->options(FALSE);
+
+			// vitriFertilisationDate
+			$this->vitriFertilisationDate->EditAttrs["class"] = "form-control";
+			$this->vitriFertilisationDate->EditCustomAttributes = "";
+			$this->vitriFertilisationDate->EditValue = HtmlEncode(FormatDateTime($this->vitriFertilisationDate->CurrentValue, 8));
+			$this->vitriFertilisationDate->PlaceHolder = RemoveHtml($this->vitriFertilisationDate->caption());
+
+			// vitriDay
+			$this->vitriDay->EditAttrs["class"] = "form-control";
+			$this->vitriDay->EditCustomAttributes = "";
+			$this->vitriDay->EditValue = $this->vitriDay->options(TRUE);
+
+			// vitriStage
+			$this->vitriStage->EditAttrs["class"] = "form-control";
+			$this->vitriStage->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriStage->CurrentValue = HtmlDecode($this->vitriStage->CurrentValue);
+			$this->vitriStage->EditValue = HtmlEncode($this->vitriStage->CurrentValue);
+			$this->vitriStage->PlaceHolder = RemoveHtml($this->vitriStage->caption());
+
+			// vitriGrade
+			$this->vitriGrade->EditAttrs["class"] = "form-control";
+			$this->vitriGrade->EditCustomAttributes = "";
+			$this->vitriGrade->EditValue = $this->vitriGrade->options(TRUE);
+
+			// vitriIncubator
+			$this->vitriIncubator->EditAttrs["class"] = "form-control";
+			$this->vitriIncubator->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriIncubator->CurrentValue = HtmlDecode($this->vitriIncubator->CurrentValue);
+			$this->vitriIncubator->EditValue = HtmlEncode($this->vitriIncubator->CurrentValue);
+			$this->vitriIncubator->PlaceHolder = RemoveHtml($this->vitriIncubator->caption());
+
+			// vitriTank
+			$this->vitriTank->EditAttrs["class"] = "form-control";
+			$this->vitriTank->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriTank->CurrentValue = HtmlDecode($this->vitriTank->CurrentValue);
+			$this->vitriTank->EditValue = HtmlEncode($this->vitriTank->CurrentValue);
+			$this->vitriTank->PlaceHolder = RemoveHtml($this->vitriTank->caption());
+
+			// vitriCanister
+			$this->vitriCanister->EditAttrs["class"] = "form-control";
+			$this->vitriCanister->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriCanister->CurrentValue = HtmlDecode($this->vitriCanister->CurrentValue);
+			$this->vitriCanister->EditValue = HtmlEncode($this->vitriCanister->CurrentValue);
+			$this->vitriCanister->PlaceHolder = RemoveHtml($this->vitriCanister->caption());
+
+			// vitriGobiet
+			$this->vitriGobiet->EditAttrs["class"] = "form-control";
+			$this->vitriGobiet->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriGobiet->CurrentValue = HtmlDecode($this->vitriGobiet->CurrentValue);
+			$this->vitriGobiet->EditValue = HtmlEncode($this->vitriGobiet->CurrentValue);
+			$this->vitriGobiet->PlaceHolder = RemoveHtml($this->vitriGobiet->caption());
+
+			// vitriViscotube
+			$this->vitriViscotube->EditAttrs["class"] = "form-control";
+			$this->vitriViscotube->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriViscotube->CurrentValue = HtmlDecode($this->vitriViscotube->CurrentValue);
+			$this->vitriViscotube->EditValue = HtmlEncode($this->vitriViscotube->CurrentValue);
+			$this->vitriViscotube->PlaceHolder = RemoveHtml($this->vitriViscotube->caption());
+
+			// vitriCryolockNo
+			$this->vitriCryolockNo->EditAttrs["class"] = "form-control";
+			$this->vitriCryolockNo->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriCryolockNo->CurrentValue = HtmlDecode($this->vitriCryolockNo->CurrentValue);
+			$this->vitriCryolockNo->EditValue = HtmlEncode($this->vitriCryolockNo->CurrentValue);
+			$this->vitriCryolockNo->PlaceHolder = RemoveHtml($this->vitriCryolockNo->caption());
+
+			// vitriCryolockColour
+			$this->vitriCryolockColour->EditAttrs["class"] = "form-control";
+			$this->vitriCryolockColour->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->vitriCryolockColour->CurrentValue = HtmlDecode($this->vitriCryolockColour->CurrentValue);
+			$this->vitriCryolockColour->EditValue = HtmlEncode($this->vitriCryolockColour->CurrentValue);
+			$this->vitriCryolockColour->PlaceHolder = RemoveHtml($this->vitriCryolockColour->caption());
+
+			// thawDate
+			$this->thawDate->EditAttrs["class"] = "form-control";
+			$this->thawDate->EditCustomAttributes = "";
+			$this->thawDate->EditValue = HtmlEncode(FormatDateTime($this->thawDate->CurrentValue, 8));
+			$this->thawDate->PlaceHolder = RemoveHtml($this->thawDate->caption());
+
+			// thawPrimaryEmbryologist
+			$this->thawPrimaryEmbryologist->EditAttrs["class"] = "form-control";
+			$this->thawPrimaryEmbryologist->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->thawPrimaryEmbryologist->CurrentValue = HtmlDecode($this->thawPrimaryEmbryologist->CurrentValue);
+			$this->thawPrimaryEmbryologist->EditValue = HtmlEncode($this->thawPrimaryEmbryologist->CurrentValue);
+			$this->thawPrimaryEmbryologist->PlaceHolder = RemoveHtml($this->thawPrimaryEmbryologist->caption());
+
+			// thawSecondaryEmbryologist
+			$this->thawSecondaryEmbryologist->EditAttrs["class"] = "form-control";
+			$this->thawSecondaryEmbryologist->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->thawSecondaryEmbryologist->CurrentValue = HtmlDecode($this->thawSecondaryEmbryologist->CurrentValue);
+			$this->thawSecondaryEmbryologist->EditValue = HtmlEncode($this->thawSecondaryEmbryologist->CurrentValue);
+			$this->thawSecondaryEmbryologist->PlaceHolder = RemoveHtml($this->thawSecondaryEmbryologist->caption());
+
+			// thawET
+			$this->thawET->EditAttrs["class"] = "form-control";
+			$this->thawET->EditCustomAttributes = "";
+			$this->thawET->EditValue = $this->thawET->options(TRUE);
+
+			// thawAbserve
+			$this->thawAbserve->EditAttrs["class"] = "form-control";
+			$this->thawAbserve->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->thawAbserve->CurrentValue = HtmlDecode($this->thawAbserve->CurrentValue);
+			$this->thawAbserve->EditValue = HtmlEncode($this->thawAbserve->CurrentValue);
+			$this->thawAbserve->PlaceHolder = RemoveHtml($this->thawAbserve->caption());
+
+			// thawDiscard
+			$this->thawDiscard->EditAttrs["class"] = "form-control";
+			$this->thawDiscard->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->thawDiscard->CurrentValue = HtmlDecode($this->thawDiscard->CurrentValue);
+			$this->thawDiscard->EditValue = HtmlEncode($this->thawDiscard->CurrentValue);
+			$this->thawDiscard->PlaceHolder = RemoveHtml($this->thawDiscard->caption());
+
+			// ETCatheter
+			$this->ETCatheter->EditAttrs["class"] = "form-control";
+			$this->ETCatheter->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->ETCatheter->CurrentValue = HtmlDecode($this->ETCatheter->CurrentValue);
+			$this->ETCatheter->EditValue = HtmlEncode($this->ETCatheter->CurrentValue);
+			$this->ETCatheter->PlaceHolder = RemoveHtml($this->ETCatheter->caption());
+
+			// ETDifficulty
+			$this->ETDifficulty->EditAttrs["class"] = "form-control";
+			$this->ETDifficulty->EditCustomAttributes = "";
+			$this->ETDifficulty->EditValue = $this->ETDifficulty->options(TRUE);
+
+			// ETEasy
+			$this->ETEasy->EditCustomAttributes = "";
+			$this->ETEasy->EditValue = $this->ETEasy->options(FALSE);
+
+			// ETComments
+			$this->ETComments->EditAttrs["class"] = "form-control";
+			$this->ETComments->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->ETComments->CurrentValue = HtmlDecode($this->ETComments->CurrentValue);
+			$this->ETComments->EditValue = HtmlEncode($this->ETComments->CurrentValue);
+			$this->ETComments->PlaceHolder = RemoveHtml($this->ETComments->caption());
+
+			// ETDoctor
+			$this->ETDoctor->EditAttrs["class"] = "form-control";
+			$this->ETDoctor->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->ETDoctor->CurrentValue = HtmlDecode($this->ETDoctor->CurrentValue);
+			$this->ETDoctor->EditValue = HtmlEncode($this->ETDoctor->CurrentValue);
+			$this->ETDoctor->PlaceHolder = RemoveHtml($this->ETDoctor->caption());
+
+			// ETEmbryologist
+			$this->ETEmbryologist->EditAttrs["class"] = "form-control";
+			$this->ETEmbryologist->EditCustomAttributes = "";
+			if (REMOVE_XSS)
+				$this->ETEmbryologist->CurrentValue = HtmlDecode($this->ETEmbryologist->CurrentValue);
+			$this->ETEmbryologist->EditValue = HtmlEncode($this->ETEmbryologist->CurrentValue);
+			$this->ETEmbryologist->PlaceHolder = RemoveHtml($this->ETEmbryologist->caption());
+
+			// ETDate
+			$this->ETDate->EditAttrs["class"] = "form-control";
+			$this->ETDate->EditCustomAttributes = "";
+			$this->ETDate->EditValue = HtmlEncode(FormatDateTime($this->ETDate->CurrentValue, 8));
+			$this->ETDate->PlaceHolder = RemoveHtml($this->ETDate->caption());
+
+			// Day1End
+			$this->Day1End->EditAttrs["class"] = "form-control";
+			$this->Day1End->EditCustomAttributes = "";
+			$this->Day1End->EditValue = $this->Day1End->options(TRUE);
+
+			// Edit refer script
+			// id
+
+			$this->id->LinkCustomAttributes = "";
+			$this->id->HrefValue = "";
+			$this->id->TooltipValue = "";
+
+			// RIDNo
+			$this->RIDNo->LinkCustomAttributes = "";
+			$this->RIDNo->HrefValue = "";
+			$this->RIDNo->TooltipValue = "";
+
+			// Name
+			$this->Name->LinkCustomAttributes = "";
+			$this->Name->HrefValue = "";
+			$this->Name->TooltipValue = "";
+
+			// ARTCycle
+			$this->ARTCycle->LinkCustomAttributes = "";
+			$this->ARTCycle->HrefValue = "";
+			$this->ARTCycle->TooltipValue = "";
+
+			// SpermOrigin
+			$this->SpermOrigin->LinkCustomAttributes = "";
+			$this->SpermOrigin->HrefValue = "";
+
+			// InseminatinTechnique
+			$this->InseminatinTechnique->LinkCustomAttributes = "";
+			$this->InseminatinTechnique->HrefValue = "";
+
+			// IndicationForART
+			$this->IndicationForART->LinkCustomAttributes = "";
+			$this->IndicationForART->HrefValue = "";
+
+			// Day0sino
+			$this->Day0sino->LinkCustomAttributes = "";
+			$this->Day0sino->HrefValue = "";
+
+			// Day0OocyteStage
+			$this->Day0OocyteStage->LinkCustomAttributes = "";
+			$this->Day0OocyteStage->HrefValue = "";
+
+			// Day0PolarBodyPosition
+			$this->Day0PolarBodyPosition->LinkCustomAttributes = "";
+			$this->Day0PolarBodyPosition->HrefValue = "";
+
+			// Day0Breakage
+			$this->Day0Breakage->LinkCustomAttributes = "";
+			$this->Day0Breakage->HrefValue = "";
+
+			// Day0Attempts
+			$this->Day0Attempts->LinkCustomAttributes = "";
+			$this->Day0Attempts->HrefValue = "";
+
+			// Day0SPZMorpho
+			$this->Day0SPZMorpho->LinkCustomAttributes = "";
+			$this->Day0SPZMorpho->HrefValue = "";
+
+			// Day0SPZLocation
+			$this->Day0SPZLocation->LinkCustomAttributes = "";
+			$this->Day0SPZLocation->HrefValue = "";
+
+			// Day0SpOrgin
+			$this->Day0SpOrgin->LinkCustomAttributes = "";
+			$this->Day0SpOrgin->HrefValue = "";
+
+			// Day5Cryoptop
+			$this->Day5Cryoptop->LinkCustomAttributes = "";
+			$this->Day5Cryoptop->HrefValue = "";
+
+			// Day1Sperm
+			$this->Day1Sperm->LinkCustomAttributes = "";
+			$this->Day1Sperm->HrefValue = "";
+
+			// Day1PN
+			$this->Day1PN->LinkCustomAttributes = "";
+			$this->Day1PN->HrefValue = "";
+
+			// Day1PB
+			$this->Day1PB->LinkCustomAttributes = "";
+			$this->Day1PB->HrefValue = "";
+
+			// Day1Pronucleus
+			$this->Day1Pronucleus->LinkCustomAttributes = "";
+			$this->Day1Pronucleus->HrefValue = "";
+
+			// Day1Nucleolus
+			$this->Day1Nucleolus->LinkCustomAttributes = "";
+			$this->Day1Nucleolus->HrefValue = "";
+
+			// Day1Halo
+			$this->Day1Halo->LinkCustomAttributes = "";
+			$this->Day1Halo->HrefValue = "";
+
+			// Day2SiNo
+			$this->Day2SiNo->LinkCustomAttributes = "";
+			$this->Day2SiNo->HrefValue = "";
+
+			// Day2CellNo
+			$this->Day2CellNo->LinkCustomAttributes = "";
+			$this->Day2CellNo->HrefValue = "";
+
+			// Day2Frag
+			$this->Day2Frag->LinkCustomAttributes = "";
+			$this->Day2Frag->HrefValue = "";
+
+			// Day2Symmetry
+			$this->Day2Symmetry->LinkCustomAttributes = "";
+			$this->Day2Symmetry->HrefValue = "";
+
+			// Day2Cryoptop
+			$this->Day2Cryoptop->LinkCustomAttributes = "";
+			$this->Day2Cryoptop->HrefValue = "";
+
+			// Day2Grade
+			$this->Day2Grade->LinkCustomAttributes = "";
+			$this->Day2Grade->HrefValue = "";
+
+			// Day2End
+			$this->Day2End->LinkCustomAttributes = "";
+			$this->Day2End->HrefValue = "";
+
+			// Day3Sino
+			$this->Day3Sino->LinkCustomAttributes = "";
+			$this->Day3Sino->HrefValue = "";
+
+			// Day3CellNo
+			$this->Day3CellNo->LinkCustomAttributes = "";
+			$this->Day3CellNo->HrefValue = "";
+
+			// Day3Frag
+			$this->Day3Frag->LinkCustomAttributes = "";
+			$this->Day3Frag->HrefValue = "";
+
+			// Day3Symmetry
+			$this->Day3Symmetry->LinkCustomAttributes = "";
+			$this->Day3Symmetry->HrefValue = "";
+
+			// Day3ZP
+			$this->Day3ZP->LinkCustomAttributes = "";
+			$this->Day3ZP->HrefValue = "";
+
+			// Day3Vacoules
+			$this->Day3Vacoules->LinkCustomAttributes = "";
+			$this->Day3Vacoules->HrefValue = "";
+
+			// Day3Grade
+			$this->Day3Grade->LinkCustomAttributes = "";
+			$this->Day3Grade->HrefValue = "";
+
+			// Day3Cryoptop
+			$this->Day3Cryoptop->LinkCustomAttributes = "";
+			$this->Day3Cryoptop->HrefValue = "";
+
+			// Day3End
+			$this->Day3End->LinkCustomAttributes = "";
+			$this->Day3End->HrefValue = "";
+
+			// Day4SiNo
+			$this->Day4SiNo->LinkCustomAttributes = "";
+			$this->Day4SiNo->HrefValue = "";
+
+			// Day4CellNo
+			$this->Day4CellNo->LinkCustomAttributes = "";
+			$this->Day4CellNo->HrefValue = "";
+
+			// Day4Frag
+			$this->Day4Frag->LinkCustomAttributes = "";
+			$this->Day4Frag->HrefValue = "";
+
+			// Day4Symmetry
+			$this->Day4Symmetry->LinkCustomAttributes = "";
+			$this->Day4Symmetry->HrefValue = "";
+
+			// Day4Grade
+			$this->Day4Grade->LinkCustomAttributes = "";
+			$this->Day4Grade->HrefValue = "";
+
+			// Day4Cryoptop
+			$this->Day4Cryoptop->LinkCustomAttributes = "";
+			$this->Day4Cryoptop->HrefValue = "";
+
+			// Day4End
+			$this->Day4End->LinkCustomAttributes = "";
+			$this->Day4End->HrefValue = "";
+
+			// Day5CellNo
+			$this->Day5CellNo->LinkCustomAttributes = "";
+			$this->Day5CellNo->HrefValue = "";
+
+			// Day5ICM
+			$this->Day5ICM->LinkCustomAttributes = "";
+			$this->Day5ICM->HrefValue = "";
+
+			// Day5TE
+			$this->Day5TE->LinkCustomAttributes = "";
+			$this->Day5TE->HrefValue = "";
+
+			// Day5Observation
+			$this->Day5Observation->LinkCustomAttributes = "";
+			$this->Day5Observation->HrefValue = "";
+
+			// Day5Collapsed
+			$this->Day5Collapsed->LinkCustomAttributes = "";
+			$this->Day5Collapsed->HrefValue = "";
+
+			// Day5Vacoulles
+			$this->Day5Vacoulles->LinkCustomAttributes = "";
+			$this->Day5Vacoulles->HrefValue = "";
+
+			// Day5Grade
+			$this->Day5Grade->LinkCustomAttributes = "";
+			$this->Day5Grade->HrefValue = "";
+
+			// Day6CellNo
+			$this->Day6CellNo->LinkCustomAttributes = "";
+			$this->Day6CellNo->HrefValue = "";
+
+			// Day6ICM
+			$this->Day6ICM->LinkCustomAttributes = "";
+			$this->Day6ICM->HrefValue = "";
+
+			// Day6TE
+			$this->Day6TE->LinkCustomAttributes = "";
+			$this->Day6TE->HrefValue = "";
+
+			// Day6Observation
+			$this->Day6Observation->LinkCustomAttributes = "";
+			$this->Day6Observation->HrefValue = "";
+
+			// Day6Collapsed
+			$this->Day6Collapsed->LinkCustomAttributes = "";
+			$this->Day6Collapsed->HrefValue = "";
+
+			// Day6Vacoulles
+			$this->Day6Vacoulles->LinkCustomAttributes = "";
+			$this->Day6Vacoulles->HrefValue = "";
+
+			// Day6Grade
+			$this->Day6Grade->LinkCustomAttributes = "";
+			$this->Day6Grade->HrefValue = "";
+
+			// Day6Cryoptop
+			$this->Day6Cryoptop->LinkCustomAttributes = "";
+			$this->Day6Cryoptop->HrefValue = "";
+
+			// EndSiNo
+			$this->EndSiNo->LinkCustomAttributes = "";
+			$this->EndSiNo->HrefValue = "";
+
+			// EndingDay
+			$this->EndingDay->LinkCustomAttributes = "";
+			$this->EndingDay->HrefValue = "";
+
+			// EndingCellStage
+			$this->EndingCellStage->LinkCustomAttributes = "";
+			$this->EndingCellStage->HrefValue = "";
+
+			// EndingGrade
+			$this->EndingGrade->LinkCustomAttributes = "";
+			$this->EndingGrade->HrefValue = "";
+
+			// EndingState
+			$this->EndingState->LinkCustomAttributes = "";
+			$this->EndingState->HrefValue = "";
+
+			// TidNo
+			$this->TidNo->LinkCustomAttributes = "";
+			$this->TidNo->HrefValue = "";
+			$this->TidNo->TooltipValue = "";
+
+			// DidNO
+			$this->DidNO->LinkCustomAttributes = "";
+			$this->DidNO->HrefValue = "";
+			$this->DidNO->TooltipValue = "";
+
+			// ICSiIVFDateTime
+			$this->ICSiIVFDateTime->LinkCustomAttributes = "";
+			$this->ICSiIVFDateTime->HrefValue = "";
+
+			// PrimaryEmbrologist
+			$this->PrimaryEmbrologist->LinkCustomAttributes = "";
+			$this->PrimaryEmbrologist->HrefValue = "";
+
+			// SecondaryEmbrologist
+			$this->SecondaryEmbrologist->LinkCustomAttributes = "";
+			$this->SecondaryEmbrologist->HrefValue = "";
+
+			// Incubator
+			$this->Incubator->LinkCustomAttributes = "";
+			$this->Incubator->HrefValue = "";
+
+			// location
+			$this->location->LinkCustomAttributes = "";
+			$this->location->HrefValue = "";
+
+			// OocyteNo
+			$this->OocyteNo->LinkCustomAttributes = "";
+			$this->OocyteNo->HrefValue = "";
+
+			// Stage
+			$this->Stage->LinkCustomAttributes = "";
+			$this->Stage->HrefValue = "";
+
+			// Remarks
+			$this->Remarks->LinkCustomAttributes = "";
+			$this->Remarks->HrefValue = "";
+
+			// vitrificationDate
+			$this->vitrificationDate->LinkCustomAttributes = "";
+			$this->vitrificationDate->HrefValue = "";
+
+			// vitriPrimaryEmbryologist
+			$this->vitriPrimaryEmbryologist->LinkCustomAttributes = "";
+			$this->vitriPrimaryEmbryologist->HrefValue = "";
+
+			// vitriSecondaryEmbryologist
+			$this->vitriSecondaryEmbryologist->LinkCustomAttributes = "";
+			$this->vitriSecondaryEmbryologist->HrefValue = "";
+
+			// vitriEmbryoNo
+			$this->vitriEmbryoNo->LinkCustomAttributes = "";
+			$this->vitriEmbryoNo->HrefValue = "";
+
+			// thawReFrozen
+			$this->thawReFrozen->LinkCustomAttributes = "";
+			$this->thawReFrozen->HrefValue = "";
+
+			// vitriFertilisationDate
+			$this->vitriFertilisationDate->LinkCustomAttributes = "";
+			$this->vitriFertilisationDate->HrefValue = "";
+
+			// vitriDay
+			$this->vitriDay->LinkCustomAttributes = "";
+			$this->vitriDay->HrefValue = "";
+
+			// vitriStage
+			$this->vitriStage->LinkCustomAttributes = "";
+			$this->vitriStage->HrefValue = "";
+
+			// vitriGrade
+			$this->vitriGrade->LinkCustomAttributes = "";
+			$this->vitriGrade->HrefValue = "";
+
+			// vitriIncubator
+			$this->vitriIncubator->LinkCustomAttributes = "";
+			$this->vitriIncubator->HrefValue = "";
+
+			// vitriTank
+			$this->vitriTank->LinkCustomAttributes = "";
+			$this->vitriTank->HrefValue = "";
+
+			// vitriCanister
+			$this->vitriCanister->LinkCustomAttributes = "";
+			$this->vitriCanister->HrefValue = "";
+
+			// vitriGobiet
+			$this->vitriGobiet->LinkCustomAttributes = "";
+			$this->vitriGobiet->HrefValue = "";
+
+			// vitriViscotube
+			$this->vitriViscotube->LinkCustomAttributes = "";
+			$this->vitriViscotube->HrefValue = "";
+
+			// vitriCryolockNo
+			$this->vitriCryolockNo->LinkCustomAttributes = "";
+			$this->vitriCryolockNo->HrefValue = "";
+
+			// vitriCryolockColour
+			$this->vitriCryolockColour->LinkCustomAttributes = "";
+			$this->vitriCryolockColour->HrefValue = "";
+
+			// thawDate
+			$this->thawDate->LinkCustomAttributes = "";
+			$this->thawDate->HrefValue = "";
+
+			// thawPrimaryEmbryologist
+			$this->thawPrimaryEmbryologist->LinkCustomAttributes = "";
+			$this->thawPrimaryEmbryologist->HrefValue = "";
+
+			// thawSecondaryEmbryologist
+			$this->thawSecondaryEmbryologist->LinkCustomAttributes = "";
+			$this->thawSecondaryEmbryologist->HrefValue = "";
+
+			// thawET
+			$this->thawET->LinkCustomAttributes = "";
+			$this->thawET->HrefValue = "";
+
+			// thawAbserve
+			$this->thawAbserve->LinkCustomAttributes = "";
+			$this->thawAbserve->HrefValue = "";
+
+			// thawDiscard
+			$this->thawDiscard->LinkCustomAttributes = "";
+			$this->thawDiscard->HrefValue = "";
+
+			// ETCatheter
+			$this->ETCatheter->LinkCustomAttributes = "";
+			$this->ETCatheter->HrefValue = "";
+
+			// ETDifficulty
+			$this->ETDifficulty->LinkCustomAttributes = "";
+			$this->ETDifficulty->HrefValue = "";
+
+			// ETEasy
+			$this->ETEasy->LinkCustomAttributes = "";
+			$this->ETEasy->HrefValue = "";
+
+			// ETComments
+			$this->ETComments->LinkCustomAttributes = "";
+			$this->ETComments->HrefValue = "";
+
+			// ETDoctor
+			$this->ETDoctor->LinkCustomAttributes = "";
+			$this->ETDoctor->HrefValue = "";
+
+			// ETEmbryologist
+			$this->ETEmbryologist->LinkCustomAttributes = "";
+			$this->ETEmbryologist->HrefValue = "";
+
+			// ETDate
+			$this->ETDate->LinkCustomAttributes = "";
+			$this->ETDate->HrefValue = "";
+
+			// Day1End
+			$this->Day1End->LinkCustomAttributes = "";
+			$this->Day1End->HrefValue = "";
+		}
+		if ($this->RowType == ROWTYPE_ADD || $this->RowType == ROWTYPE_EDIT || $this->RowType == ROWTYPE_SEARCH) // Add/Edit/Search row
+			$this->setupFieldTitles();
+
+		// Call Row Rendered event
+		if ($this->RowType <> ROWTYPE_AGGREGATEINIT)
+			$this->Row_Rendered();
+	}
+
+	// Validate form
+	protected function validateForm()
+	{
+		global $Language, $FormError;
+
+		// Initialize form error message
+		$FormError = "";
+
+		// Check if validation required
+		if (!SERVER_VALIDATE)
+			return ($FormError == "");
+		if ($this->id->Required) {
+			if (!$this->id->IsDetailKey && $this->id->FormValue != NULL && $this->id->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->id->caption(), $this->id->RequiredErrorMessage));
+			}
+		}
+		if ($this->RIDNo->Required) {
+			if (!$this->RIDNo->IsDetailKey && $this->RIDNo->FormValue != NULL && $this->RIDNo->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->RIDNo->caption(), $this->RIDNo->RequiredErrorMessage));
+			}
+		}
+		if ($this->Name->Required) {
+			if (!$this->Name->IsDetailKey && $this->Name->FormValue != NULL && $this->Name->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Name->caption(), $this->Name->RequiredErrorMessage));
+			}
+		}
+		if ($this->ARTCycle->Required) {
+			if (!$this->ARTCycle->IsDetailKey && $this->ARTCycle->FormValue != NULL && $this->ARTCycle->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->ARTCycle->caption(), $this->ARTCycle->RequiredErrorMessage));
+			}
+		}
+		if ($this->SpermOrigin->Required) {
+			if (!$this->SpermOrigin->IsDetailKey && $this->SpermOrigin->FormValue != NULL && $this->SpermOrigin->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->SpermOrigin->caption(), $this->SpermOrigin->RequiredErrorMessage));
+			}
+		}
+		if ($this->InseminatinTechnique->Required) {
+			if (!$this->InseminatinTechnique->IsDetailKey && $this->InseminatinTechnique->FormValue != NULL && $this->InseminatinTechnique->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->InseminatinTechnique->caption(), $this->InseminatinTechnique->RequiredErrorMessage));
+			}
+		}
+		if ($this->IndicationForART->Required) {
+			if (!$this->IndicationForART->IsDetailKey && $this->IndicationForART->FormValue != NULL && $this->IndicationForART->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->IndicationForART->caption(), $this->IndicationForART->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day0sino->Required) {
+			if (!$this->Day0sino->IsDetailKey && $this->Day0sino->FormValue != NULL && $this->Day0sino->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day0sino->caption(), $this->Day0sino->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day0OocyteStage->Required) {
+			if (!$this->Day0OocyteStage->IsDetailKey && $this->Day0OocyteStage->FormValue != NULL && $this->Day0OocyteStage->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day0OocyteStage->caption(), $this->Day0OocyteStage->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day0PolarBodyPosition->Required) {
+			if (!$this->Day0PolarBodyPosition->IsDetailKey && $this->Day0PolarBodyPosition->FormValue != NULL && $this->Day0PolarBodyPosition->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day0PolarBodyPosition->caption(), $this->Day0PolarBodyPosition->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day0Breakage->Required) {
+			if (!$this->Day0Breakage->IsDetailKey && $this->Day0Breakage->FormValue != NULL && $this->Day0Breakage->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day0Breakage->caption(), $this->Day0Breakage->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day0Attempts->Required) {
+			if (!$this->Day0Attempts->IsDetailKey && $this->Day0Attempts->FormValue != NULL && $this->Day0Attempts->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day0Attempts->caption(), $this->Day0Attempts->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day0SPZMorpho->Required) {
+			if (!$this->Day0SPZMorpho->IsDetailKey && $this->Day0SPZMorpho->FormValue != NULL && $this->Day0SPZMorpho->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day0SPZMorpho->caption(), $this->Day0SPZMorpho->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day0SPZLocation->Required) {
+			if (!$this->Day0SPZLocation->IsDetailKey && $this->Day0SPZLocation->FormValue != NULL && $this->Day0SPZLocation->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day0SPZLocation->caption(), $this->Day0SPZLocation->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day0SpOrgin->Required) {
+			if (!$this->Day0SpOrgin->IsDetailKey && $this->Day0SpOrgin->FormValue != NULL && $this->Day0SpOrgin->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day0SpOrgin->caption(), $this->Day0SpOrgin->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day5Cryoptop->Required) {
+			if (!$this->Day5Cryoptop->IsDetailKey && $this->Day5Cryoptop->FormValue != NULL && $this->Day5Cryoptop->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day5Cryoptop->caption(), $this->Day5Cryoptop->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day1Sperm->Required) {
+			if (!$this->Day1Sperm->IsDetailKey && $this->Day1Sperm->FormValue != NULL && $this->Day1Sperm->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day1Sperm->caption(), $this->Day1Sperm->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day1PN->Required) {
+			if (!$this->Day1PN->IsDetailKey && $this->Day1PN->FormValue != NULL && $this->Day1PN->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day1PN->caption(), $this->Day1PN->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day1PB->Required) {
+			if (!$this->Day1PB->IsDetailKey && $this->Day1PB->FormValue != NULL && $this->Day1PB->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day1PB->caption(), $this->Day1PB->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day1Pronucleus->Required) {
+			if (!$this->Day1Pronucleus->IsDetailKey && $this->Day1Pronucleus->FormValue != NULL && $this->Day1Pronucleus->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day1Pronucleus->caption(), $this->Day1Pronucleus->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day1Nucleolus->Required) {
+			if (!$this->Day1Nucleolus->IsDetailKey && $this->Day1Nucleolus->FormValue != NULL && $this->Day1Nucleolus->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day1Nucleolus->caption(), $this->Day1Nucleolus->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day1Halo->Required) {
+			if (!$this->Day1Halo->IsDetailKey && $this->Day1Halo->FormValue != NULL && $this->Day1Halo->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day1Halo->caption(), $this->Day1Halo->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day2SiNo->Required) {
+			if (!$this->Day2SiNo->IsDetailKey && $this->Day2SiNo->FormValue != NULL && $this->Day2SiNo->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day2SiNo->caption(), $this->Day2SiNo->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day2CellNo->Required) {
+			if (!$this->Day2CellNo->IsDetailKey && $this->Day2CellNo->FormValue != NULL && $this->Day2CellNo->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day2CellNo->caption(), $this->Day2CellNo->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day2Frag->Required) {
+			if (!$this->Day2Frag->IsDetailKey && $this->Day2Frag->FormValue != NULL && $this->Day2Frag->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day2Frag->caption(), $this->Day2Frag->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day2Symmetry->Required) {
+			if (!$this->Day2Symmetry->IsDetailKey && $this->Day2Symmetry->FormValue != NULL && $this->Day2Symmetry->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day2Symmetry->caption(), $this->Day2Symmetry->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day2Cryoptop->Required) {
+			if (!$this->Day2Cryoptop->IsDetailKey && $this->Day2Cryoptop->FormValue != NULL && $this->Day2Cryoptop->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day2Cryoptop->caption(), $this->Day2Cryoptop->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day2Grade->Required) {
+			if (!$this->Day2Grade->IsDetailKey && $this->Day2Grade->FormValue != NULL && $this->Day2Grade->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day2Grade->caption(), $this->Day2Grade->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day2End->Required) {
+			if (!$this->Day2End->IsDetailKey && $this->Day2End->FormValue != NULL && $this->Day2End->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day2End->caption(), $this->Day2End->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day3Sino->Required) {
+			if (!$this->Day3Sino->IsDetailKey && $this->Day3Sino->FormValue != NULL && $this->Day3Sino->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day3Sino->caption(), $this->Day3Sino->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day3CellNo->Required) {
+			if (!$this->Day3CellNo->IsDetailKey && $this->Day3CellNo->FormValue != NULL && $this->Day3CellNo->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day3CellNo->caption(), $this->Day3CellNo->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day3Frag->Required) {
+			if (!$this->Day3Frag->IsDetailKey && $this->Day3Frag->FormValue != NULL && $this->Day3Frag->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day3Frag->caption(), $this->Day3Frag->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day3Symmetry->Required) {
+			if (!$this->Day3Symmetry->IsDetailKey && $this->Day3Symmetry->FormValue != NULL && $this->Day3Symmetry->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day3Symmetry->caption(), $this->Day3Symmetry->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day3ZP->Required) {
+			if (!$this->Day3ZP->IsDetailKey && $this->Day3ZP->FormValue != NULL && $this->Day3ZP->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day3ZP->caption(), $this->Day3ZP->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day3Vacoules->Required) {
+			if (!$this->Day3Vacoules->IsDetailKey && $this->Day3Vacoules->FormValue != NULL && $this->Day3Vacoules->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day3Vacoules->caption(), $this->Day3Vacoules->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day3Grade->Required) {
+			if (!$this->Day3Grade->IsDetailKey && $this->Day3Grade->FormValue != NULL && $this->Day3Grade->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day3Grade->caption(), $this->Day3Grade->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day3Cryoptop->Required) {
+			if (!$this->Day3Cryoptop->IsDetailKey && $this->Day3Cryoptop->FormValue != NULL && $this->Day3Cryoptop->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day3Cryoptop->caption(), $this->Day3Cryoptop->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day3End->Required) {
+			if (!$this->Day3End->IsDetailKey && $this->Day3End->FormValue != NULL && $this->Day3End->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day3End->caption(), $this->Day3End->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day4SiNo->Required) {
+			if (!$this->Day4SiNo->IsDetailKey && $this->Day4SiNo->FormValue != NULL && $this->Day4SiNo->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day4SiNo->caption(), $this->Day4SiNo->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day4CellNo->Required) {
+			if (!$this->Day4CellNo->IsDetailKey && $this->Day4CellNo->FormValue != NULL && $this->Day4CellNo->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day4CellNo->caption(), $this->Day4CellNo->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day4Frag->Required) {
+			if (!$this->Day4Frag->IsDetailKey && $this->Day4Frag->FormValue != NULL && $this->Day4Frag->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day4Frag->caption(), $this->Day4Frag->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day4Symmetry->Required) {
+			if (!$this->Day4Symmetry->IsDetailKey && $this->Day4Symmetry->FormValue != NULL && $this->Day4Symmetry->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day4Symmetry->caption(), $this->Day4Symmetry->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day4Grade->Required) {
+			if (!$this->Day4Grade->IsDetailKey && $this->Day4Grade->FormValue != NULL && $this->Day4Grade->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day4Grade->caption(), $this->Day4Grade->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day4Cryoptop->Required) {
+			if (!$this->Day4Cryoptop->IsDetailKey && $this->Day4Cryoptop->FormValue != NULL && $this->Day4Cryoptop->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day4Cryoptop->caption(), $this->Day4Cryoptop->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day4End->Required) {
+			if (!$this->Day4End->IsDetailKey && $this->Day4End->FormValue != NULL && $this->Day4End->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day4End->caption(), $this->Day4End->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day5CellNo->Required) {
+			if (!$this->Day5CellNo->IsDetailKey && $this->Day5CellNo->FormValue != NULL && $this->Day5CellNo->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day5CellNo->caption(), $this->Day5CellNo->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day5ICM->Required) {
+			if (!$this->Day5ICM->IsDetailKey && $this->Day5ICM->FormValue != NULL && $this->Day5ICM->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day5ICM->caption(), $this->Day5ICM->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day5TE->Required) {
+			if (!$this->Day5TE->IsDetailKey && $this->Day5TE->FormValue != NULL && $this->Day5TE->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day5TE->caption(), $this->Day5TE->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day5Observation->Required) {
+			if (!$this->Day5Observation->IsDetailKey && $this->Day5Observation->FormValue != NULL && $this->Day5Observation->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day5Observation->caption(), $this->Day5Observation->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day5Collapsed->Required) {
+			if (!$this->Day5Collapsed->IsDetailKey && $this->Day5Collapsed->FormValue != NULL && $this->Day5Collapsed->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day5Collapsed->caption(), $this->Day5Collapsed->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day5Vacoulles->Required) {
+			if (!$this->Day5Vacoulles->IsDetailKey && $this->Day5Vacoulles->FormValue != NULL && $this->Day5Vacoulles->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day5Vacoulles->caption(), $this->Day5Vacoulles->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day5Grade->Required) {
+			if (!$this->Day5Grade->IsDetailKey && $this->Day5Grade->FormValue != NULL && $this->Day5Grade->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day5Grade->caption(), $this->Day5Grade->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day6CellNo->Required) {
+			if (!$this->Day6CellNo->IsDetailKey && $this->Day6CellNo->FormValue != NULL && $this->Day6CellNo->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day6CellNo->caption(), $this->Day6CellNo->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day6ICM->Required) {
+			if (!$this->Day6ICM->IsDetailKey && $this->Day6ICM->FormValue != NULL && $this->Day6ICM->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day6ICM->caption(), $this->Day6ICM->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day6TE->Required) {
+			if (!$this->Day6TE->IsDetailKey && $this->Day6TE->FormValue != NULL && $this->Day6TE->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day6TE->caption(), $this->Day6TE->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day6Observation->Required) {
+			if (!$this->Day6Observation->IsDetailKey && $this->Day6Observation->FormValue != NULL && $this->Day6Observation->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day6Observation->caption(), $this->Day6Observation->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day6Collapsed->Required) {
+			if (!$this->Day6Collapsed->IsDetailKey && $this->Day6Collapsed->FormValue != NULL && $this->Day6Collapsed->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day6Collapsed->caption(), $this->Day6Collapsed->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day6Vacoulles->Required) {
+			if (!$this->Day6Vacoulles->IsDetailKey && $this->Day6Vacoulles->FormValue != NULL && $this->Day6Vacoulles->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day6Vacoulles->caption(), $this->Day6Vacoulles->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day6Grade->Required) {
+			if (!$this->Day6Grade->IsDetailKey && $this->Day6Grade->FormValue != NULL && $this->Day6Grade->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day6Grade->caption(), $this->Day6Grade->RequiredErrorMessage));
+			}
+		}
+		if ($this->Day6Cryoptop->Required) {
+			if (!$this->Day6Cryoptop->IsDetailKey && $this->Day6Cryoptop->FormValue != NULL && $this->Day6Cryoptop->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day6Cryoptop->caption(), $this->Day6Cryoptop->RequiredErrorMessage));
+			}
+		}
+		if ($this->EndSiNo->Required) {
+			if (!$this->EndSiNo->IsDetailKey && $this->EndSiNo->FormValue != NULL && $this->EndSiNo->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->EndSiNo->caption(), $this->EndSiNo->RequiredErrorMessage));
+			}
+		}
+		if ($this->EndingDay->Required) {
+			if (!$this->EndingDay->IsDetailKey && $this->EndingDay->FormValue != NULL && $this->EndingDay->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->EndingDay->caption(), $this->EndingDay->RequiredErrorMessage));
+			}
+		}
+		if ($this->EndingCellStage->Required) {
+			if (!$this->EndingCellStage->IsDetailKey && $this->EndingCellStage->FormValue != NULL && $this->EndingCellStage->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->EndingCellStage->caption(), $this->EndingCellStage->RequiredErrorMessage));
+			}
+		}
+		if ($this->EndingGrade->Required) {
+			if (!$this->EndingGrade->IsDetailKey && $this->EndingGrade->FormValue != NULL && $this->EndingGrade->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->EndingGrade->caption(), $this->EndingGrade->RequiredErrorMessage));
+			}
+		}
+		if ($this->EndingState->Required) {
+			if (!$this->EndingState->IsDetailKey && $this->EndingState->FormValue != NULL && $this->EndingState->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->EndingState->caption(), $this->EndingState->RequiredErrorMessage));
+			}
+		}
+		if ($this->TidNo->Required) {
+			if (!$this->TidNo->IsDetailKey && $this->TidNo->FormValue != NULL && $this->TidNo->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->TidNo->caption(), $this->TidNo->RequiredErrorMessage));
+			}
+		}
+		if ($this->DidNO->Required) {
+			if (!$this->DidNO->IsDetailKey && $this->DidNO->FormValue != NULL && $this->DidNO->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->DidNO->caption(), $this->DidNO->RequiredErrorMessage));
+			}
+		}
+		if ($this->ICSiIVFDateTime->Required) {
+			if (!$this->ICSiIVFDateTime->IsDetailKey && $this->ICSiIVFDateTime->FormValue != NULL && $this->ICSiIVFDateTime->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->ICSiIVFDateTime->caption(), $this->ICSiIVFDateTime->RequiredErrorMessage));
+			}
+		}
+		if (!CheckDate($this->ICSiIVFDateTime->FormValue)) {
+			AddMessage($FormError, $this->ICSiIVFDateTime->errorMessage());
+		}
+		if ($this->PrimaryEmbrologist->Required) {
+			if (!$this->PrimaryEmbrologist->IsDetailKey && $this->PrimaryEmbrologist->FormValue != NULL && $this->PrimaryEmbrologist->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->PrimaryEmbrologist->caption(), $this->PrimaryEmbrologist->RequiredErrorMessage));
+			}
+		}
+		if ($this->SecondaryEmbrologist->Required) {
+			if (!$this->SecondaryEmbrologist->IsDetailKey && $this->SecondaryEmbrologist->FormValue != NULL && $this->SecondaryEmbrologist->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->SecondaryEmbrologist->caption(), $this->SecondaryEmbrologist->RequiredErrorMessage));
+			}
+		}
+		if ($this->Incubator->Required) {
+			if (!$this->Incubator->IsDetailKey && $this->Incubator->FormValue != NULL && $this->Incubator->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Incubator->caption(), $this->Incubator->RequiredErrorMessage));
+			}
+		}
+		if ($this->location->Required) {
+			if (!$this->location->IsDetailKey && $this->location->FormValue != NULL && $this->location->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->location->caption(), $this->location->RequiredErrorMessage));
+			}
+		}
+		if ($this->OocyteNo->Required) {
+			if (!$this->OocyteNo->IsDetailKey && $this->OocyteNo->FormValue != NULL && $this->OocyteNo->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->OocyteNo->caption(), $this->OocyteNo->RequiredErrorMessage));
+			}
+		}
+		if ($this->Stage->Required) {
+			if (!$this->Stage->IsDetailKey && $this->Stage->FormValue != NULL && $this->Stage->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Stage->caption(), $this->Stage->RequiredErrorMessage));
+			}
+		}
+		if ($this->Remarks->Required) {
+			if (!$this->Remarks->IsDetailKey && $this->Remarks->FormValue != NULL && $this->Remarks->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Remarks->caption(), $this->Remarks->RequiredErrorMessage));
+			}
+		}
+		if ($this->vitrificationDate->Required) {
+			if (!$this->vitrificationDate->IsDetailKey && $this->vitrificationDate->FormValue != NULL && $this->vitrificationDate->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->vitrificationDate->caption(), $this->vitrificationDate->RequiredErrorMessage));
+			}
+		}
+		if (!CheckDate($this->vitrificationDate->FormValue)) {
+			AddMessage($FormError, $this->vitrificationDate->errorMessage());
+		}
+		if ($this->vitriPrimaryEmbryologist->Required) {
+			if (!$this->vitriPrimaryEmbryologist->IsDetailKey && $this->vitriPrimaryEmbryologist->FormValue != NULL && $this->vitriPrimaryEmbryologist->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->vitriPrimaryEmbryologist->caption(), $this->vitriPrimaryEmbryologist->RequiredErrorMessage));
+			}
+		}
+		if ($this->vitriSecondaryEmbryologist->Required) {
+			if (!$this->vitriSecondaryEmbryologist->IsDetailKey && $this->vitriSecondaryEmbryologist->FormValue != NULL && $this->vitriSecondaryEmbryologist->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->vitriSecondaryEmbryologist->caption(), $this->vitriSecondaryEmbryologist->RequiredErrorMessage));
+			}
+		}
+		if ($this->vitriEmbryoNo->Required) {
+			if (!$this->vitriEmbryoNo->IsDetailKey && $this->vitriEmbryoNo->FormValue != NULL && $this->vitriEmbryoNo->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->vitriEmbryoNo->caption(), $this->vitriEmbryoNo->RequiredErrorMessage));
+			}
+		}
+		if ($this->thawReFrozen->Required) {
+			if ($this->thawReFrozen->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->thawReFrozen->caption(), $this->thawReFrozen->RequiredErrorMessage));
+			}
+		}
+		if ($this->vitriFertilisationDate->Required) {
+			if (!$this->vitriFertilisationDate->IsDetailKey && $this->vitriFertilisationDate->FormValue != NULL && $this->vitriFertilisationDate->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->vitriFertilisationDate->caption(), $this->vitriFertilisationDate->RequiredErrorMessage));
+			}
+		}
+		if (!CheckDate($this->vitriFertilisationDate->FormValue)) {
+			AddMessage($FormError, $this->vitriFertilisationDate->errorMessage());
+		}
+		if ($this->vitriDay->Required) {
+			if (!$this->vitriDay->IsDetailKey && $this->vitriDay->FormValue != NULL && $this->vitriDay->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->vitriDay->caption(), $this->vitriDay->RequiredErrorMessage));
+			}
+		}
+		if ($this->vitriStage->Required) {
+			if (!$this->vitriStage->IsDetailKey && $this->vitriStage->FormValue != NULL && $this->vitriStage->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->vitriStage->caption(), $this->vitriStage->RequiredErrorMessage));
+			}
+		}
+		if ($this->vitriGrade->Required) {
+			if (!$this->vitriGrade->IsDetailKey && $this->vitriGrade->FormValue != NULL && $this->vitriGrade->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->vitriGrade->caption(), $this->vitriGrade->RequiredErrorMessage));
+			}
+		}
+		if ($this->vitriIncubator->Required) {
+			if (!$this->vitriIncubator->IsDetailKey && $this->vitriIncubator->FormValue != NULL && $this->vitriIncubator->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->vitriIncubator->caption(), $this->vitriIncubator->RequiredErrorMessage));
+			}
+		}
+		if ($this->vitriTank->Required) {
+			if (!$this->vitriTank->IsDetailKey && $this->vitriTank->FormValue != NULL && $this->vitriTank->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->vitriTank->caption(), $this->vitriTank->RequiredErrorMessage));
+			}
+		}
+		if ($this->vitriCanister->Required) {
+			if (!$this->vitriCanister->IsDetailKey && $this->vitriCanister->FormValue != NULL && $this->vitriCanister->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->vitriCanister->caption(), $this->vitriCanister->RequiredErrorMessage));
+			}
+		}
+		if ($this->vitriGobiet->Required) {
+			if (!$this->vitriGobiet->IsDetailKey && $this->vitriGobiet->FormValue != NULL && $this->vitriGobiet->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->vitriGobiet->caption(), $this->vitriGobiet->RequiredErrorMessage));
+			}
+		}
+		if ($this->vitriViscotube->Required) {
+			if (!$this->vitriViscotube->IsDetailKey && $this->vitriViscotube->FormValue != NULL && $this->vitriViscotube->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->vitriViscotube->caption(), $this->vitriViscotube->RequiredErrorMessage));
+			}
+		}
+		if ($this->vitriCryolockNo->Required) {
+			if (!$this->vitriCryolockNo->IsDetailKey && $this->vitriCryolockNo->FormValue != NULL && $this->vitriCryolockNo->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->vitriCryolockNo->caption(), $this->vitriCryolockNo->RequiredErrorMessage));
+			}
+		}
+		if ($this->vitriCryolockColour->Required) {
+			if (!$this->vitriCryolockColour->IsDetailKey && $this->vitriCryolockColour->FormValue != NULL && $this->vitriCryolockColour->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->vitriCryolockColour->caption(), $this->vitriCryolockColour->RequiredErrorMessage));
+			}
+		}
+		if ($this->thawDate->Required) {
+			if (!$this->thawDate->IsDetailKey && $this->thawDate->FormValue != NULL && $this->thawDate->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->thawDate->caption(), $this->thawDate->RequiredErrorMessage));
+			}
+		}
+		if (!CheckDate($this->thawDate->FormValue)) {
+			AddMessage($FormError, $this->thawDate->errorMessage());
+		}
+		if ($this->thawPrimaryEmbryologist->Required) {
+			if (!$this->thawPrimaryEmbryologist->IsDetailKey && $this->thawPrimaryEmbryologist->FormValue != NULL && $this->thawPrimaryEmbryologist->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->thawPrimaryEmbryologist->caption(), $this->thawPrimaryEmbryologist->RequiredErrorMessage));
+			}
+		}
+		if ($this->thawSecondaryEmbryologist->Required) {
+			if (!$this->thawSecondaryEmbryologist->IsDetailKey && $this->thawSecondaryEmbryologist->FormValue != NULL && $this->thawSecondaryEmbryologist->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->thawSecondaryEmbryologist->caption(), $this->thawSecondaryEmbryologist->RequiredErrorMessage));
+			}
+		}
+		if ($this->thawET->Required) {
+			if (!$this->thawET->IsDetailKey && $this->thawET->FormValue != NULL && $this->thawET->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->thawET->caption(), $this->thawET->RequiredErrorMessage));
+			}
+		}
+		if ($this->thawAbserve->Required) {
+			if (!$this->thawAbserve->IsDetailKey && $this->thawAbserve->FormValue != NULL && $this->thawAbserve->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->thawAbserve->caption(), $this->thawAbserve->RequiredErrorMessage));
+			}
+		}
+		if ($this->thawDiscard->Required) {
+			if (!$this->thawDiscard->IsDetailKey && $this->thawDiscard->FormValue != NULL && $this->thawDiscard->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->thawDiscard->caption(), $this->thawDiscard->RequiredErrorMessage));
+			}
+		}
+		if ($this->ETCatheter->Required) {
+			if (!$this->ETCatheter->IsDetailKey && $this->ETCatheter->FormValue != NULL && $this->ETCatheter->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->ETCatheter->caption(), $this->ETCatheter->RequiredErrorMessage));
+			}
+		}
+		if ($this->ETDifficulty->Required) {
+			if (!$this->ETDifficulty->IsDetailKey && $this->ETDifficulty->FormValue != NULL && $this->ETDifficulty->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->ETDifficulty->caption(), $this->ETDifficulty->RequiredErrorMessage));
+			}
+		}
+		if ($this->ETEasy->Required) {
+			if ($this->ETEasy->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->ETEasy->caption(), $this->ETEasy->RequiredErrorMessage));
+			}
+		}
+		if ($this->ETComments->Required) {
+			if (!$this->ETComments->IsDetailKey && $this->ETComments->FormValue != NULL && $this->ETComments->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->ETComments->caption(), $this->ETComments->RequiredErrorMessage));
+			}
+		}
+		if ($this->ETDoctor->Required) {
+			if (!$this->ETDoctor->IsDetailKey && $this->ETDoctor->FormValue != NULL && $this->ETDoctor->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->ETDoctor->caption(), $this->ETDoctor->RequiredErrorMessage));
+			}
+		}
+		if ($this->ETEmbryologist->Required) {
+			if (!$this->ETEmbryologist->IsDetailKey && $this->ETEmbryologist->FormValue != NULL && $this->ETEmbryologist->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->ETEmbryologist->caption(), $this->ETEmbryologist->RequiredErrorMessage));
+			}
+		}
+		if ($this->ETDate->Required) {
+			if (!$this->ETDate->IsDetailKey && $this->ETDate->FormValue != NULL && $this->ETDate->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->ETDate->caption(), $this->ETDate->RequiredErrorMessage));
+			}
+		}
+		if (!CheckDate($this->ETDate->FormValue)) {
+			AddMessage($FormError, $this->ETDate->errorMessage());
+		}
+		if ($this->Day1End->Required) {
+			if (!$this->Day1End->IsDetailKey && $this->Day1End->FormValue != NULL && $this->Day1End->FormValue == "") {
+				AddMessage($FormError, str_replace("%s", $this->Day1End->caption(), $this->Day1End->RequiredErrorMessage));
+			}
+		}
+
+		// Return validate result
+		$validateForm = ($FormError == "");
+
+		// Call Form_CustomValidate event
+		$formCustomError = "";
+		$validateForm = $validateForm && $this->Form_CustomValidate($formCustomError);
+		if ($formCustomError <> "") {
+			AddMessage($FormError, $formCustomError);
+		}
+		return $validateForm;
+	}
+
+	// Delete records based on current filter
+	protected function deleteRows()
+	{
+		global $Language, $Security;
+		if (!$Security->canDelete()) {
+			$this->setFailureMessage($Language->phrase("NoDeletePermission")); // No delete permission
+			return FALSE;
+		}
+		$deleteRows = TRUE;
+		$sql = $this->getCurrentSql();
+		$conn = &$this->getConnection();
+		$conn->raiseErrorFn = $GLOBALS["ERROR_FUNC"];
+		$rs = $conn->execute($sql);
+		$conn->raiseErrorFn = '';
+		if ($rs === FALSE) {
+			return FALSE;
+		} elseif ($rs->EOF) {
+			$this->setFailureMessage($Language->phrase("NoRecord")); // No record found
+			$rs->close();
+			return FALSE;
+		}
+		$rows = ($rs) ? $rs->getRows() : [];
+
+		// Clone old rows
+		$rsold = $rows;
+		if ($rs)
+			$rs->close();
+
+		// Call row deleting event
+		if ($deleteRows) {
+			foreach ($rsold as $row) {
+				$deleteRows = $this->Row_Deleting($row);
+				if (!$deleteRows)
+					break;
+			}
+		}
+		if ($deleteRows) {
+			$key = "";
+			foreach ($rsold as $row) {
+				$thisKey = "";
+				if ($thisKey <> "")
+					$thisKey .= $GLOBALS["COMPOSITE_KEY_SEPARATOR"];
+				$thisKey .= $row['id'];
+				if (DELETE_UPLOADED_FILES) // Delete old files
+					$this->deleteUploadedFiles($row);
+				$conn->raiseErrorFn = $GLOBALS["ERROR_FUNC"];
+				$deleteRows = $this->delete($row); // Delete
+				$conn->raiseErrorFn = '';
+				if ($deleteRows === FALSE)
+					break;
+				if ($key <> "")
+					$key .= ", ";
+				$key .= $thisKey;
+			}
+		}
+		if (!$deleteRows) {
+
+			// Set up error message
+			if ($this->getSuccessMessage() <> "" || $this->getFailureMessage() <> "") {
+
+				// Use the message, do nothing
+			} elseif ($this->CancelMessage <> "") {
+				$this->setFailureMessage($this->CancelMessage);
+				$this->CancelMessage = "";
+			} else {
+				$this->setFailureMessage($Language->phrase("DeleteCancelled"));
+			}
+		}
+
+		// Call Row Deleted event
+		if ($deleteRows) {
+			foreach ($rsold as $row) {
+				$this->Row_Deleted($row);
+			}
+		}
+
+		// Write JSON for API request (Support single row only)
+		if (IsApi() && $deleteRows) {
+			$row = $this->getRecordsFromRecordset($rsold, TRUE);
+			WriteJson(["success" => TRUE, $this->TableVar => $row]);
+		}
+		return $deleteRows;
+	}
+
+	// Update record based on key values
+	protected function editRow()
+	{
+		global $Security, $Language;
+		$filter = $this->getRecordFilter();
+		$filter = $this->applyUserIDFilters($filter);
+		$conn = &$this->getConnection();
+		$this->CurrentFilter = $filter;
+		$sql = $this->getCurrentSql();
+		$conn->raiseErrorFn = $GLOBALS["ERROR_FUNC"];
+		$rs = $conn->execute($sql);
+		$conn->raiseErrorFn = '';
+		if ($rs === FALSE)
+			return FALSE;
+		if ($rs->EOF) {
+			$this->setFailureMessage($Language->phrase("NoRecord")); // Set no record message
+			$editRow = FALSE; // Update Failed
+		} else {
+
+			// Save old values
+			$rsold = &$rs->fields;
+			$this->loadDbValues($rsold);
+			$rsnew = [];
+
+			// SpermOrigin
+			$this->SpermOrigin->setDbValueDef($rsnew, $this->SpermOrigin->CurrentValue, NULL, $this->SpermOrigin->ReadOnly);
+
+			// InseminatinTechnique
+			$this->InseminatinTechnique->setDbValueDef($rsnew, $this->InseminatinTechnique->CurrentValue, NULL, $this->InseminatinTechnique->ReadOnly);
+
+			// IndicationForART
+			$this->IndicationForART->setDbValueDef($rsnew, $this->IndicationForART->CurrentValue, NULL, $this->IndicationForART->ReadOnly);
+
+			// Day0sino
+			$this->Day0sino->setDbValueDef($rsnew, $this->Day0sino->CurrentValue, NULL, $this->Day0sino->ReadOnly);
+
+			// Day0OocyteStage
+			$this->Day0OocyteStage->setDbValueDef($rsnew, $this->Day0OocyteStage->CurrentValue, NULL, $this->Day0OocyteStage->ReadOnly);
+
+			// Day0PolarBodyPosition
+			$this->Day0PolarBodyPosition->setDbValueDef($rsnew, $this->Day0PolarBodyPosition->CurrentValue, NULL, $this->Day0PolarBodyPosition->ReadOnly);
+
+			// Day0Breakage
+			$this->Day0Breakage->setDbValueDef($rsnew, $this->Day0Breakage->CurrentValue, NULL, $this->Day0Breakage->ReadOnly);
+
+			// Day0Attempts
+			$this->Day0Attempts->setDbValueDef($rsnew, $this->Day0Attempts->CurrentValue, NULL, $this->Day0Attempts->ReadOnly);
+
+			// Day0SPZMorpho
+			$this->Day0SPZMorpho->setDbValueDef($rsnew, $this->Day0SPZMorpho->CurrentValue, NULL, $this->Day0SPZMorpho->ReadOnly);
+
+			// Day0SPZLocation
+			$this->Day0SPZLocation->setDbValueDef($rsnew, $this->Day0SPZLocation->CurrentValue, NULL, $this->Day0SPZLocation->ReadOnly);
+
+			// Day0SpOrgin
+			$this->Day0SpOrgin->setDbValueDef($rsnew, $this->Day0SpOrgin->CurrentValue, NULL, $this->Day0SpOrgin->ReadOnly);
+
+			// Day5Cryoptop
+			$this->Day5Cryoptop->setDbValueDef($rsnew, $this->Day5Cryoptop->CurrentValue, NULL, $this->Day5Cryoptop->ReadOnly);
+
+			// Day1Sperm
+			$this->Day1Sperm->setDbValueDef($rsnew, $this->Day1Sperm->CurrentValue, NULL, $this->Day1Sperm->ReadOnly);
+
+			// Day1PN
+			$this->Day1PN->setDbValueDef($rsnew, $this->Day1PN->CurrentValue, NULL, $this->Day1PN->ReadOnly);
+
+			// Day1PB
+			$this->Day1PB->setDbValueDef($rsnew, $this->Day1PB->CurrentValue, NULL, $this->Day1PB->ReadOnly);
+
+			// Day1Pronucleus
+			$this->Day1Pronucleus->setDbValueDef($rsnew, $this->Day1Pronucleus->CurrentValue, NULL, $this->Day1Pronucleus->ReadOnly);
+
+			// Day1Nucleolus
+			$this->Day1Nucleolus->setDbValueDef($rsnew, $this->Day1Nucleolus->CurrentValue, NULL, $this->Day1Nucleolus->ReadOnly);
+
+			// Day1Halo
+			$this->Day1Halo->setDbValueDef($rsnew, $this->Day1Halo->CurrentValue, NULL, $this->Day1Halo->ReadOnly);
+
+			// Day2SiNo
+			$this->Day2SiNo->setDbValueDef($rsnew, $this->Day2SiNo->CurrentValue, NULL, $this->Day2SiNo->ReadOnly);
+
+			// Day2CellNo
+			$this->Day2CellNo->setDbValueDef($rsnew, $this->Day2CellNo->CurrentValue, NULL, $this->Day2CellNo->ReadOnly);
+
+			// Day2Frag
+			$this->Day2Frag->setDbValueDef($rsnew, $this->Day2Frag->CurrentValue, NULL, $this->Day2Frag->ReadOnly);
+
+			// Day2Symmetry
+			$this->Day2Symmetry->setDbValueDef($rsnew, $this->Day2Symmetry->CurrentValue, NULL, $this->Day2Symmetry->ReadOnly);
+
+			// Day2Cryoptop
+			$this->Day2Cryoptop->setDbValueDef($rsnew, $this->Day2Cryoptop->CurrentValue, NULL, $this->Day2Cryoptop->ReadOnly);
+
+			// Day2Grade
+			$this->Day2Grade->setDbValueDef($rsnew, $this->Day2Grade->CurrentValue, NULL, $this->Day2Grade->ReadOnly);
+
+			// Day2End
+			$this->Day2End->setDbValueDef($rsnew, $this->Day2End->CurrentValue, NULL, $this->Day2End->ReadOnly);
+
+			// Day3Sino
+			$this->Day3Sino->setDbValueDef($rsnew, $this->Day3Sino->CurrentValue, NULL, $this->Day3Sino->ReadOnly);
+
+			// Day3CellNo
+			$this->Day3CellNo->setDbValueDef($rsnew, $this->Day3CellNo->CurrentValue, NULL, $this->Day3CellNo->ReadOnly);
+
+			// Day3Frag
+			$this->Day3Frag->setDbValueDef($rsnew, $this->Day3Frag->CurrentValue, NULL, $this->Day3Frag->ReadOnly);
+
+			// Day3Symmetry
+			$this->Day3Symmetry->setDbValueDef($rsnew, $this->Day3Symmetry->CurrentValue, NULL, $this->Day3Symmetry->ReadOnly);
+
+			// Day3ZP
+			$this->Day3ZP->setDbValueDef($rsnew, $this->Day3ZP->CurrentValue, NULL, $this->Day3ZP->ReadOnly);
+
+			// Day3Vacoules
+			$this->Day3Vacoules->setDbValueDef($rsnew, $this->Day3Vacoules->CurrentValue, NULL, $this->Day3Vacoules->ReadOnly);
+
+			// Day3Grade
+			$this->Day3Grade->setDbValueDef($rsnew, $this->Day3Grade->CurrentValue, NULL, $this->Day3Grade->ReadOnly);
+
+			// Day3Cryoptop
+			$this->Day3Cryoptop->setDbValueDef($rsnew, $this->Day3Cryoptop->CurrentValue, NULL, $this->Day3Cryoptop->ReadOnly);
+
+			// Day3End
+			$this->Day3End->setDbValueDef($rsnew, $this->Day3End->CurrentValue, NULL, $this->Day3End->ReadOnly);
+
+			// Day4SiNo
+			$this->Day4SiNo->setDbValueDef($rsnew, $this->Day4SiNo->CurrentValue, NULL, $this->Day4SiNo->ReadOnly);
+
+			// Day4CellNo
+			$this->Day4CellNo->setDbValueDef($rsnew, $this->Day4CellNo->CurrentValue, NULL, $this->Day4CellNo->ReadOnly);
+
+			// Day4Frag
+			$this->Day4Frag->setDbValueDef($rsnew, $this->Day4Frag->CurrentValue, NULL, $this->Day4Frag->ReadOnly);
+
+			// Day4Symmetry
+			$this->Day4Symmetry->setDbValueDef($rsnew, $this->Day4Symmetry->CurrentValue, NULL, $this->Day4Symmetry->ReadOnly);
+
+			// Day4Grade
+			$this->Day4Grade->setDbValueDef($rsnew, $this->Day4Grade->CurrentValue, NULL, $this->Day4Grade->ReadOnly);
+
+			// Day4Cryoptop
+			$this->Day4Cryoptop->setDbValueDef($rsnew, $this->Day4Cryoptop->CurrentValue, NULL, $this->Day4Cryoptop->ReadOnly);
+
+			// Day4End
+			$this->Day4End->setDbValueDef($rsnew, $this->Day4End->CurrentValue, NULL, $this->Day4End->ReadOnly);
+
+			// Day5CellNo
+			$this->Day5CellNo->setDbValueDef($rsnew, $this->Day5CellNo->CurrentValue, NULL, $this->Day5CellNo->ReadOnly);
+
+			// Day5ICM
+			$this->Day5ICM->setDbValueDef($rsnew, $this->Day5ICM->CurrentValue, NULL, $this->Day5ICM->ReadOnly);
+
+			// Day5TE
+			$this->Day5TE->setDbValueDef($rsnew, $this->Day5TE->CurrentValue, NULL, $this->Day5TE->ReadOnly);
+
+			// Day5Observation
+			$this->Day5Observation->setDbValueDef($rsnew, $this->Day5Observation->CurrentValue, NULL, $this->Day5Observation->ReadOnly);
+
+			// Day5Collapsed
+			$this->Day5Collapsed->setDbValueDef($rsnew, $this->Day5Collapsed->CurrentValue, NULL, $this->Day5Collapsed->ReadOnly);
+
+			// Day5Vacoulles
+			$this->Day5Vacoulles->setDbValueDef($rsnew, $this->Day5Vacoulles->CurrentValue, NULL, $this->Day5Vacoulles->ReadOnly);
+
+			// Day5Grade
+			$this->Day5Grade->setDbValueDef($rsnew, $this->Day5Grade->CurrentValue, NULL, $this->Day5Grade->ReadOnly);
+
+			// Day6CellNo
+			$this->Day6CellNo->setDbValueDef($rsnew, $this->Day6CellNo->CurrentValue, NULL, $this->Day6CellNo->ReadOnly);
+
+			// Day6ICM
+			$this->Day6ICM->setDbValueDef($rsnew, $this->Day6ICM->CurrentValue, NULL, $this->Day6ICM->ReadOnly);
+
+			// Day6TE
+			$this->Day6TE->setDbValueDef($rsnew, $this->Day6TE->CurrentValue, NULL, $this->Day6TE->ReadOnly);
+
+			// Day6Observation
+			$this->Day6Observation->setDbValueDef($rsnew, $this->Day6Observation->CurrentValue, NULL, $this->Day6Observation->ReadOnly);
+
+			// Day6Collapsed
+			$this->Day6Collapsed->setDbValueDef($rsnew, $this->Day6Collapsed->CurrentValue, NULL, $this->Day6Collapsed->ReadOnly);
+
+			// Day6Vacoulles
+			$this->Day6Vacoulles->setDbValueDef($rsnew, $this->Day6Vacoulles->CurrentValue, NULL, $this->Day6Vacoulles->ReadOnly);
+
+			// Day6Grade
+			$this->Day6Grade->setDbValueDef($rsnew, $this->Day6Grade->CurrentValue, NULL, $this->Day6Grade->ReadOnly);
+
+			// Day6Cryoptop
+			$this->Day6Cryoptop->setDbValueDef($rsnew, $this->Day6Cryoptop->CurrentValue, NULL, $this->Day6Cryoptop->ReadOnly);
+
+			// EndSiNo
+			$this->EndSiNo->setDbValueDef($rsnew, $this->EndSiNo->CurrentValue, NULL, $this->EndSiNo->ReadOnly);
+
+			// EndingDay
+			$this->EndingDay->setDbValueDef($rsnew, $this->EndingDay->CurrentValue, NULL, $this->EndingDay->ReadOnly);
+
+			// EndingCellStage
+			$this->EndingCellStage->setDbValueDef($rsnew, $this->EndingCellStage->CurrentValue, NULL, $this->EndingCellStage->ReadOnly);
+
+			// EndingGrade
+			$this->EndingGrade->setDbValueDef($rsnew, $this->EndingGrade->CurrentValue, NULL, $this->EndingGrade->ReadOnly);
+
+			// EndingState
+			$this->EndingState->setDbValueDef($rsnew, $this->EndingState->CurrentValue, NULL, $this->EndingState->ReadOnly);
+
+			// ICSiIVFDateTime
+			$this->ICSiIVFDateTime->setDbValueDef($rsnew, UnFormatDateTime($this->ICSiIVFDateTime->CurrentValue, 0), NULL, $this->ICSiIVFDateTime->ReadOnly);
+
+			// PrimaryEmbrologist
+			$this->PrimaryEmbrologist->setDbValueDef($rsnew, $this->PrimaryEmbrologist->CurrentValue, NULL, $this->PrimaryEmbrologist->ReadOnly);
+
+			// SecondaryEmbrologist
+			$this->SecondaryEmbrologist->setDbValueDef($rsnew, $this->SecondaryEmbrologist->CurrentValue, NULL, $this->SecondaryEmbrologist->ReadOnly);
+
+			// Incubator
+			$this->Incubator->setDbValueDef($rsnew, $this->Incubator->CurrentValue, NULL, $this->Incubator->ReadOnly);
+
+			// location
+			$this->location->setDbValueDef($rsnew, $this->location->CurrentValue, NULL, $this->location->ReadOnly);
+
+			// OocyteNo
+			$this->OocyteNo->setDbValueDef($rsnew, $this->OocyteNo->CurrentValue, NULL, $this->OocyteNo->ReadOnly);
+
+			// Stage
+			$this->Stage->setDbValueDef($rsnew, $this->Stage->CurrentValue, NULL, $this->Stage->ReadOnly);
+
+			// Remarks
+			$this->Remarks->setDbValueDef($rsnew, $this->Remarks->CurrentValue, NULL, $this->Remarks->ReadOnly);
+
+			// vitrificationDate
+			$this->vitrificationDate->setDbValueDef($rsnew, UnFormatDateTime($this->vitrificationDate->CurrentValue, 0), NULL, $this->vitrificationDate->ReadOnly);
+
+			// vitriPrimaryEmbryologist
+			$this->vitriPrimaryEmbryologist->setDbValueDef($rsnew, $this->vitriPrimaryEmbryologist->CurrentValue, NULL, $this->vitriPrimaryEmbryologist->ReadOnly);
+
+			// vitriSecondaryEmbryologist
+			$this->vitriSecondaryEmbryologist->setDbValueDef($rsnew, $this->vitriSecondaryEmbryologist->CurrentValue, NULL, $this->vitriSecondaryEmbryologist->ReadOnly);
+
+			// vitriEmbryoNo
+			$this->vitriEmbryoNo->setDbValueDef($rsnew, $this->vitriEmbryoNo->CurrentValue, NULL, $this->vitriEmbryoNo->ReadOnly);
+
+			// thawReFrozen
+			$this->thawReFrozen->setDbValueDef($rsnew, $this->thawReFrozen->CurrentValue, NULL, $this->thawReFrozen->ReadOnly);
+
+			// vitriFertilisationDate
+			$this->vitriFertilisationDate->setDbValueDef($rsnew, UnFormatDateTime($this->vitriFertilisationDate->CurrentValue, 0), NULL, $this->vitriFertilisationDate->ReadOnly);
+
+			// vitriDay
+			$this->vitriDay->setDbValueDef($rsnew, $this->vitriDay->CurrentValue, NULL, $this->vitriDay->ReadOnly);
+
+			// vitriStage
+			$this->vitriStage->setDbValueDef($rsnew, $this->vitriStage->CurrentValue, NULL, $this->vitriStage->ReadOnly);
+
+			// vitriGrade
+			$this->vitriGrade->setDbValueDef($rsnew, $this->vitriGrade->CurrentValue, NULL, $this->vitriGrade->ReadOnly);
+
+			// vitriIncubator
+			$this->vitriIncubator->setDbValueDef($rsnew, $this->vitriIncubator->CurrentValue, NULL, $this->vitriIncubator->ReadOnly);
+
+			// vitriTank
+			$this->vitriTank->setDbValueDef($rsnew, $this->vitriTank->CurrentValue, NULL, $this->vitriTank->ReadOnly);
+
+			// vitriCanister
+			$this->vitriCanister->setDbValueDef($rsnew, $this->vitriCanister->CurrentValue, NULL, $this->vitriCanister->ReadOnly);
+
+			// vitriGobiet
+			$this->vitriGobiet->setDbValueDef($rsnew, $this->vitriGobiet->CurrentValue, NULL, $this->vitriGobiet->ReadOnly);
+
+			// vitriViscotube
+			$this->vitriViscotube->setDbValueDef($rsnew, $this->vitriViscotube->CurrentValue, NULL, $this->vitriViscotube->ReadOnly);
+
+			// vitriCryolockNo
+			$this->vitriCryolockNo->setDbValueDef($rsnew, $this->vitriCryolockNo->CurrentValue, NULL, $this->vitriCryolockNo->ReadOnly);
+
+			// vitriCryolockColour
+			$this->vitriCryolockColour->setDbValueDef($rsnew, $this->vitriCryolockColour->CurrentValue, NULL, $this->vitriCryolockColour->ReadOnly);
+
+			// thawDate
+			$this->thawDate->setDbValueDef($rsnew, UnFormatDateTime($this->thawDate->CurrentValue, 0), NULL, $this->thawDate->ReadOnly);
+
+			// thawPrimaryEmbryologist
+			$this->thawPrimaryEmbryologist->setDbValueDef($rsnew, $this->thawPrimaryEmbryologist->CurrentValue, NULL, $this->thawPrimaryEmbryologist->ReadOnly);
+
+			// thawSecondaryEmbryologist
+			$this->thawSecondaryEmbryologist->setDbValueDef($rsnew, $this->thawSecondaryEmbryologist->CurrentValue, NULL, $this->thawSecondaryEmbryologist->ReadOnly);
+
+			// thawET
+			$this->thawET->setDbValueDef($rsnew, $this->thawET->CurrentValue, NULL, $this->thawET->ReadOnly);
+
+			// thawAbserve
+			$this->thawAbserve->setDbValueDef($rsnew, $this->thawAbserve->CurrentValue, NULL, $this->thawAbserve->ReadOnly);
+
+			// thawDiscard
+			$this->thawDiscard->setDbValueDef($rsnew, $this->thawDiscard->CurrentValue, NULL, $this->thawDiscard->ReadOnly);
+
+			// ETCatheter
+			$this->ETCatheter->setDbValueDef($rsnew, $this->ETCatheter->CurrentValue, NULL, $this->ETCatheter->ReadOnly);
+
+			// ETDifficulty
+			$this->ETDifficulty->setDbValueDef($rsnew, $this->ETDifficulty->CurrentValue, NULL, $this->ETDifficulty->ReadOnly);
+
+			// ETEasy
+			$this->ETEasy->setDbValueDef($rsnew, $this->ETEasy->CurrentValue, NULL, $this->ETEasy->ReadOnly);
+
+			// ETComments
+			$this->ETComments->setDbValueDef($rsnew, $this->ETComments->CurrentValue, NULL, $this->ETComments->ReadOnly);
+
+			// ETDoctor
+			$this->ETDoctor->setDbValueDef($rsnew, $this->ETDoctor->CurrentValue, NULL, $this->ETDoctor->ReadOnly);
+
+			// ETEmbryologist
+			$this->ETEmbryologist->setDbValueDef($rsnew, $this->ETEmbryologist->CurrentValue, NULL, $this->ETEmbryologist->ReadOnly);
+
+			// ETDate
+			$this->ETDate->setDbValueDef($rsnew, UnFormatDateTime($this->ETDate->CurrentValue, 0), NULL, $this->ETDate->ReadOnly);
+
+			// Day1End
+			$this->Day1End->setDbValueDef($rsnew, $this->Day1End->CurrentValue, NULL, $this->Day1End->ReadOnly);
+
+			// Call Row Updating event
+			$updateRow = $this->Row_Updating($rsold, $rsnew);
+			if ($updateRow) {
+				$conn->raiseErrorFn = $GLOBALS["ERROR_FUNC"];
+				if (count($rsnew) > 0)
+					$editRow = $this->update($rsnew, "", $rsold);
+				else
+					$editRow = TRUE; // No field to update
+				$conn->raiseErrorFn = '';
+				if ($editRow) {
+				}
+			} else {
+				if ($this->getSuccessMessage() <> "" || $this->getFailureMessage() <> "") {
+
+					// Use the message, do nothing
+				} elseif ($this->CancelMessage <> "") {
+					$this->setFailureMessage($this->CancelMessage);
+					$this->CancelMessage = "";
+				} else {
+					$this->setFailureMessage($Language->phrase("UpdateCancelled"));
+				}
+				$editRow = FALSE;
+			}
+		}
+
+		// Call Row_Updated event
+		if ($editRow)
+			$this->Row_Updated($rsold, $rsnew);
+		$rs->close();
+
+		// Write JSON for API request
+		if (IsApi() && $editRow) {
+			$row = $this->getRecordsFromRecordset([$rsnew], TRUE);
+			WriteJson(["success" => TRUE, $this->TableVar => $row]);
+		}
+		return $editRow;
+	}
+
+	// Load row hash
+	protected function loadRowHash()
+	{
+		$filter = $this->getRecordFilter();
+
+		// Load SQL based on filter
+		$this->CurrentFilter = $filter;
+		$sql = $this->getCurrentSql();
+		$conn = &$this->getConnection();
+		$rsRow = $conn->Execute($sql);
+		$this->HashValue = ($rsRow && !$rsRow->EOF) ? $this->getRowHash($rsRow) : ""; // Get hash value for record
+		$rsRow->close();
+	}
+
+	// Get Row Hash
+	public function getRowHash(&$rs)
+	{
+		if (!$rs)
+			return "";
+		$hash = "";
+		$hash .= GetFieldHash($rs->fields('SpermOrigin')); // SpermOrigin
+		$hash .= GetFieldHash($rs->fields('InseminatinTechnique')); // InseminatinTechnique
+		$hash .= GetFieldHash($rs->fields('IndicationForART')); // IndicationForART
+		$hash .= GetFieldHash($rs->fields('Day0sino')); // Day0sino
+		$hash .= GetFieldHash($rs->fields('Day0OocyteStage')); // Day0OocyteStage
+		$hash .= GetFieldHash($rs->fields('Day0PolarBodyPosition')); // Day0PolarBodyPosition
+		$hash .= GetFieldHash($rs->fields('Day0Breakage')); // Day0Breakage
+		$hash .= GetFieldHash($rs->fields('Day0Attempts')); // Day0Attempts
+		$hash .= GetFieldHash($rs->fields('Day0SPZMorpho')); // Day0SPZMorpho
+		$hash .= GetFieldHash($rs->fields('Day0SPZLocation')); // Day0SPZLocation
+		$hash .= GetFieldHash($rs->fields('Day0SpOrgin')); // Day0SpOrgin
+		$hash .= GetFieldHash($rs->fields('Day5Cryoptop')); // Day5Cryoptop
+		$hash .= GetFieldHash($rs->fields('Day1Sperm')); // Day1Sperm
+		$hash .= GetFieldHash($rs->fields('Day1PN')); // Day1PN
+		$hash .= GetFieldHash($rs->fields('Day1PB')); // Day1PB
+		$hash .= GetFieldHash($rs->fields('Day1Pronucleus')); // Day1Pronucleus
+		$hash .= GetFieldHash($rs->fields('Day1Nucleolus')); // Day1Nucleolus
+		$hash .= GetFieldHash($rs->fields('Day1Halo')); // Day1Halo
+		$hash .= GetFieldHash($rs->fields('Day2SiNo')); // Day2SiNo
+		$hash .= GetFieldHash($rs->fields('Day2CellNo')); // Day2CellNo
+		$hash .= GetFieldHash($rs->fields('Day2Frag')); // Day2Frag
+		$hash .= GetFieldHash($rs->fields('Day2Symmetry')); // Day2Symmetry
+		$hash .= GetFieldHash($rs->fields('Day2Cryoptop')); // Day2Cryoptop
+		$hash .= GetFieldHash($rs->fields('Day2Grade')); // Day2Grade
+		$hash .= GetFieldHash($rs->fields('Day2End')); // Day2End
+		$hash .= GetFieldHash($rs->fields('Day3Sino')); // Day3Sino
+		$hash .= GetFieldHash($rs->fields('Day3CellNo')); // Day3CellNo
+		$hash .= GetFieldHash($rs->fields('Day3Frag')); // Day3Frag
+		$hash .= GetFieldHash($rs->fields('Day3Symmetry')); // Day3Symmetry
+		$hash .= GetFieldHash($rs->fields('Day3ZP')); // Day3ZP
+		$hash .= GetFieldHash($rs->fields('Day3Vacoules')); // Day3Vacoules
+		$hash .= GetFieldHash($rs->fields('Day3Grade')); // Day3Grade
+		$hash .= GetFieldHash($rs->fields('Day3Cryoptop')); // Day3Cryoptop
+		$hash .= GetFieldHash($rs->fields('Day3End')); // Day3End
+		$hash .= GetFieldHash($rs->fields('Day4SiNo')); // Day4SiNo
+		$hash .= GetFieldHash($rs->fields('Day4CellNo')); // Day4CellNo
+		$hash .= GetFieldHash($rs->fields('Day4Frag')); // Day4Frag
+		$hash .= GetFieldHash($rs->fields('Day4Symmetry')); // Day4Symmetry
+		$hash .= GetFieldHash($rs->fields('Day4Grade')); // Day4Grade
+		$hash .= GetFieldHash($rs->fields('Day4Cryoptop')); // Day4Cryoptop
+		$hash .= GetFieldHash($rs->fields('Day4End')); // Day4End
+		$hash .= GetFieldHash($rs->fields('Day5CellNo')); // Day5CellNo
+		$hash .= GetFieldHash($rs->fields('Day5ICM')); // Day5ICM
+		$hash .= GetFieldHash($rs->fields('Day5TE')); // Day5TE
+		$hash .= GetFieldHash($rs->fields('Day5Observation')); // Day5Observation
+		$hash .= GetFieldHash($rs->fields('Day5Collapsed')); // Day5Collapsed
+		$hash .= GetFieldHash($rs->fields('Day5Vacoulles')); // Day5Vacoulles
+		$hash .= GetFieldHash($rs->fields('Day5Grade')); // Day5Grade
+		$hash .= GetFieldHash($rs->fields('Day6CellNo')); // Day6CellNo
+		$hash .= GetFieldHash($rs->fields('Day6ICM')); // Day6ICM
+		$hash .= GetFieldHash($rs->fields('Day6TE')); // Day6TE
+		$hash .= GetFieldHash($rs->fields('Day6Observation')); // Day6Observation
+		$hash .= GetFieldHash($rs->fields('Day6Collapsed')); // Day6Collapsed
+		$hash .= GetFieldHash($rs->fields('Day6Vacoulles')); // Day6Vacoulles
+		$hash .= GetFieldHash($rs->fields('Day6Grade')); // Day6Grade
+		$hash .= GetFieldHash($rs->fields('Day6Cryoptop')); // Day6Cryoptop
+		$hash .= GetFieldHash($rs->fields('EndSiNo')); // EndSiNo
+		$hash .= GetFieldHash($rs->fields('EndingDay')); // EndingDay
+		$hash .= GetFieldHash($rs->fields('EndingCellStage')); // EndingCellStage
+		$hash .= GetFieldHash($rs->fields('EndingGrade')); // EndingGrade
+		$hash .= GetFieldHash($rs->fields('EndingState')); // EndingState
+		$hash .= GetFieldHash($rs->fields('ICSiIVFDateTime')); // ICSiIVFDateTime
+		$hash .= GetFieldHash($rs->fields('PrimaryEmbrologist')); // PrimaryEmbrologist
+		$hash .= GetFieldHash($rs->fields('SecondaryEmbrologist')); // SecondaryEmbrologist
+		$hash .= GetFieldHash($rs->fields('Incubator')); // Incubator
+		$hash .= GetFieldHash($rs->fields('location')); // location
+		$hash .= GetFieldHash($rs->fields('OocyteNo')); // OocyteNo
+		$hash .= GetFieldHash($rs->fields('Stage')); // Stage
+		$hash .= GetFieldHash($rs->fields('Remarks')); // Remarks
+		$hash .= GetFieldHash($rs->fields('vitrificationDate')); // vitrificationDate
+		$hash .= GetFieldHash($rs->fields('vitriPrimaryEmbryologist')); // vitriPrimaryEmbryologist
+		$hash .= GetFieldHash($rs->fields('vitriSecondaryEmbryologist')); // vitriSecondaryEmbryologist
+		$hash .= GetFieldHash($rs->fields('vitriEmbryoNo')); // vitriEmbryoNo
+		$hash .= GetFieldHash($rs->fields('thawReFrozen')); // thawReFrozen
+		$hash .= GetFieldHash($rs->fields('vitriFertilisationDate')); // vitriFertilisationDate
+		$hash .= GetFieldHash($rs->fields('vitriDay')); // vitriDay
+		$hash .= GetFieldHash($rs->fields('vitriStage')); // vitriStage
+		$hash .= GetFieldHash($rs->fields('vitriGrade')); // vitriGrade
+		$hash .= GetFieldHash($rs->fields('vitriIncubator')); // vitriIncubator
+		$hash .= GetFieldHash($rs->fields('vitriTank')); // vitriTank
+		$hash .= GetFieldHash($rs->fields('vitriCanister')); // vitriCanister
+		$hash .= GetFieldHash($rs->fields('vitriGobiet')); // vitriGobiet
+		$hash .= GetFieldHash($rs->fields('vitriViscotube')); // vitriViscotube
+		$hash .= GetFieldHash($rs->fields('vitriCryolockNo')); // vitriCryolockNo
+		$hash .= GetFieldHash($rs->fields('vitriCryolockColour')); // vitriCryolockColour
+		$hash .= GetFieldHash($rs->fields('thawDate')); // thawDate
+		$hash .= GetFieldHash($rs->fields('thawPrimaryEmbryologist')); // thawPrimaryEmbryologist
+		$hash .= GetFieldHash($rs->fields('thawSecondaryEmbryologist')); // thawSecondaryEmbryologist
+		$hash .= GetFieldHash($rs->fields('thawET')); // thawET
+		$hash .= GetFieldHash($rs->fields('thawAbserve')); // thawAbserve
+		$hash .= GetFieldHash($rs->fields('thawDiscard')); // thawDiscard
+		$hash .= GetFieldHash($rs->fields('ETCatheter')); // ETCatheter
+		$hash .= GetFieldHash($rs->fields('ETDifficulty')); // ETDifficulty
+		$hash .= GetFieldHash($rs->fields('ETEasy')); // ETEasy
+		$hash .= GetFieldHash($rs->fields('ETComments')); // ETComments
+		$hash .= GetFieldHash($rs->fields('ETDoctor')); // ETDoctor
+		$hash .= GetFieldHash($rs->fields('ETEmbryologist')); // ETEmbryologist
+		$hash .= GetFieldHash($rs->fields('ETDate')); // ETDate
+		$hash .= GetFieldHash($rs->fields('Day1End')); // Day1End
+		return md5($hash);
+	}
+
+	// Add record
+	protected function addRow($rsold = NULL)
+	{
+		global $Language, $Security;
+		$conn = &$this->getConnection();
+
+		// Load db values from rsold
+		$this->loadDbValues($rsold);
+		if ($rsold) {
+		}
+		$rsnew = [];
+
+		// RIDNo
+		$this->RIDNo->setDbValueDef($rsnew, $this->RIDNo->CurrentValue, 0, FALSE);
+
+		// Name
+		$this->Name->setDbValueDef($rsnew, $this->Name->CurrentValue, NULL, FALSE);
+
+		// ARTCycle
+		$this->ARTCycle->setDbValueDef($rsnew, $this->ARTCycle->CurrentValue, NULL, FALSE);
+
+		// SpermOrigin
+		$this->SpermOrigin->setDbValueDef($rsnew, $this->SpermOrigin->CurrentValue, NULL, FALSE);
+
+		// InseminatinTechnique
+		$this->InseminatinTechnique->setDbValueDef($rsnew, $this->InseminatinTechnique->CurrentValue, NULL, FALSE);
+
+		// IndicationForART
+		$this->IndicationForART->setDbValueDef($rsnew, $this->IndicationForART->CurrentValue, NULL, FALSE);
+
+		// Day0sino
+		$this->Day0sino->setDbValueDef($rsnew, $this->Day0sino->CurrentValue, NULL, FALSE);
+
+		// Day0OocyteStage
+		$this->Day0OocyteStage->setDbValueDef($rsnew, $this->Day0OocyteStage->CurrentValue, NULL, FALSE);
+
+		// Day0PolarBodyPosition
+		$this->Day0PolarBodyPosition->setDbValueDef($rsnew, $this->Day0PolarBodyPosition->CurrentValue, NULL, FALSE);
+
+		// Day0Breakage
+		$this->Day0Breakage->setDbValueDef($rsnew, $this->Day0Breakage->CurrentValue, NULL, FALSE);
+
+		// Day0Attempts
+		$this->Day0Attempts->setDbValueDef($rsnew, $this->Day0Attempts->CurrentValue, NULL, FALSE);
+
+		// Day0SPZMorpho
+		$this->Day0SPZMorpho->setDbValueDef($rsnew, $this->Day0SPZMorpho->CurrentValue, NULL, FALSE);
+
+		// Day0SPZLocation
+		$this->Day0SPZLocation->setDbValueDef($rsnew, $this->Day0SPZLocation->CurrentValue, NULL, FALSE);
+
+		// Day0SpOrgin
+		$this->Day0SpOrgin->setDbValueDef($rsnew, $this->Day0SpOrgin->CurrentValue, NULL, FALSE);
+
+		// Day5Cryoptop
+		$this->Day5Cryoptop->setDbValueDef($rsnew, $this->Day5Cryoptop->CurrentValue, NULL, FALSE);
+
+		// Day1Sperm
+		$this->Day1Sperm->setDbValueDef($rsnew, $this->Day1Sperm->CurrentValue, NULL, FALSE);
+
+		// Day1PN
+		$this->Day1PN->setDbValueDef($rsnew, $this->Day1PN->CurrentValue, NULL, FALSE);
+
+		// Day1PB
+		$this->Day1PB->setDbValueDef($rsnew, $this->Day1PB->CurrentValue, NULL, FALSE);
+
+		// Day1Pronucleus
+		$this->Day1Pronucleus->setDbValueDef($rsnew, $this->Day1Pronucleus->CurrentValue, NULL, FALSE);
+
+		// Day1Nucleolus
+		$this->Day1Nucleolus->setDbValueDef($rsnew, $this->Day1Nucleolus->CurrentValue, NULL, FALSE);
+
+		// Day1Halo
+		$this->Day1Halo->setDbValueDef($rsnew, $this->Day1Halo->CurrentValue, NULL, FALSE);
+
+		// Day2SiNo
+		$this->Day2SiNo->setDbValueDef($rsnew, $this->Day2SiNo->CurrentValue, NULL, FALSE);
+
+		// Day2CellNo
+		$this->Day2CellNo->setDbValueDef($rsnew, $this->Day2CellNo->CurrentValue, NULL, FALSE);
+
+		// Day2Frag
+		$this->Day2Frag->setDbValueDef($rsnew, $this->Day2Frag->CurrentValue, NULL, FALSE);
+
+		// Day2Symmetry
+		$this->Day2Symmetry->setDbValueDef($rsnew, $this->Day2Symmetry->CurrentValue, NULL, FALSE);
+
+		// Day2Cryoptop
+		$this->Day2Cryoptop->setDbValueDef($rsnew, $this->Day2Cryoptop->CurrentValue, NULL, FALSE);
+
+		// Day2Grade
+		$this->Day2Grade->setDbValueDef($rsnew, $this->Day2Grade->CurrentValue, NULL, FALSE);
+
+		// Day2End
+		$this->Day2End->setDbValueDef($rsnew, $this->Day2End->CurrentValue, NULL, FALSE);
+
+		// Day3Sino
+		$this->Day3Sino->setDbValueDef($rsnew, $this->Day3Sino->CurrentValue, NULL, FALSE);
+
+		// Day3CellNo
+		$this->Day3CellNo->setDbValueDef($rsnew, $this->Day3CellNo->CurrentValue, NULL, FALSE);
+
+		// Day3Frag
+		$this->Day3Frag->setDbValueDef($rsnew, $this->Day3Frag->CurrentValue, NULL, FALSE);
+
+		// Day3Symmetry
+		$this->Day3Symmetry->setDbValueDef($rsnew, $this->Day3Symmetry->CurrentValue, NULL, FALSE);
+
+		// Day3ZP
+		$this->Day3ZP->setDbValueDef($rsnew, $this->Day3ZP->CurrentValue, NULL, FALSE);
+
+		// Day3Vacoules
+		$this->Day3Vacoules->setDbValueDef($rsnew, $this->Day3Vacoules->CurrentValue, NULL, FALSE);
+
+		// Day3Grade
+		$this->Day3Grade->setDbValueDef($rsnew, $this->Day3Grade->CurrentValue, NULL, FALSE);
+
+		// Day3Cryoptop
+		$this->Day3Cryoptop->setDbValueDef($rsnew, $this->Day3Cryoptop->CurrentValue, NULL, FALSE);
+
+		// Day3End
+		$this->Day3End->setDbValueDef($rsnew, $this->Day3End->CurrentValue, NULL, FALSE);
+
+		// Day4SiNo
+		$this->Day4SiNo->setDbValueDef($rsnew, $this->Day4SiNo->CurrentValue, NULL, FALSE);
+
+		// Day4CellNo
+		$this->Day4CellNo->setDbValueDef($rsnew, $this->Day4CellNo->CurrentValue, NULL, FALSE);
+
+		// Day4Frag
+		$this->Day4Frag->setDbValueDef($rsnew, $this->Day4Frag->CurrentValue, NULL, FALSE);
+
+		// Day4Symmetry
+		$this->Day4Symmetry->setDbValueDef($rsnew, $this->Day4Symmetry->CurrentValue, NULL, FALSE);
+
+		// Day4Grade
+		$this->Day4Grade->setDbValueDef($rsnew, $this->Day4Grade->CurrentValue, NULL, FALSE);
+
+		// Day4Cryoptop
+		$this->Day4Cryoptop->setDbValueDef($rsnew, $this->Day4Cryoptop->CurrentValue, NULL, FALSE);
+
+		// Day4End
+		$this->Day4End->setDbValueDef($rsnew, $this->Day4End->CurrentValue, NULL, FALSE);
+
+		// Day5CellNo
+		$this->Day5CellNo->setDbValueDef($rsnew, $this->Day5CellNo->CurrentValue, NULL, FALSE);
+
+		// Day5ICM
+		$this->Day5ICM->setDbValueDef($rsnew, $this->Day5ICM->CurrentValue, NULL, FALSE);
+
+		// Day5TE
+		$this->Day5TE->setDbValueDef($rsnew, $this->Day5TE->CurrentValue, NULL, FALSE);
+
+		// Day5Observation
+		$this->Day5Observation->setDbValueDef($rsnew, $this->Day5Observation->CurrentValue, NULL, FALSE);
+
+		// Day5Collapsed
+		$this->Day5Collapsed->setDbValueDef($rsnew, $this->Day5Collapsed->CurrentValue, NULL, FALSE);
+
+		// Day5Vacoulles
+		$this->Day5Vacoulles->setDbValueDef($rsnew, $this->Day5Vacoulles->CurrentValue, NULL, FALSE);
+
+		// Day5Grade
+		$this->Day5Grade->setDbValueDef($rsnew, $this->Day5Grade->CurrentValue, NULL, FALSE);
+
+		// Day6CellNo
+		$this->Day6CellNo->setDbValueDef($rsnew, $this->Day6CellNo->CurrentValue, NULL, FALSE);
+
+		// Day6ICM
+		$this->Day6ICM->setDbValueDef($rsnew, $this->Day6ICM->CurrentValue, NULL, FALSE);
+
+		// Day6TE
+		$this->Day6TE->setDbValueDef($rsnew, $this->Day6TE->CurrentValue, NULL, FALSE);
+
+		// Day6Observation
+		$this->Day6Observation->setDbValueDef($rsnew, $this->Day6Observation->CurrentValue, NULL, FALSE);
+
+		// Day6Collapsed
+		$this->Day6Collapsed->setDbValueDef($rsnew, $this->Day6Collapsed->CurrentValue, NULL, FALSE);
+
+		// Day6Vacoulles
+		$this->Day6Vacoulles->setDbValueDef($rsnew, $this->Day6Vacoulles->CurrentValue, NULL, FALSE);
+
+		// Day6Grade
+		$this->Day6Grade->setDbValueDef($rsnew, $this->Day6Grade->CurrentValue, NULL, FALSE);
+
+		// Day6Cryoptop
+		$this->Day6Cryoptop->setDbValueDef($rsnew, $this->Day6Cryoptop->CurrentValue, NULL, FALSE);
+
+		// EndSiNo
+		$this->EndSiNo->setDbValueDef($rsnew, $this->EndSiNo->CurrentValue, NULL, FALSE);
+
+		// EndingDay
+		$this->EndingDay->setDbValueDef($rsnew, $this->EndingDay->CurrentValue, NULL, FALSE);
+
+		// EndingCellStage
+		$this->EndingCellStage->setDbValueDef($rsnew, $this->EndingCellStage->CurrentValue, NULL, FALSE);
+
+		// EndingGrade
+		$this->EndingGrade->setDbValueDef($rsnew, $this->EndingGrade->CurrentValue, NULL, FALSE);
+
+		// EndingState
+		$this->EndingState->setDbValueDef($rsnew, $this->EndingState->CurrentValue, NULL, FALSE);
+
+		// TidNo
+		$this->TidNo->setDbValueDef($rsnew, $this->TidNo->CurrentValue, NULL, FALSE);
+
+		// DidNO
+		$this->DidNO->setDbValueDef($rsnew, $this->DidNO->CurrentValue, NULL, FALSE);
+
+		// ICSiIVFDateTime
+		$this->ICSiIVFDateTime->setDbValueDef($rsnew, UnFormatDateTime($this->ICSiIVFDateTime->CurrentValue, 0), NULL, FALSE);
+
+		// PrimaryEmbrologist
+		$this->PrimaryEmbrologist->setDbValueDef($rsnew, $this->PrimaryEmbrologist->CurrentValue, NULL, FALSE);
+
+		// SecondaryEmbrologist
+		$this->SecondaryEmbrologist->setDbValueDef($rsnew, $this->SecondaryEmbrologist->CurrentValue, NULL, FALSE);
+
+		// Incubator
+		$this->Incubator->setDbValueDef($rsnew, $this->Incubator->CurrentValue, NULL, FALSE);
+
+		// location
+		$this->location->setDbValueDef($rsnew, $this->location->CurrentValue, NULL, FALSE);
+
+		// OocyteNo
+		$this->OocyteNo->setDbValueDef($rsnew, $this->OocyteNo->CurrentValue, NULL, FALSE);
+
+		// Stage
+		$this->Stage->setDbValueDef($rsnew, $this->Stage->CurrentValue, NULL, FALSE);
+
+		// Remarks
+		$this->Remarks->setDbValueDef($rsnew, $this->Remarks->CurrentValue, NULL, FALSE);
+
+		// vitrificationDate
+		$this->vitrificationDate->setDbValueDef($rsnew, UnFormatDateTime($this->vitrificationDate->CurrentValue, 0), NULL, FALSE);
+
+		// vitriPrimaryEmbryologist
+		$this->vitriPrimaryEmbryologist->setDbValueDef($rsnew, $this->vitriPrimaryEmbryologist->CurrentValue, NULL, FALSE);
+
+		// vitriSecondaryEmbryologist
+		$this->vitriSecondaryEmbryologist->setDbValueDef($rsnew, $this->vitriSecondaryEmbryologist->CurrentValue, NULL, FALSE);
+
+		// vitriEmbryoNo
+		$this->vitriEmbryoNo->setDbValueDef($rsnew, $this->vitriEmbryoNo->CurrentValue, NULL, FALSE);
+
+		// thawReFrozen
+		$this->thawReFrozen->setDbValueDef($rsnew, $this->thawReFrozen->CurrentValue, NULL, FALSE);
+
+		// vitriFertilisationDate
+		$this->vitriFertilisationDate->setDbValueDef($rsnew, UnFormatDateTime($this->vitriFertilisationDate->CurrentValue, 0), NULL, FALSE);
+
+		// vitriDay
+		$this->vitriDay->setDbValueDef($rsnew, $this->vitriDay->CurrentValue, NULL, FALSE);
+
+		// vitriStage
+		$this->vitriStage->setDbValueDef($rsnew, $this->vitriStage->CurrentValue, NULL, FALSE);
+
+		// vitriGrade
+		$this->vitriGrade->setDbValueDef($rsnew, $this->vitriGrade->CurrentValue, NULL, FALSE);
+
+		// vitriIncubator
+		$this->vitriIncubator->setDbValueDef($rsnew, $this->vitriIncubator->CurrentValue, NULL, FALSE);
+
+		// vitriTank
+		$this->vitriTank->setDbValueDef($rsnew, $this->vitriTank->CurrentValue, NULL, FALSE);
+
+		// vitriCanister
+		$this->vitriCanister->setDbValueDef($rsnew, $this->vitriCanister->CurrentValue, NULL, FALSE);
+
+		// vitriGobiet
+		$this->vitriGobiet->setDbValueDef($rsnew, $this->vitriGobiet->CurrentValue, NULL, FALSE);
+
+		// vitriViscotube
+		$this->vitriViscotube->setDbValueDef($rsnew, $this->vitriViscotube->CurrentValue, NULL, FALSE);
+
+		// vitriCryolockNo
+		$this->vitriCryolockNo->setDbValueDef($rsnew, $this->vitriCryolockNo->CurrentValue, NULL, FALSE);
+
+		// vitriCryolockColour
+		$this->vitriCryolockColour->setDbValueDef($rsnew, $this->vitriCryolockColour->CurrentValue, NULL, FALSE);
+
+		// thawDate
+		$this->thawDate->setDbValueDef($rsnew, UnFormatDateTime($this->thawDate->CurrentValue, 0), NULL, FALSE);
+
+		// thawPrimaryEmbryologist
+		$this->thawPrimaryEmbryologist->setDbValueDef($rsnew, $this->thawPrimaryEmbryologist->CurrentValue, NULL, FALSE);
+
+		// thawSecondaryEmbryologist
+		$this->thawSecondaryEmbryologist->setDbValueDef($rsnew, $this->thawSecondaryEmbryologist->CurrentValue, NULL, FALSE);
+
+		// thawET
+		$this->thawET->setDbValueDef($rsnew, $this->thawET->CurrentValue, NULL, FALSE);
+
+		// thawAbserve
+		$this->thawAbserve->setDbValueDef($rsnew, $this->thawAbserve->CurrentValue, NULL, FALSE);
+
+		// thawDiscard
+		$this->thawDiscard->setDbValueDef($rsnew, $this->thawDiscard->CurrentValue, NULL, FALSE);
+
+		// ETCatheter
+		$this->ETCatheter->setDbValueDef($rsnew, $this->ETCatheter->CurrentValue, NULL, FALSE);
+
+		// ETDifficulty
+		$this->ETDifficulty->setDbValueDef($rsnew, $this->ETDifficulty->CurrentValue, NULL, FALSE);
+
+		// ETEasy
+		$this->ETEasy->setDbValueDef($rsnew, $this->ETEasy->CurrentValue, NULL, FALSE);
+
+		// ETComments
+		$this->ETComments->setDbValueDef($rsnew, $this->ETComments->CurrentValue, NULL, FALSE);
+
+		// ETDoctor
+		$this->ETDoctor->setDbValueDef($rsnew, $this->ETDoctor->CurrentValue, NULL, FALSE);
+
+		// ETEmbryologist
+		$this->ETEmbryologist->setDbValueDef($rsnew, $this->ETEmbryologist->CurrentValue, NULL, FALSE);
+
+		// ETDate
+		$this->ETDate->setDbValueDef($rsnew, UnFormatDateTime($this->ETDate->CurrentValue, 0), NULL, FALSE);
+
+		// Day1End
+		$this->Day1End->setDbValueDef($rsnew, $this->Day1End->CurrentValue, NULL, FALSE);
+
+		// Call Row Inserting event
+		$rs = ($rsold) ? $rsold->fields : NULL;
+		$insertRow = $this->Row_Inserting($rs, $rsnew);
+		if ($insertRow) {
+			$conn->raiseErrorFn = $GLOBALS["ERROR_FUNC"];
+			$addRow = $this->insert($rsnew);
+			$conn->raiseErrorFn = '';
+			if ($addRow) {
+			}
+		} else {
+			if ($this->getSuccessMessage() <> "" || $this->getFailureMessage() <> "") {
+
+				// Use the message, do nothing
+			} elseif ($this->CancelMessage <> "") {
+				$this->setFailureMessage($this->CancelMessage);
+				$this->CancelMessage = "";
+			} else {
+				$this->setFailureMessage($Language->phrase("InsertCancelled"));
+			}
+			$addRow = FALSE;
+		}
+		if ($addRow) {
+
+			// Call Row Inserted event
+			$rs = ($rsold) ? $rsold->fields : NULL;
+			$this->Row_Inserted($rs, $rsnew);
+		}
+
+		// Write JSON for API request
+		if (IsApi() && $addRow) {
+			$row = $this->getRecordsFromRecordset([$rsnew], TRUE);
+			WriteJson(["success" => TRUE, $this->TableVar => $row]);
+		}
+		return $addRow;
+	}
+
+	// Get export HTML tag
+	protected function getExportTag($type, $custom = FALSE)
+	{
+		global $Language;
+		if (SameText($type, "excel")) {
+			if ($custom)
+				return "<a href=\"javascript:void(0);\" class=\"ew-export-link ew-excel\" title=\"" . HtmlEncode($Language->phrase("ExportToExcelText")) . "\" data-caption=\"" . HtmlEncode($Language->phrase("ExportToExcelText")) . "\" onclick=\"ew.export(document.fivf_embryology_chartlist,'" . $this->ExportExcelUrl . "','excel',true);\">" . $Language->phrase("ExportToExcel") . "</a>";
+			else
+				return "<a href=\"" . $this->ExportExcelUrl . "\" class=\"ew-export-link ew-excel\" title=\"" . HtmlEncode($Language->phrase("ExportToExcelText")) . "\" data-caption=\"" . HtmlEncode($Language->phrase("ExportToExcelText")) . "\">" . $Language->phrase("ExportToExcel") . "</a>";
+		} elseif (SameText($type, "word")) {
+			if ($custom)
+				return "<a href=\"javascript:void(0);\" class=\"ew-export-link ew-word\" title=\"" . HtmlEncode($Language->phrase("ExportToWordText")) . "\" data-caption=\"" . HtmlEncode($Language->phrase("ExportToWordText")) . "\" onclick=\"ew.export(document.fivf_embryology_chartlist,'" . $this->ExportWordUrl . "','word',true);\">" . $Language->phrase("ExportToWord") . "</a>";
+			else
+				return "<a href=\"" . $this->ExportWordUrl . "\" class=\"ew-export-link ew-word\" title=\"" . HtmlEncode($Language->phrase("ExportToWordText")) . "\" data-caption=\"" . HtmlEncode($Language->phrase("ExportToWordText")) . "\">" . $Language->phrase("ExportToWord") . "</a>";
+		} elseif (SameText($type, "pdf")) {
+			if ($custom)
+				return "<a href=\"javascript:void(0);\" class=\"ew-export-link ew-pdf\" title=\"" . HtmlEncode($Language->phrase("ExportToPDFText")) . "\" data-caption=\"" . HtmlEncode($Language->phrase("ExportToPDFText")) . "\" onclick=\"ew.export(document.fivf_embryology_chartlist,'" . $this->ExportPdfUrl . "','pdf',true);\">" . $Language->phrase("ExportToPDF") . "</a>";
+			else
+				return "<a href=\"" . $this->ExportPdfUrl . "\" class=\"ew-export-link ew-pdf\" title=\"" . HtmlEncode($Language->phrase("ExportToPDFText")) . "\" data-caption=\"" . HtmlEncode($Language->phrase("ExportToPDFText")) . "\">" . $Language->phrase("ExportToPDF") . "</a>";
+		} elseif (SameText($type, "html")) {
+			return "<a href=\"" . $this->ExportHtmlUrl . "\" class=\"ew-export-link ew-html\" title=\"" . HtmlEncode($Language->phrase("ExportToHtmlText")) . "\" data-caption=\"" . HtmlEncode($Language->phrase("ExportToHtmlText")) . "\">" . $Language->phrase("ExportToHtml") . "</a>";
+		} elseif (SameText($type, "xml")) {
+			return "<a href=\"" . $this->ExportXmlUrl . "\" class=\"ew-export-link ew-xml\" title=\"" . HtmlEncode($Language->phrase("ExportToXmlText")) . "\" data-caption=\"" . HtmlEncode($Language->phrase("ExportToXmlText")) . "\">" . $Language->phrase("ExportToXml") . "</a>";
+		} elseif (SameText($type, "csv")) {
+			return "<a href=\"" . $this->ExportCsvUrl . "\" class=\"ew-export-link ew-csv\" title=\"" . HtmlEncode($Language->phrase("ExportToCsvText")) . "\" data-caption=\"" . HtmlEncode($Language->phrase("ExportToCsvText")) . "\">" . $Language->phrase("ExportToCsv") . "</a>";
+		} elseif (SameText($type, "print")) {
+			return "<a href=\"" . $this->ExportPrintUrl . "\" class=\"ew-export-link ew-print\" title=\"" . HtmlEncode($Language->phrase("PrinterFriendlyText")) . "\" data-caption=\"" . HtmlEncode($Language->phrase("PrinterFriendlyText")) . "\">" . $Language->phrase("PrinterFriendly") . "</a>";
+		}
+	}
+
+	// Set up export options
+	protected function setupExportOptions()
+	{
+		global $Language;
+
+		// Printer friendly
+		$item = &$this->ExportOptions->add("print");
+		$item->Body = $this->getExportTag("print");
+		$item->Visible = TRUE;
+
+		// Export to Excel
+		$item = &$this->ExportOptions->add("excel");
+		$item->Body = $this->getExportTag("excel");
+		$item->Visible = TRUE;
+
+		// Export to Word
+		$item = &$this->ExportOptions->add("word");
+		$item->Body = $this->getExportTag("word");
+		$item->Visible = TRUE;
+
+		// Export to Html
+		$item = &$this->ExportOptions->add("html");
+		$item->Body = $this->getExportTag("html");
+		$item->Visible = TRUE;
+
+		// Export to Xml
+		$item = &$this->ExportOptions->add("xml");
+		$item->Body = $this->getExportTag("xml");
+		$item->Visible = TRUE;
+
+		// Export to Csv
+		$item = &$this->ExportOptions->add("csv");
+		$item->Body = $this->getExportTag("csv");
+		$item->Visible = TRUE;
+
+		// Export to Pdf
+		$item = &$this->ExportOptions->add("pdf");
+		$item->Body = $this->getExportTag("pdf");
+		$item->Visible = TRUE;
+
+		// Export to Email
+		$item = &$this->ExportOptions->add("email");
+		$url = "";
+		$item->Body = "<button id=\"emf_ivf_embryology_chart\" class=\"ew-export-link ew-email\" title=\"" . $Language->phrase("ExportToEmailText") . "\" data-caption=\"" . $Language->phrase("ExportToEmailText") . "\" onclick=\"ew.emailDialogShow({lnk:'emf_ivf_embryology_chart',hdr:ew.language.phrase('ExportToEmailText'),f:document.fivf_embryology_chartlist,sel:false" . $url . "});\">" . $Language->phrase("ExportToEmail") . "</button>";
+		$item->Visible = TRUE;
+
+		// Drop down button for export
+		$this->ExportOptions->UseButtonGroup = TRUE;
+		$this->ExportOptions->UseDropDownButton = TRUE;
+		if ($this->ExportOptions->UseButtonGroup && IsMobile())
+			$this->ExportOptions->UseDropDownButton = TRUE;
+		$this->ExportOptions->DropDownButtonPhrase = $Language->phrase("ButtonExport");
+
+		// Add group option item
+		$item = &$this->ExportOptions->add($this->ExportOptions->GroupOptionName);
+		$item->Body = "";
+		$item->Visible = FALSE;
+	}
+
+	/**
+	 * Export data in HTML/CSV/Word/Excel/XML/Email/PDF format
+	 *
+	 * @param boolean $return Return the data rather than output it
+	 * @return mixed 
+	 */
+	public function exportData($return = FALSE)
+	{
+		global $Language;
+		$utf8 = SameText(PROJECT_CHARSET, "utf-8");
+		$selectLimit = $this->UseSelectLimit;
+
+		// Load recordset
+		if ($selectLimit) {
+			$this->TotalRecs = $this->listRecordCount();
+		} else {
+			if (!$this->Recordset)
+				$this->Recordset = $this->loadRecordset();
+			$rs = &$this->Recordset;
+			if ($rs)
+				$this->TotalRecs = $rs->RecordCount();
+		}
+		$this->StartRec = 1;
+
+		// Export all
+		if ($this->ExportAll) {
+			set_time_limit(EXPORT_ALL_TIME_LIMIT);
+			$this->DisplayRecs = $this->TotalRecs;
+			$this->StopRec = $this->TotalRecs;
+		} else { // Export one page only
+			$this->setupStartRec(); // Set up start record position
+
+			// Set the last record to display
+			if ($this->DisplayRecs <= 0) {
+				$this->StopRec = $this->TotalRecs;
+			} else {
+				$this->StopRec = $this->StartRec + $this->DisplayRecs - 1;
+			}
+		}
+		if ($selectLimit)
+			$rs = $this->loadRecordset($this->StartRec - 1, $this->DisplayRecs <= 0 ? $this->TotalRecs : $this->DisplayRecs);
+		$this->ExportDoc = GetExportDocument($this, "h");
+		$doc = &$this->ExportDoc;
+		if (!$doc)
+			$this->setFailureMessage($Language->phrase("ExportClassNotFound")); // Export class not found
+		if (!$rs || !$doc) {
+			RemoveHeader("Content-Type"); // Remove header
+			RemoveHeader("Content-Disposition");
+			$this->showMessage();
+			return;
+		}
+		if ($selectLimit) {
+			$this->StartRec = 1;
+			$this->StopRec = $this->DisplayRecs <= 0 ? $this->TotalRecs : $this->DisplayRecs;
+		}
+
+		// Call Page Exporting server event
+		$this->ExportDoc->ExportCustom = !$this->Page_Exporting();
+
+		// Export master record
+		if (EXPORT_MASTER_RECORD && $this->getMasterFilter() <> "" && $this->getCurrentMasterTable() == "ivf_treatment_plan") {
+			global $ivf_treatment_plan;
+			if (!isset($ivf_treatment_plan))
+				$ivf_treatment_plan = new ivf_treatment_plan();
+			$rsmaster = $ivf_treatment_plan->loadRs($this->DbMasterFilter); // Load master record
+			if ($rsmaster && !$rsmaster->EOF) {
+				$exportStyle = $doc->Style;
+				$doc->setStyle("v"); // Change to vertical
+				if (!$this->isExport("csv") || EXPORT_MASTER_RECORD_FOR_CSV) {
+					$doc->Table = &$ivf_treatment_plan;
+					$ivf_treatment_plan->exportDocument($doc, $rsmaster);
+					$doc->exportEmptyRow();
+					$doc->Table = &$this;
+				}
+				$doc->setStyle($exportStyle); // Restore
+				$rsmaster->close();
+			}
+		}
+
+		// Export master record
+		if (EXPORT_MASTER_RECORD && $this->getMasterFilter() <> "" && $this->getCurrentMasterTable() == "ivf_oocytedenudation") {
+			global $ivf_oocytedenudation;
+			if (!isset($ivf_oocytedenudation))
+				$ivf_oocytedenudation = new ivf_oocytedenudation();
+			$rsmaster = $ivf_oocytedenudation->loadRs($this->DbMasterFilter); // Load master record
+			if ($rsmaster && !$rsmaster->EOF) {
+				$exportStyle = $doc->Style;
+				$doc->setStyle("v"); // Change to vertical
+				if (!$this->isExport("csv") || EXPORT_MASTER_RECORD_FOR_CSV) {
+					$doc->Table = &$ivf_oocytedenudation;
+					$ivf_oocytedenudation->exportDocument($doc, $rsmaster);
+					$doc->exportEmptyRow();
+					$doc->Table = &$this;
+				}
+				$doc->setStyle($exportStyle); // Restore
+				$rsmaster->close();
+			}
+		}
+		$header = $this->PageHeader;
+		$this->Page_DataRendering($header);
+		$doc->Text .= $header;
+		$this->exportDocument($doc, $rs, $this->StartRec, $this->StopRec, "");
+		$footer = $this->PageFooter;
+		$this->Page_DataRendered($footer);
+		$doc->Text .= $footer;
+
+		// Close recordset
+		$rs->close();
+
+		// Call Page Exported server event
+		$this->Page_Exported();
+
+		// Export header and footer
+		$doc->exportHeaderAndFooter();
+
+		// Clean output buffer (without destroying output buffer)
+		$buffer = ob_get_contents(); // Save the output buffer
+		if (!DEBUG_ENABLED && $buffer)
+			ob_clean();
+
+		// Write debug message if enabled
+		if (DEBUG_ENABLED && !$this->isExport("pdf"))
+			echo GetDebugMessage();
+
+		// Output data
+		if ($this->isExport("email")) {
+			if ($return)
+				return $doc->Text; // Return email content
+			else
+				echo $this->exportEmail($doc->Text); // Send email
+		} else {
+			$doc->export();
+			if ($return) {
+				RemoveHeader("Content-Type"); // Remove header
+				RemoveHeader("Content-Disposition");
+				$content = ob_get_contents();
+				if ($content)
+					ob_clean();
+				if ($buffer)
+					echo $buffer; // Resume the output buffer
+				return $content;
+			}
+		}
+	}
+
+	// Export email
+	protected function exportEmail($emailContent)
+	{
+		global $TempImages, $Language;
+		$sender = Post("sender", "");
+		$recipient = Post("recipient", "");
+		$cc = Post("cc", "");
+		$bcc = Post("bcc", "");
+
+		// Subject
+		$subject = Post("subject", "");
+		$emailSubject = $subject;
+
+		// Message
+		$content = Post("message", "");
+		$emailMessage = $content;
+
+		// Check sender
+		if ($sender == "") {
+			return "<p class=\"text-danger\">" . $Language->phrase("EnterSenderEmail") . "</p>";
+		}
+		if (!CheckEmail($sender)) {
+			return "<p class=\"text-danger\">" . $Language->phrase("EnterProperSenderEmail") . "</p>";
+		}
+
+		// Check recipient
+		if (!CheckEmailList($recipient, MAX_EMAIL_RECIPIENT)) {
+			return "<p class=\"text-danger\">" . $Language->phrase("EnterProperRecipientEmail") . "</p>";
+		}
+
+		// Check cc
+		if (!CheckEmailList($cc, MAX_EMAIL_RECIPIENT)) {
+			return "<p class=\"text-danger\">" . $Language->phrase("EnterProperCcEmail") . "</p>";
+		}
+
+		// Check bcc
+		if (!CheckEmailList($bcc, MAX_EMAIL_RECIPIENT)) {
+			return "<p class=\"text-danger\">" . $Language->phrase("EnterProperBccEmail") . "</p>";
+		}
+
+		// Check email sent count
+		if (!isset($_SESSION[EXPORT_EMAIL_COUNTER]))
+			$_SESSION[EXPORT_EMAIL_COUNTER] = 0;
+		if ((int)$_SESSION[EXPORT_EMAIL_COUNTER] > MAX_EMAIL_SENT_COUNT) {
+			return "<p class=\"text-danger\">" . $Language->phrase("ExceedMaxEmailExport") . "</p>";
+		}
+
+		// Send email
+		$email = new Email();
+		$email->Sender = $sender; // Sender
+		$email->Recipient = $recipient; // Recipient
+		$email->Cc = $cc; // Cc
+		$email->Bcc = $bcc; // Bcc
+		$email->Subject = $emailSubject; // Subject
+		$email->Format = "html";
+		if ($emailMessage <> "")
+			$emailMessage = RemoveXss($emailMessage) . "<br><br>";
+		foreach ($TempImages as $tmpImage)
+			$email->addEmbeddedImage($tmpImage);
+		$email->Content = $emailMessage . CleanEmailContent($emailContent); // Content
+		$eventArgs = [];
+		if ($this->Recordset) {
+			$this->RecCnt = $this->StartRec - 1;
+			$this->Recordset->moveFirst();
+			if ($this->StartRec > 1)
+				$this->Recordset->move($this->StartRec - 1);
+			$eventArgs["rs"] = &$this->Recordset;
+		}
+		$emailSent = FALSE;
+		if ($this->Email_Sending($email, $eventArgs))
+			$emailSent = $email->send();
+
+		// Check email sent status
+		if ($emailSent) {
+
+			// Update email sent count
+			$_SESSION[EXPORT_EMAIL_COUNTER]++;
+
+			// Sent email success
+			return "<p class=\"text-success\">" . $Language->phrase("SendEmailSuccess") . "</p>"; // Set up success message
+		} else {
+
+			// Sent email failure
+			return "<p class=\"text-danger\">" . $email->SendErrDescription . "</p>";
+		}
+	}
+
+	// Set up master/detail based on QueryString
+	protected function setupMasterParms()
+	{
+		$validMaster = FALSE;
+
+		// Get the keys for master table
+		if (Get(TABLE_SHOW_MASTER) !== NULL) {
+			$masterTblVar = Get(TABLE_SHOW_MASTER);
+			if ($masterTblVar == "") {
+				$validMaster = TRUE;
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+			}
+			if ($masterTblVar == "ivf_treatment_plan") {
+				$validMaster = TRUE;
+				if (Get("fk_RIDNO") !== NULL) {
+					$this->RIDNo->setQueryStringValue(Get("fk_RIDNO"));
+					$this->RIDNo->setSessionValue($this->RIDNo->QueryStringValue);
+					if (!is_numeric($this->RIDNo->QueryStringValue))
+						$validMaster = FALSE;
+				} else {
+					$validMaster = FALSE;
+				}
+				if (Get("fk_Name") !== NULL) {
+					$this->Name->setQueryStringValue(Get("fk_Name"));
+					$this->Name->setSessionValue($this->Name->QueryStringValue);
+				} else {
+					$validMaster = FALSE;
+				}
+				if (Get("fk_id") !== NULL) {
+					$this->TidNo->setQueryStringValue(Get("fk_id"));
+					$this->TidNo->setSessionValue($this->TidNo->QueryStringValue);
+					if (!is_numeric($this->TidNo->QueryStringValue))
+						$validMaster = FALSE;
+				} else {
+					$validMaster = FALSE;
+				}
+			}
+			if ($masterTblVar == "ivf_oocytedenudation") {
+				$validMaster = TRUE;
+				if (Get("fk_id") !== NULL) {
+					$this->DidNO->setQueryStringValue(Get("fk_id"));
+					$this->DidNO->setSessionValue($this->DidNO->QueryStringValue);
+					if (!is_numeric($this->DidNO->QueryStringValue))
+						$validMaster = FALSE;
+				} else {
+					$validMaster = FALSE;
+				}
+			}
+		} elseif (Post(TABLE_SHOW_MASTER) !== NULL) {
+			$masterTblVar = Post(TABLE_SHOW_MASTER);
+			if ($masterTblVar == "") {
+				$validMaster = TRUE;
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+			}
+			if ($masterTblVar == "ivf_treatment_plan") {
+				$validMaster = TRUE;
+				if (Post("fk_RIDNO") !== NULL) {
+					$this->RIDNo->setFormValue(Post("fk_RIDNO"));
+					$this->RIDNo->setSessionValue($this->RIDNo->FormValue);
+					if (!is_numeric($this->RIDNo->FormValue))
+						$validMaster = FALSE;
+				} else {
+					$validMaster = FALSE;
+				}
+				if (Post("fk_Name") !== NULL) {
+					$this->Name->setFormValue(Post("fk_Name"));
+					$this->Name->setSessionValue($this->Name->FormValue);
+				} else {
+					$validMaster = FALSE;
+				}
+				if (Post("fk_id") !== NULL) {
+					$this->TidNo->setFormValue(Post("fk_id"));
+					$this->TidNo->setSessionValue($this->TidNo->FormValue);
+					if (!is_numeric($this->TidNo->FormValue))
+						$validMaster = FALSE;
+				} else {
+					$validMaster = FALSE;
+				}
+			}
+			if ($masterTblVar == "ivf_oocytedenudation") {
+				$validMaster = TRUE;
+				if (Post("fk_id") !== NULL) {
+					$this->DidNO->setFormValue(Post("fk_id"));
+					$this->DidNO->setSessionValue($this->DidNO->FormValue);
+					if (!is_numeric($this->DidNO->FormValue))
+						$validMaster = FALSE;
+				} else {
+					$validMaster = FALSE;
+				}
+			}
+		}
+		if ($validMaster) {
+
+			// Update URL
+			$this->AddUrl = $this->addMasterUrl($this->AddUrl);
+			$this->InlineAddUrl = $this->addMasterUrl($this->InlineAddUrl);
+			$this->GridAddUrl = $this->addMasterUrl($this->GridAddUrl);
+			$this->GridEditUrl = $this->addMasterUrl($this->GridEditUrl);
+			$this->CancelUrl = $this->addMasterUrl($this->CancelUrl);
+
+			// Save current master table
+			$this->setCurrentMasterTable($masterTblVar);
+
+			// Reset start record counter (new master key)
+			if (!$this->isAddOrEdit()) {
+				$this->StartRec = 1;
+				$this->setStartRecordNumber($this->StartRec);
+			}
+
+			// Clear previous master key from Session
+			if ($masterTblVar <> "ivf_treatment_plan") {
+				if ($this->RIDNo->CurrentValue == "")
+					$this->RIDNo->setSessionValue("");
+				if ($this->Name->CurrentValue == "")
+					$this->Name->setSessionValue("");
+				if ($this->TidNo->CurrentValue == "")
+					$this->TidNo->setSessionValue("");
+			}
+			if ($masterTblVar <> "ivf_oocytedenudation") {
+				if ($this->DidNO->CurrentValue == "")
+					$this->DidNO->setSessionValue("");
+			}
+		}
+		$this->DbMasterFilter = $this->getMasterFilter(); // Get master filter
+		$this->DbDetailFilter = $this->getDetailFilter(); // Get detail filter
+	}
+
+	// Set up Breadcrumb
+	protected function setupBreadcrumb()
+	{
+		global $Breadcrumb, $Language;
+		$Breadcrumb = new Breadcrumb();
+		$url = substr(CurrentUrl(), strrpos(CurrentUrl(), "/")+1);
+		$url = preg_replace('/\?cmd=reset(all){0,1}$/i', '', $url); // Remove cmd=reset / cmd=resetall
+		$Breadcrumb->add("list", $this->TableVar, $url, "", $this->TableVar, TRUE);
+	}
+
+	// Setup lookup options
+	public function setupLookupOptions($fld)
+	{
+		if ($fld->Lookup !== NULL && $fld->Lookup->Options === NULL) {
+
+			// No need to check any more
+			$fld->Lookup->Options = [];
+
+			// Set up lookup SQL
+			switch ($fld->FieldVar) {
+				default:
+					$lookupFilter = "";
+					break;
+			}
+
+			// Always call to Lookup->getSql so that user can setup Lookup->Options in Lookup_Selecting server event
+			$sql = $fld->Lookup->getSql(FALSE, "", $lookupFilter, $this);
+
+			// Set up lookup cache
+			if ($fld->UseLookupCache && $sql <> "" && count($fld->Lookup->ParentFields) == 0 && count($fld->Lookup->Options) == 0) {
+				$conn = &$this->getConnection();
+				$totalCnt = $this->getRecordCount($sql);
+				if ($totalCnt > $fld->LookupCacheCount) // Total count > cache count, do not cache
+					return;
+				$rs = $conn->execute($sql);
+				$ar = [];
+				while ($rs && !$rs->EOF) {
+					$row = &$rs->fields;
+
+					// Format the field values
+					switch ($fld->FieldVar) {
+					}
+					$ar[strval($row[0])] = $row;
+					$rs->moveNext();
+				}
+				if ($rs)
+					$rs->close();
+				$fld->Lookup->Options = $ar;
+			}
+		}
+	}
+
+	// Page Load event
+	function Page_Load() {
+
+		//echo "Page Load";
+			//$this->GridAddRowCount = 40;
+
+	if($_GET["page"] == '')
+	{
+	$this->id->Visible = FALSE;
+	$this->RIDNo->Visible = FALSE;
+	$this->Name->Visible = FALSE;
+	$this->ARTCycle->Visible = FALSE;
+	$this->SpermOrigin->Visible = FALSE;
+	$this->InseminatinTechnique->Visible = FALSE;
+	$this->IndicationForART->Visible = FALSE;
+	 $this->Day6Cryoptop->Visible = FALSE;
+	$this->TidNo->Visible = FALSE;
+	$this->DidNO->Visible = FALSE;
+	$this->ICSiIVFDateTime->Visible = FALSE;
+	$this->PrimaryEmbrologist->Visible = FALSE;
+	$this->SecondaryEmbrologist->Visible = FALSE;
+	$this->Incubator->Visible = FALSE;
+	$this->location->Visible = FALSE;
+	$this->Day0sino->Visible = FALSE;
+	$this->Day0OocyteStage->Visible = FALSE;
+	$this->Day0PolarBodyPosition->Visible = FALSE;
+	$this->Day0Breakage->Visible = FALSE;
+	$this->Day0Attempts->Visible = FALSE;
+	$this->Day0SPZMorpho->Visible = FALSE;
+	$this->Day0SPZLocation->Visible = FALSE;
+	$this->Day0SpOrgin->Visible = FALSE;
+	$this->Day5Cryoptop->Visible = FALSE;
+			$this->Day1PN->Visible = FALSE;
+			$this->Day1PB->Visible = FALSE;
+			$this->Day1Pronucleus->Visible = FALSE;
+			$this->Day1Nucleolus->Visible = FALSE;
+			$this->Day1Halo->Visible = FALSE;
+			$this->Day1Sperm->Visible = FALSE;
+	$this->Day1End->Visible = FALSE;
+				$this->Day2SiNo->Visible = FALSE;
+			$this->Day2CellNo->Visible = FALSE;
+			$this->Day2Frag->Visible = FALSE;
+			$this->Day2Symmetry->Visible = FALSE;
+			$this->Day2Cryoptop->Visible = FALSE;
+			$this->Day2Grade->Visible = FALSE;
+			$this->Day2End->Visible = FALSE;
+			$this->Day3Sino->Visible = FALSE;		
+			$this->Day3CellNo->Visible = FALSE;
+			$this->Day3Frag->Visible = FALSE;
+			$this->Day3Symmetry->Visible = FALSE;
+			$this->Day3Grade->Visible = FALSE;
+			$this->Day3Vacoules->Visible = FALSE;
+			$this->Day3ZP->Visible = FALSE;		
+			$this->Day3Cryoptop->Visible = FALSE;
+			$this->Day3End->Visible = FALSE;
+			$this->Day4SiNo->Visible = FALSE;
+			$this->Day4CellNo->Visible = FALSE;
+			$this->Day4Frag->Visible = FALSE;
+			$this->Day4Symmetry->Visible = FALSE;
+			$this->Day4Grade->Visible = FALSE;
+			$this->Day4Cryoptop->Visible = FALSE;
+			$this->Day5CellNo->Visible = FALSE;
+			$this->Day5ICM->Visible = FALSE;
+			$this->Day5TE->Visible = FALSE;
+			$this->Day5Observation->Visible = FALSE;
+			$this->Day5Collapsed->Visible = FALSE;
+			$this->Day5Vacoulles->Visible = FALSE;
+			$this->Day5Grade->Visible = FALSE;
+			$this->Day6CellNo->Visible = FALSE;
+			$this->Day6ICM->Visible = FALSE;
+			$this->Day6TE->Visible = FALSE;
+			$this->Day6Observation->Visible = FALSE;
+			$this->Day6Collapsed->Visible = FALSE;		
+			$this->Day6Vacoulles->Visible = FALSE;
+			$this->Day6Grade->Visible = FALSE;
+			$this->EndingDay->Visible = FALSE;
+			$this->EndingCellStage->Visible = FALSE;
+			$this->EndingGrade->Visible = FALSE;
+			$this->EndingState->Visible = FALSE;
+
+			//===================================
+			$this->vitrificationDate->Visible = FALSE;
+			$this->vitriPrimaryEmbryologist->Visible = FALSE;
+			$this->vitriSecondaryEmbryologist->Visible = FALSE;
+			$this->vitriEmbryoNo->Visible = FALSE;
+			$this->vitriFertilisationDate->Visible = FALSE;
+			$this->vitriDay->Visible = FALSE;
+			$this->vitriGrade->Visible = FALSE;
+			$this->vitriIncubator->Visible = FALSE;
+			$this->vitriTank->Visible = FALSE;
+			$this->vitriCanister->Visible = FALSE;
+			$this->vitriGobiet->Visible = FALSE;
+	$this->vitriViscotube->Visible = FALSE;
+			$this->vitriCryolockNo->Visible = FALSE;
+			$this->vitriCryolockColour->Visible = FALSE;
+			$this->vitriStage->Visible = FALSE;
+			$this->thawDate->Visible = FALSE;
+			$this->thawPrimaryEmbryologist->Visible = FALSE;
+			$this->thawSecondaryEmbryologist->Visible = FALSE;
+			$this->thawET->Visible = FALSE;
+			$this->thawReFrozen->Visible = FALSE;
+			$this->thawAbserve->Visible = FALSE;
+			$this->thawDiscard->Visible = FALSE;
+			$this->ETCatheter->Visible = FALSE;
+			$this->ETDifficulty->Visible = FALSE;
+			$this->ETEasy->Visible = FALSE;
+			$this->ETComments->Visible = FALSE;
+			$this->ETDoctor->Visible = FALSE;
+			$this->ETEmbryologist->Visible = FALSE;
+		$this->ETDate->Visible = FALSE;
+			$this->EndSiNo->Visible = FALSE;
+			$this->Day4End->Visible = FALSE;
+
+			//=====================================
+	}else{
+	$this->id->Visible = FALSE;
+	$this->RIDNo->Visible = FALSE;
+	$this->Name->Visible = FALSE;
+	$this->ARTCycle->Visible = FALSE;
+	$this->SpermOrigin->Visible = FALSE;
+	$this->InseminatinTechnique->Visible = FALSE;
+	$this->IndicationForART->Visible = FALSE;
+	 $this->Day6Cryoptop->Visible = FALSE;
+	$this->TidNo->Visible = FALSE;
+	$this->DidNO->Visible = FALSE;
+	$this->ICSiIVFDateTime->Visible = FALSE;
+	$this->PrimaryEmbrologist->Visible = FALSE;
+	$this->SecondaryEmbrologist->Visible = FALSE;
+	$this->Incubator->Visible = FALSE;
+	$this->location->Visible = FALSE;
+	$this->Day0sino->Visible = FALSE;
+	$this->Day0OocyteStage->Visible = FALSE;
+	$this->Day0PolarBodyPosition->Visible = FALSE;
+	$this->Day0Breakage->Visible = FALSE;
+	$this->Day0Attempts->Visible = FALSE;
+	$this->Day0SPZMorpho->Visible = FALSE;
+	$this->Day0SPZLocation->Visible = FALSE;
+	$this->Day0SpOrgin->Visible = FALSE;
+	$this->Day5Cryoptop->Visible = FALSE;
+			$this->Day1PN->Visible = FALSE;
+			$this->Day1PB->Visible = FALSE;
+			$this->Day1Pronucleus->Visible = FALSE;
+			$this->Day1Nucleolus->Visible = FALSE;
+			$this->Day1Halo->Visible = FALSE;
+			$this->Day1Sperm->Visible = FALSE;
+			$this->Day1End->Visible = FALSE;				
+			$this->Day2SiNo->Visible = FALSE;
+			$this->Day2CellNo->Visible = FALSE;
+			$this->Day2Frag->Visible = FALSE;
+			$this->Day2Symmetry->Visible = FALSE;
+			$this->Day2Cryoptop->Visible = FALSE;
+			$this->Day2Grade->Visible = FALSE;
+	$this->Day2End->Visible = FALSE;
+			$this->Day3Sino->Visible = FALSE;		
+			$this->Day3CellNo->Visible = FALSE;
+			$this->Day3Frag->Visible = FALSE;
+			$this->Day3Symmetry->Visible = FALSE;
+			$this->Day3Grade->Visible = FALSE;
+			$this->Day3Vacoules->Visible = FALSE;
+			$this->Day3ZP->Visible = FALSE;		
+			$this->Day3Cryoptop->Visible = FALSE;
+			$this->Day3End->Visible = FALSE;
+			$this->Day4SiNo->Visible = FALSE;
+			$this->Day4CellNo->Visible = FALSE;
+			$this->Day4Frag->Visible = FALSE;
+			$this->Day4Symmetry->Visible = FALSE;
+			$this->Day4Grade->Visible = FALSE;
+			$this->Day4Cryoptop->Visible = FALSE;
+			$this->Day5CellNo->Visible = FALSE;
+			$this->Day5ICM->Visible = FALSE;
+			$this->Day5TE->Visible = FALSE;
+			$this->Day5Observation->Visible = FALSE;
+			$this->Day5Collapsed->Visible = FALSE;
+			$this->Day5Vacoulles->Visible = FALSE;
+			$this->Day5Grade->Visible = FALSE;
+			$this->Day6CellNo->Visible = FALSE;
+			$this->Day6ICM->Visible = FALSE;
+			$this->Day6TE->Visible = FALSE;
+			$this->Day6Observation->Visible = FALSE;
+			$this->Day6Collapsed->Visible = FALSE;		
+			$this->Day6Vacoulles->Visible = FALSE;
+			$this->Day6Grade->Visible = FALSE;
+			$this->EndingDay->Visible = FALSE;
+			$this->EndingCellStage->Visible = FALSE;
+			$this->EndingGrade->Visible = FALSE;
+			$this->EndingState->Visible = FALSE;
+
+			//===================================
+			$this->vitrificationDate->Visible = FALSE;
+			$this->vitriPrimaryEmbryologist->Visible = FALSE;
+			$this->vitriSecondaryEmbryologist->Visible = FALSE;
+			$this->vitriEmbryoNo->Visible = FALSE;
+			$this->vitriFertilisationDate->Visible = FALSE;
+			$this->vitriDay->Visible = FALSE;
+			$this->vitriGrade->Visible = FALSE;
+			$this->vitriIncubator->Visible = FALSE;
+			$this->vitriTank->Visible = FALSE;
+			$this->vitriCanister->Visible = FALSE;
+			$this->vitriGobiet->Visible = FALSE;
+	$this->vitriViscotube->Visible = FALSE;
+			$this->vitriCryolockNo->Visible = FALSE;
+			$this->vitriCryolockColour->Visible = FALSE;
+			$this->vitriStage->Visible = FALSE;
+			$this->thawDate->Visible = FALSE;
+			$this->thawPrimaryEmbryologist->Visible = FALSE;
+			$this->thawSecondaryEmbryologist->Visible = FALSE;
+			$this->thawET->Visible = FALSE;
+			$this->thawReFrozen->Visible = FALSE;
+			$this->thawAbserve->Visible = FALSE;
+			$this->thawDiscard->Visible = FALSE;
+			$this->ETCatheter->Visible = FALSE;
+			$this->ETDifficulty->Visible = FALSE;
+			$this->ETEasy->Visible = FALSE;
+			$this->ETComments->Visible = FALSE;
+			$this->ETDoctor->Visible = FALSE;
+			$this->ETEmbryologist->Visible = FALSE;
+		$this->ETDate->Visible = FALSE;
+					$this->EndSiNo->Visible = FALSE;
+			$this->Day4End->Visible = FALSE;
+
+			//=====================================
+	}
+				if($_GET["page"] == 'page0')
+				{
+					$this->Day0sino->Visible = TRUE;
+					$this->Day0OocyteStage->Visible = TRUE;
+					$this->Day0PolarBodyPosition->Visible = TRUE;
+					$this->Day0Breakage->Visible = TRUE;
+					$this->Day0Attempts->Visible = TRUE;
+					$this->Day0SPZMorpho->Visible = TRUE;
+					$this->Day0SPZLocation->Visible = TRUE;
+					$this->Day0SpOrgin->Visible = TRUE;
+					$this->Day5Cryoptop->Visible = TRUE;
+					$this->Remarks->Visible = FALSE;
+					$this->OocyteNo->Visible = FALSE;
+					$this->Stage->Visible = FALSE;
+				}
+				if($_GET["page"] == 'page1')
+				{
+					$this->Day1PN->Visible = TRUE;
+					$this->Day1PB->Visible = TRUE;
+					$this->Day1Pronucleus->Visible = TRUE;
+					$this->Day1Nucleolus->Visible = TRUE;
+					$this->Day1Halo->Visible = TRUE;
+					$this->Day1Sperm->Visible = TRUE;
+	$this->Day1End->Visible = TRUE;
+					$this->Remarks->Visible = FALSE;
+					$this->OocyteNo->Visible = FALSE;
+					$this->Stage->Visible = FALSE;
+				}
+				if($_GET["page"] == 'page2')
+				{
+				$this->Day2SiNo->Visible = TRUE;
+					$this->Day2CellNo->Visible = TRUE;
+					$this->Day2Frag->Visible = TRUE;
+					$this->Day2Symmetry->Visible = TRUE;
+					$this->Day2Cryoptop->Visible = TRUE;
+					$this->Day2Grade->Visible = TRUE;
+	$this->Day2End->Visible = TRUE;
+					$this->Remarks->Visible = FALSE;
+					$this->OocyteNo->Visible = FALSE;
+					$this->Stage->Visible = FALSE;
+				}
+				if($_GET["page"] == 'page3')
+				{
+					$this->Day3Sino->Visible = TRUE;
+					$this->Day3CellNo->Visible = TRUE;
+					$this->Day3Frag->Visible = TRUE;
+					$this->Day3Symmetry->Visible = TRUE;
+					$this->Day3Grade->Visible = TRUE;
+					$this->Day3Vacoules->Visible = TRUE;
+					$this->Day3ZP->Visible = TRUE;
+					$this->Day3Cryoptop->Visible = TRUE;
+					$this->Day3End->Visible = TRUE;
+					$this->Remarks->Visible = FALSE;
+					$this->OocyteNo->Visible = FALSE;
+					$this->Stage->Visible = FALSE;
+				}
+				if($_GET["page"] == 'page4')
+				{
+					$this->Day4SiNo->Visible = TRUE;
+					$this->Day4CellNo->Visible = TRUE;
+					$this->Day4Frag->Visible = TRUE;
+					$this->Day4Symmetry->Visible = TRUE;
+					$this->Day4Grade->Visible = TRUE;
+					$this->Day4Cryoptop->Visible = TRUE;
+					$this->Day4End->Visible = TRUE;
+					$this->Remarks->Visible = FALSE;
+					$this->OocyteNo->Visible = FALSE;
+					$this->Stage->Visible = FALSE;
+				}
+				if($_GET["page"] == 'page5')
+				{
+					$this->Day5CellNo->Visible = TRUE;
+					$this->Day5ICM->Visible = TRUE;
+					$this->Day5TE->Visible = TRUE;
+					$this->Day5Observation->Visible = TRUE;
+					$this->Day5Collapsed->Visible = TRUE;
+					$this->Day5Vacoulles->Visible = TRUE;
+					$this->Day5Grade->Visible = TRUE;
+					$this->Remarks->Visible = FALSE;
+					$this->OocyteNo->Visible = FALSE;
+					$this->Stage->Visible = FALSE;
+				}
+				if($_GET["page"] == 'page6')
+				{
+					$this->Day6CellNo->Visible = TRUE;
+					$this->Day6ICM->Visible = TRUE;
+					$this->Day6TE->Visible = TRUE;
+					$this->Day6Observation->Visible = TRUE;
+					$this->Day6Collapsed->Visible = TRUE;
+					$this->Day6Vacoulles->Visible = TRUE;
+					$this->Day6Grade->Visible = TRUE;
+					$this->Remarks->Visible = FALSE;
+					$this->OocyteNo->Visible = FALSE;
+					$this->Stage->Visible = FALSE;
+				}
+				if($_GET["page"] == 'pageEnd')
+				{
+						$this->EndSiNo->Visible = TRUE;
+					$this->EndingDay->Visible = TRUE;
+					$this->EndingCellStage->Visible = TRUE;
+					$this->EndingGrade->Visible = TRUE;
+					$this->EndingState->Visible = TRUE;
+					$this->Remarks->Visible = FALSE;
+					$this->OocyteNo->Visible = FALSE;
+					$this->Stage->Visible = FALSE;
+				}
+				if($_GET["page"] == 'pageAll')
+				{
+					$this->Day0sino->Visible = TRUE;
+					$this->Day0OocyteStage->Visible = TRUE;
+					$this->Day0PolarBodyPosition->Visible = TRUE;
+					$this->Day0Breakage->Visible = TRUE;
+					$this->Day0Attempts->Visible = TRUE;
+					$this->Day0SPZMorpho->Visible = TRUE;
+					$this->Day0SPZLocation->Visible = TRUE;
+					$this->Day0SpOrgin->Visible = TRUE;
+					$this->Day5Cryoptop->Visible = TRUE;
+					$this->Day1PN->Visible = TRUE;
+					$this->Day1PB->Visible = TRUE;
+					$this->Day1Pronucleus->Visible = TRUE;
+					$this->Day1Nucleolus->Visible = TRUE;
+					$this->Day1Halo->Visible = TRUE;
+					$this->Day1Sperm->Visible = TRUE;
+					$this->Day1End->Visible = TRUE;
+					$this->Day2SiNo->Visible = TRUE;
+					$this->Day2CellNo->Visible = TRUE;
+					$this->Day2Frag->Visible = TRUE;
+					$this->Day2Symmetry->Visible = TRUE;
+					$this->Day2Cryoptop->Visible = TRUE;
+					$this->Day2Grade->Visible = TRUE;
+					$this->Day2End->Visible = TRUE;
+					$this->Day3Sino->Visible = TRUE;
+					$this->Day3CellNo->Visible = TRUE;
+					$this->Day3Frag->Visible = TRUE;
+					$this->Day3Symmetry->Visible = TRUE;
+					$this->Day3Grade->Visible = TRUE;
+					$this->Day3Vacoules->Visible = TRUE;
+					$this->Day3ZP->Visible = TRUE;
+					$this->Day3Cryoptop->Visible = TRUE;
+					$this->Day3End->Visible = TRUE;
+					$this->Day4SiNo->Visible = TRUE;
+					$this->Day4CellNo->Visible = TRUE;
+					$this->Day4Frag->Visible = TRUE;
+					$this->Day4Symmetry->Visible = TRUE;
+					$this->Day4Grade->Visible = TRUE;
+					$this->Day4Cryoptop->Visible = TRUE;
+					$this->Day4End->Visible = TRUE;
+	$this->Day5CellNo->Visible = TRUE;
+					$this->Day5ICM->Visible = TRUE;
+					$this->Day5TE->Visible = TRUE;
+					$this->Day5Observation->Visible = TRUE;
+					$this->Day5Collapsed->Visible = TRUE;
+					$this->Day5Vacoulles->Visible = TRUE;
+					$this->Day5Grade->Visible = TRUE;
+					$this->Day6CellNo->Visible = TRUE;
+					$this->Day6ICM->Visible = TRUE;
+					$this->Day6TE->Visible = TRUE;
+					$this->Day6Observation->Visible = TRUE;
+					$this->Day6Collapsed->Visible = TRUE;
+					$this->Day6Vacoulles->Visible = TRUE;
+					$this->Day6Grade->Visible = TRUE;
+										$this->EndSiNo->Visible = TRUE;
+					$this->EndingDay->Visible = TRUE;
+					$this->EndingCellStage->Visible = TRUE;
+					$this->EndingGrade->Visible = TRUE;
+					$this->EndingState->Visible = TRUE;
+					$this->Remarks->Visible = FALSE;
+					$this->OocyteNo->Visible = FALSE;
+					$this->Stage->Visible = FALSE;
+				}
+			if($_GET["page"] == 'Vitrification')
+			{
+				$this->vitrificationDate->Visible = FALSE;
+				$this->vitriPrimaryEmbryologist->Visible = FALSE;
+				$this->vitriSecondaryEmbryologist->Visible = FALSE;
+				$this->vitriFertilisationDate->Visible = FALSE;
+				$this->vitriEmbryoNo->Visible = TRUE;
+				$this->vitriDay->Visible = TRUE;
+				$this->vitriGrade->Visible = TRUE;
+				$this->vitriIncubator->Visible = TRUE;
+				$this->vitriTank->Visible = TRUE;
+				$this->vitriCanister->Visible = TRUE;
+				$this->vitriGobiet->Visible = TRUE;
+	$this->vitriViscotube->Visible = TRUE;
+				$this->vitriCryolockNo->Visible = TRUE;
+				$this->vitriCryolockColour->Visible = TRUE;
+				$this->vitriStage->Visible = TRUE;
+					$this->Remarks->Visible = FALSE;
+					$this->OocyteNo->Visible = FALSE;
+					$this->Stage->Visible = FALSE;
+			}
+			if($_GET["page"] == 'Thawing')
+			{
+						$this->vitriEmbryoNo->Visible = TRUE;
+				$this->vitriDay->Visible = TRUE;
+				$this->vitriGrade->Visible = TRUE;
+				$this->vitriIncubator->Visible = TRUE;
+				$this->vitriTank->Visible = TRUE;
+				$this->vitriCanister->Visible = TRUE;
+				$this->vitriGobiet->Visible = TRUE;
+				$this->vitriCryolockNo->Visible = TRUE;
+				$this->vitriCryolockColour->Visible = TRUE;
+				$this->vitriStage->Visible = TRUE;
+				$this->thawDate->Visible = FALSE;
+				$this->thawPrimaryEmbryologist->Visible = FALSE;
+				$this->thawSecondaryEmbryologist->Visible = FALSE;
+				$this->thawET->Visible = TRUE;
+				$this->thawReFrozen->Visible = TRUE;
+				$this->thawAbserve->Visible = FALSE;
+				$this->thawDiscard->Visible = FALSE;
+					$this->Remarks->Visible = FALSE;
+					$this->OocyteNo->Visible = FALSE;
+					$this->Stage->Visible = FALSE;
+			}
+			if($_GET["page"] == 'EmbryoTransfer')
+			{
+
+			//	$this->thawDiscard->Visible = TRUE;
+						$this->EndSiNo->Visible = TRUE;
+					$this->EndingDay->Visible = TRUE;
+					$this->EndingCellStage->Visible = TRUE;
+					$this->EndingGrade->Visible = TRUE;
+				$this->ETCatheter->Visible = TRUE;
+				$this->ETDifficulty->Visible = TRUE;
+				$this->ETEasy->Visible = TRUE;
+				$this->ETComments->Visible = FALSE;
+				$this->ETDoctor->Visible = FALSE;
+				$this->ETEmbryologist->Visible = FALSE;
+				$this->ETDate->Visible = FALSE;
+					$this->Remarks->Visible = FALSE;
+					$this->OocyteNo->Visible = FALSE;
+					$this->Stage->Visible = FALSE;
+			}
+	}
+
+	// Page Unload event
+	function Page_Unload() {
+
+		//echo "Page Unload";
+	}
+
+	// Page Redirecting event
+	function Page_Redirecting(&$url) {
+
+		// Example:
+		//$url = "your URL";
+	//	$url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+
+	}
+
+	// Message Showing event
+	// $type = ''|'success'|'failure'|'warning'
+	function Message_Showing(&$msg, $type) {
+		if ($type == 'success') {
+
+			//$msg = "your success message";
+		} elseif ($type == 'failure') {
+
+			//$msg = "your failure message";
+		} elseif ($type == 'warning') {
+
+			//$msg = "your warning message";
+		} else {
+
+			//$msg = "your message";
+		}
+	}
+
+	// Page Render event
+	function Page_Render() {
+
+		//echo "Page Render";
+	}
+
+	// Page Data Rendering event
+	function Page_DataRendering(&$header) {
+
+		// Example:
+		//$header = "your header";
+
+	}
+
+	// Page Data Rendered event
+	function Page_DataRendered(&$footer) {
+
+		// Example:
+		//$footer = "your footer";
+
+	}
+
+	// Form Custom Validate event
+	function Form_CustomValidate(&$customError) {
+
+		// Return error message in CustomError
+		return TRUE;
+	}
+
+	// ListOptions Load event
+	function ListOptions_Load() {
+
+		// Example:
+		//$opt = &$this->ListOptions->Add("new");
+		//$opt->Header = "xxx";
+		//$opt->OnLeft = TRUE; // Link on left
+		//$opt->MoveTo(0); // Move to first column
+
+	}
+
+	// ListOptions Rendering event
+	function ListOptions_Rendering() {
+
+		//$GLOBALS["xxx_grid"]->DetailAdd = (...condition...); // Set to TRUE or FALSE conditionally
+		//$GLOBALS["xxx_grid"]->DetailEdit = (...condition...); // Set to TRUE or FALSE conditionally
+		//$GLOBALS["xxx_grid"]->DetailView = (...condition...); // Set to TRUE or FALSE conditionally
+
+	}
+
+	// ListOptions Rendered event
+	function ListOptions_Rendered() {
+
+		// Example:
+		//$this->ListOptions->Items["new"]->Body = "xxx";
+
+	}
+
+	// Row Custom Action event
+	function Row_CustomAction($action, $row) {
+
+		// Return FALSE to abort
+		return TRUE;
+	}
+
+	// Page Exporting event
+	// $this->ExportDoc = export document object
+	function Page_Exporting() {
+
+		//$this->ExportDoc->Text = "my header"; // Export header
+		//return FALSE; // Return FALSE to skip default export and use Row_Export event
+
+		return TRUE; // Return TRUE to use default export and skip Row_Export event
+	}
+
+	// Row Export event
+	// $this->ExportDoc = export document object
+	function Row_Export($rs) {
+
+		//$this->ExportDoc->Text .= "my content"; // Build HTML with field value: $rs["MyField"] or $this->MyField->ViewValue
+	}
+
+	// Page Exported event
+	// $this->ExportDoc = export document object
+	function Page_Exported() {
+
+		//$this->ExportDoc->Text .= "my footer"; // Export footer
+		//echo $this->ExportDoc->Text;
+
+	}
+
+	// Page Importing event
+	function Page_Importing($reader, &$options) {
+
+		//var_dump($reader); // Import data reader
+		//var_dump($options); // Show all options for importing
+		//return FALSE; // Return FALSE to skip import
+
+		return TRUE;
+	}
+
+	// Row Import event
+	function Row_Import(&$row, $cnt) {
+
+		//echo $cnt; // Import record count
+		//var_dump($row); // Import row
+		//return FALSE; // Return FALSE to skip import
+
+		return TRUE;
+	}
+
+	// Page Imported event
+	function Page_Imported($reader, $results) {
+
+		//var_dump($reader); // Import data reader
+		//var_dump($results); // Import results
+
+	}
+}
+?>

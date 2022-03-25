@@ -1,0 +1,14 @@
+{
+  ".b-grid-row[data-index='0'] .b-sch-timeaxis-cell": {
+    "title": "Row height",
+    "content": "Events fill available row height. Drag slider to adjust",
+    "align": {
+      "align": "t0-b0",
+      "anchorPosition": {"x": 10}
+    }
+  },
+  ".b-sch-color-violet": {
+    "title": "Bar margin",
+    "content": "Bar margin is subtracted from row height when determining event height. Drag slider to adjust"
+  }
+}
